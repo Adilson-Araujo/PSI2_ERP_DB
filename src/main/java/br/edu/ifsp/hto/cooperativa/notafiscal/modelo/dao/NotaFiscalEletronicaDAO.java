@@ -21,7 +21,7 @@ public class NotaFiscalEletronicaDAO {
                     vo = new NotaFiscalEletronicaVO();
                     vo.setId(rs.getLong("id"));
                     vo.setAssociadoId(rs.getLong("associado_id"));
-                    vo.setClienteId(rs.getInt("cliente_id"));
+                    vo.setClienteId(rs.getLong("cliente_id"));
                     vo.setChaveAcesso(rs.getString("chave_acesso"));
                     vo.setRazaoSocial(rs.getString("razao_social"));
                     Timestamp ts_data_missao = rs.getTimestamp("data_missao");
@@ -74,7 +74,7 @@ public class NotaFiscalEletronicaDAO {
             } else { 
                 p.setLong(1, vo.getAssociadoId());
             }
-            p.setInt(2, vo.getClienteId()==null?0:vo.getClienteId());
+            p.setLong(2, vo.getClienteId()== null? 0: vo.getClienteId());
             p.setString(3, vo.getChaveAcesso());
             p.setString(4, vo.getRazaoSocial());
             if (vo.getDataEmissao() != null) {
@@ -163,7 +163,7 @@ public class NotaFiscalEletronicaDAO {
             } else { 
                 p.setLong(1, vo.getAssociadoId());
             }
-            p.setInt(2, vo.getClienteId()==null?0:vo.getClienteId());
+            p.setLong(2, vo.getClienteId()==null?0:vo.getClienteId());
             p.setString(3, vo.getChaveAcesso());
             p.setString(4, vo.getRazaoSocial());
             if (vo.getDataEmissao() != null) {
@@ -223,7 +223,7 @@ public class NotaFiscalEletronicaDAO {
                 NotaFiscalEletronicaVO vo = new NotaFiscalEletronicaVO();
                 vo.setId(rs.getLong("id"));
                 vo.setAssociadoId(rs.getLong("associado_id"));
-                vo.setClienteId(rs.getInt("cliente_id"));
+                vo.setClienteId(rs.getLong("cliente_id"));
                 vo.setChaveAcesso(rs.getString("chave_acesso"));
                 vo.setRazaoSocial(rs.getString("razao_social"));
                 Timestamp ts_data_missao = rs.getTimestamp("data_missao");

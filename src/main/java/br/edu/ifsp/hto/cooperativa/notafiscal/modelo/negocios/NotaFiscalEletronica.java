@@ -1,0 +1,158 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package br.edu.ifsp.hto.cooperativa.notafiscal.modelo.negocios;
+
+import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.dto.*;
+import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.nfeSchema.nfe.*;
+import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.vo.*;
+import jakarta.xml.bind.*;
+
+import java.io.StringWriter;
+import java.math.BigDecimal;
+
+public class NotaFiscalEletronica {
+        public String gerarXml(NotaFiscalEletronicaTO nfe) {
+            try {
+                var context = JAXBContext.newInstance(TNFe.class);
+                var marshaller = context.createMarshaller();
+                marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
+                TNFe tnFe = new TNFe();
+                TNFe.InfNFe inf = new TNFe.InfNFe();
+                tnFe.setInfNFe(inf);
+
+                // Ajustar id e versão, id deve ser a sigla NFe seguida da chave de acesso
+                // Se for possivel assinar no futuro, deverá ser usado na tag <Signature>
+                inf.setId("NFe" + nfe.notaFiscalEletronica.getChaveAcesso());
+                inf.setVersao("4.00");
+
+                inf.setIde(buildIde(nfe));
+                inf.setEmit(buildEmit(nfe));
+                inf.setDest(buildDest(nfe));
+
+                buildItens(nfe, inf);
+                buildTotais(nfe, inf);
+
+                var sw = new StringWriter();
+                marshaller.marshal(tnFe, sw);
+                return sw.toString();
+
+            } catch (Exception e) {
+                throw new RuntimeException("Erro ao gerar XML da NFe", e);
+            }
+        }
+
+    private TNFe.InfNFe.Ide buildIde(NotaFiscalEletronicaTO nfe) {
+        var vo = nfe.notaFiscalEletronica;
+
+        TNFe.InfNFe.Ide ide = new TNFe.InfNFe.Ide();
+        ide.setCUF("35");
+        ide.setNatOp("VENDA");
+        ide.setMod("55");
+        ide.setSerie(vo.getNumeroSerie());
+        ide.setNNF(vo.getNumeroNotaFiscal());
+        ide.setDhEmi(vo.getDataEmissao() + "-03:00");
+        ide.setTpAmb(vo.getTipoAmbiente().toString());
+        ide.setTpEmis(vo.getTipoFormaEmissao().toString());
+        ide.setTpImp("1");
+        ide.setTpNF(vo.getTipoOperacao().toString());
+        ide.setFinNFe("1");
+        ide.setProcEmi("0");
+        return ide;
+    }
+
+    private TNFe.InfNFe.Emit buildEmit(NotaFiscalEletronicaTO nfe) {
+        var a = nfe.associadoTO.associado;
+        var e = nfe.associadoTO.endereco;
+
+        var emit = new TNFe.InfNFe.Emit();
+        emit.setCNPJ(a.getCnpj());
+        emit.setXNome(a.getRazaoSocial());
+        emit.setXFant(a.getNomeFantasia());
+        emit.setIE(a.getInscricaoEstadual());
+
+        var ender = new TEnderEmi();
+        ender.setXLgr(e.getRua());
+        ender.setNro(String.valueOf(e.getNumero()));
+        ender.setXBairro(e.getBairro());
+        ender.setCMun("3550308");
+        ender.setXMun(e.getCidade());
+        ender.setUF(TUfEmi.valueOf(e.getEstado()));
+        ender.setCEP(e.getCep().replace("-", ""));
+        emit.setEnderEmit(ender);
+
+        return emit;
+    }
+
+    private TNFe.InfNFe.Dest buildDest(NotaFiscalEletronicaTO nfe) {
+        var c = nfe.clienteTO.cliente;
+        var e = nfe.clienteTO.endereco;
+
+        TNFe.InfNFe.Dest dest = new TNFe.InfNFe.Dest();
+
+        if (c.getCpfCnpj().length() == 11)
+            dest.setCPF(c.getCpfCnpj());
+        else
+            dest.setCNPJ(c.getCpfCnpj());
+
+        dest.setXNome(c.getRazaoSocial());
+
+        var ender = new TEndereco();
+        ender.setXLgr(e.getRua());
+        ender.setNro(String.valueOf(e.getNumero()));
+        ender.setXBairro(e.getBairro());
+        ender.setCMun("3550308");
+        ender.setXMun(e.getCidade());
+        ender.setUF(TUf.valueOf(e.getEstado()));
+        ender.setCEP(e.getCep().replace("-", ""));
+        dest.setEnderDest(ender);
+
+        return dest;
+    }
+
+    private void buildItens(NotaFiscalEletronicaTO nfe, TNFe.InfNFe inf) {
+
+        int n = 1;
+        for (NotaFiscalItemTO itemTO : nfe.notaFiscalItens) {
+            var it = itemTO.notaFiscalItem;
+
+            TNFe.InfNFe.Det det = new TNFe.InfNFe.Det();
+            det.setNItem(String.valueOf(n++));
+
+            TNFe.InfNFe.Det.Prod prod = new TNFe.InfNFe.Det.Prod();
+            prod.setCFOP(it.getCfop());
+            prod.setNCM(it.getNcm());
+            prod.setQCom(it.getQuantidade().toString());
+            prod.setVUnCom(it.getValorUnitario().toString());
+            prod.setVProd(it.getValorTotal().toString());
+            prod.setXProd("PRODUTO " + it.getProdutoId());
+
+            det.setProd(prod);
+
+            TNFe.InfNFe.Det.Imposto imposto = new TNFe.InfNFe.Det.Imposto();
+            det.setImposto(imposto);
+
+            inf.getDet().add(det);
+        }
+    }
+
+    private void buildTotais(NotaFiscalEletronicaTO nfe, TNFe.InfNFe inf) {
+
+        var total = BigDecimal.ZERO;
+
+        for (NotaFiscalItemTO item : nfe.notaFiscalItens) {
+            total = total.add(item.notaFiscalItem.getValorTotal());
+        }
+
+        var totalNode = new TNFe.InfNFe.Total();
+        var icms = new TNFe.InfNFe.Total.ICMSTot();
+
+        icms.setVProd(total.toString());
+        icms.setVNF(total.toString());
+
+        totalNode.setICMSTot(icms);
+        inf.setTotal(totalNode);
+    }
+}

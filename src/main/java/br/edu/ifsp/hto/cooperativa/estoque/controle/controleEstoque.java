@@ -9,6 +9,7 @@ import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.OrigemDAO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.PrecoPPADAO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.ProdutoDAO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.TipoDAO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.to.AssociadoProdutoTO;
 
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Armazem;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Categoria;
@@ -78,6 +79,10 @@ public class controleEstoque {
         return instancia;
     }
     
+    // BÁSICO DA CLASS
+    // //////////////////////////////////////////
+    // READ GERAL
+
     /**
      * Lista todos os armazens cadastrados.
      *
@@ -127,6 +132,46 @@ public class controleEstoque {
         return especieDAO.buscarPorId(id);
     }
     
+    // READ GERAL
+    // //////////////////////////////////////////
+    // AUXILIAR DE OUTROS MÓDULOS
+
+    /**
+     * Retorna o estoque Produto e Quantidade de um dado Associado.
+     *
+     * @param associado_id    identificador do associado
+     * @return List de AssociadoProdutoTO com relação Produto e Quantidade
+     */    
+    public List<AssociadoProdutoTO> listarEstoque(int associado_id){
+        return estoqueAtualDAO.listarEstoque(associado_id);
+    }
+    
+    /**
+     * Retorna o estoque Produto e Quantidade de um dado Associado e Produto.
+     *
+     * @param associado_id    identificador do associado
+     * @param produto_id      identificador do produto
+     * @return List de AssociadoProdutoTO com relação Produto e Quantidade
+     */    
+    public AssociadoProdutoTO buscarEstoque(int associado_id, int produto_id){
+        return estoqueAtualDAO.buscarEstoque(associado_id, produto_id);
+    }
+    
+    /**
+     * Calcula a quantidade produzida com base na espécie e área cultivada.
+     *
+     * @param especie_id    identificador da espécie
+     * @param area_produzida área produzida em m²
+     * @return quantidade estimada em kg
+     */
+    public float calculaQuantidade(int especie_id, float area_produzida){
+        return area_produzida * especieDAO.buscarPorId(especie_id).getRendimento_kg_m2();
+    }
+
+    // AUXILIAR DE OUTROS MÓDULOS
+    // //////////////////////////////////////////
+    // OPERAÇÕES DE PRODUÇÃO E VENDA
+    
     /**
      * Cria uma nova movimentação genérica com base nos parâmetros informados.
      *
@@ -147,17 +192,6 @@ public class controleEstoque {
         Timestamp horacriacao = new Timestamp(System.currentTimeMillis());
         Movimentacao nova_movimentacao = new Movimentacao(-1, tipo, origem, produto, armazem, associado_id, quantidade, horacriacao);
         return nova_movimentacao;
-    }
-    
-    /**
-     * Calcula a quantidade produzida com base na espécie e área cultivada.
-     *
-     * @param especie_id    identificador da espécie
-     * @param area_produzida área produzida em m²
-     * @return quantidade estimada em kg
-     */
-    public float calculaQuantidade(int especie_id, float area_produzida){
-        return area_produzida * especieDAO.buscarPorId(especie_id).getRendimento_kg_m2();
     }
     
     /**
@@ -281,7 +315,7 @@ public class controleEstoque {
         excluirMovimentacao(movimentacao.getId());
     }
     
-    // ACESSO DE OUTROS MÓDULOS
+    // OPERAÇÕES DE PRODUÇÃO E VENDA
     // //////////////////////////////////////////
     // VERIFICAR
 

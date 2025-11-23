@@ -1,6 +1,7 @@
 package br.edu.ifsp.hto.cooperativa.estoque.modelo.dao;
 
 import br.edu.ifsp.hto.cooperativa.ConnectionFactory;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.to.AssociadoProdutoTO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Produto;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Armazem;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.EstoqueAtual;
@@ -155,5 +156,62 @@ public class EstoqueAtualDAO {
         }
 
         return estoquesAtuais;
+    }
+    
+    // Outros para alem do crud básico
+
+    public List<AssociadoProdutoTO> listarEstoque(int associado_id) {
+        List<AssociadoProdutoTO> estoquesAtuais = new ArrayList<>();
+        String sql = "SELECT associado_id, produto_id, SUM(quantidade) AS quantidade FROM estoque_atual WHERE associado_id = ? GROUP BY associado_id, produto_id;";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, associado_id);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int produto_id = rs.getInt("produto_id");
+                Produto produto = DAO_produto.buscarPorId(produto_id);
+
+                AssociadoProdutoTO estoqueAtual = new AssociadoProdutoTO(
+                    associado_id,
+                    produto,
+                    rs.getFloat("quantidade"));
+                estoquesAtuais.add(estoqueAtual);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao listar estoques atuais: " + e.getMessage());
+        }
+
+        return estoquesAtuais;
+    }
+    
+    public AssociadoProdutoTO buscarEstoque(int associado_id, int produto_id) {
+        String sql = "SELECT associado_id, produto_id, SUM(quantidade) AS quantidade FROM estoque_atual WHERE associado_id = ? AND produto_id GROUP BY associado_id, produto_id;";
+        AssociadoProdutoTO estoqueAtual = null;
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, associado_id);
+            stmt.setInt(2, produto_id);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                Produto produto = DAO_produto.buscarPorId(produto_id);
+                
+                estoqueAtual = new AssociadoProdutoTO(
+                        associado_id,
+                        produto,
+                        rs.getFloat("quantidade"));
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao buscar estoque atual por ID: " + e.getMessage());
+        }
+
+        return estoqueAtual;
     }
 }

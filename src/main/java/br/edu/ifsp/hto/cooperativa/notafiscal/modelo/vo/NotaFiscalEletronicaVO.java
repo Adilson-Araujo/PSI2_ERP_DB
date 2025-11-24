@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 public class NotaFiscalEletronicaVO {
     private Long id;
     private Long associadoId;
-    private Integer clienteId;
+    private Long clienteId;
     private String chaveAcesso;
     private String razaoSocial;
     private LocalDateTime dataEmissao;
@@ -30,8 +30,8 @@ public class NotaFiscalEletronicaVO {
     public void setId(Long id) { this.id = id; }
     public Long getAssociadoId() { return associadoId; }
     public void setAssociadoId(Long associadoId) { this.associadoId = associadoId; }
-    public Integer getClienteId() { return clienteId; }
-    public void setClienteId(Integer clienteId) { this.clienteId = clienteId; }
+    public Long getClienteId() { return clienteId; }
+    public void setClienteId(Long clienteId) { this.clienteId = clienteId; }
     public String getChaveAcesso() { return chaveAcesso; }
     public void setChaveAcesso(String chaveAcesso) { this.chaveAcesso = chaveAcesso; }
     public String getRazaoSocial() { return razaoSocial; }

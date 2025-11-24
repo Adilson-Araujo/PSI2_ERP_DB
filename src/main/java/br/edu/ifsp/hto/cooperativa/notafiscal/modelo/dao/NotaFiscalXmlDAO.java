@@ -1,162 +1,106 @@
 package br.edu.ifsp.hto.cooperativa.notafiscal.modelo.dao;
 
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.vo.NotaFiscalXmlVO;
+import br.edu.ifsp.hto.cooperativa.ConnectionFactory;
+
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class NotaFiscalXmlDAO {
 
-    public NotaFiscalXmlDAO() {}
+    public NotaFiscalXmlVO inserir(NotaFiscalXmlVO xml) throws SQLException {
+        String sql = """
+            INSERT INTO nota_fiscal_xml (hash, conteudo)
+            VALUES (?, ?)
+            RETURNING id, hash, conteudo
+        """;
 
-    public NotaFiscalXmlVO buscarId(long id) {
-        NotaFiscalXmlVO vo = null;
-        String sql = "SELECT * FROM nota_fiscal_xml WHERE id = ?";
-        Connection conexao = null;
-        try {
-            conexao = DriverManager.getConnection("","","");
-            PreparedStatement p = conexao.prepareStatement(sql);
-            p.setLong(1, id);
-            try (ResultSet rs = p.executeQuery()) {
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, xml.getHash());
+            ps.setString(2, xml.getConteudo());
+
+            try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    vo = new NotaFiscalXmlVO();
-                    vo.setId(rs.getLong("id"));
-                    vo.setHash(rs.getString("hash"));
-                    vo.setConteudo(rs.getString("conteudo"));
-                    return vo;
+                    xml.setId(rs.getLong("id"));
+                    xml.setHash(rs.getString("hash"));
+                    xml.setConteudo(rs.getString("conteudo"));
                 }
             }
-        } catch (SQLException e) {
-             e.printStackTrace(); 
         }
-        finally 
-        { 
-            try 
-            { 
-                conexao.close(); 
-            } 
-            catch (SQLException e) 
-            { 
-                e.printStackTrace();
-            } 
+
+        return xml;
+    }
+
+    public NotaFiscalXmlVO atualizar(NotaFiscalXmlVO xml) throws SQLException {
+        String sql = """
+            UPDATE nota_fiscal_xml
+            SET hash = ?, conteudo = ?
+            WHERE id = ?
+        """;
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, xml.getHash());
+            ps.setString(2, xml.getConteudo());
+            ps.setLong(3, xml.getId());
+            ps.executeUpdate();
         }
+
+        return buscarPorId(xml.getId());
+    }
+
+    public NotaFiscalXmlVO buscarPorId(Long id) throws SQLException {
+        String sql = """
+            SELECT id, hash, conteudo
+            FROM nota_fiscal_xml
+            WHERE id = ?
+        """;
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, id);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    NotaFiscalXmlVO xml = new NotaFiscalXmlVO();
+                    xml.setId(rs.getLong("id"));
+                    xml.setHash(rs.getString("hash"));
+                    xml.setConteudo(rs.getString("conteudo"));
+                    return xml;
+                }
+            }
+        }
+
         return null;
     }
 
-    public String adicionar(NotaFiscalXmlVO vo) {
-        String sql = "INSERT INTO nota_fiscal_xml (hash, conteudo) VALUES (?, ?) RETURNING id";
-        Connection conexao = null;
-        try {
-            conexao = DriverManager.getConnection("","","");
-            PreparedStatement p = conexao.prepareStatement(sql);
-            p.setString(1, vo.getHash());
-            p.setString(2, vo.getConteudo());
-            try (ResultSet rs = p.executeQuery()) { 
-                if (rs.next()) { 
-                    vo.setId(rs.getLong("id")); 
-                    return "OK"; 
-                } 
-            }
-        } catch (SQLException e) { 
-            e.printStackTrace(); 
-            return e.getMessage(); 
-        }
-        finally 
-        { 
-            try 
-            { 
-                conexao.close(); 
-            } 
-            catch (SQLException e) 
-            { 
-                e.printStackTrace();
-            } 
-        }
-        return "ERROR";
-    }
+    public List<NotaFiscalXmlVO> listarTodos() throws SQLException {
+        String sql = """
+            SELECT id, hash, conteudo
+            FROM nota_fiscal_xml
+            ORDER BY id
+        """;
 
-    public String remover(long id) {
-        String sql = "DELETE FROM nota_fiscal_xml WHERE id = ?";
-        Connection conexao = null;
-        try {
-            conexao = DriverManager.getConnection("","","");
-            PreparedStatement p = conexao.prepareStatement(sql);
-            p.setLong(1, id);
-            int changed = p.executeUpdate();
-            return changed > 0 ? "OK" : "NAO_ENCONTRADO";
-        } catch (SQLException e) { 
-            e.printStackTrace(); 
-            return e.getMessage(); 
-        }
-        finally 
-        { 
-            try 
-            { 
-                conexao.close(); 
-            } 
-            catch (SQLException e) 
-            { 
-                e.printStackTrace();
-            } 
-        }
-    }
+        List<NotaFiscalXmlVO> lista = new ArrayList<>();
 
-    public String atualizar(NotaFiscalXmlVO vo) {
-        String sql = "UPDATE nota_fiscal_xml SET hash = ?, conteudo = ? WHERE id = ?";
-        Connection conexao = null;
-        try {
-            conexao = DriverManager.getConnection("","","");
-            PreparedStatement p = conexao.prepareStatement(sql);
-            p.setString(1, vo.getHash());
-            p.setString(2, vo.getConteudo());
-            p.setLong(3, vo.getId());
-            int changed = p.executeUpdate();
-            return changed > 0 ? "OK" : "NAO_ATUALIZADO";
-        } catch (SQLException e) { 
-            e.printStackTrace(); 
-            return e.getMessage(); 
-        }
-        finally 
-        { 
-            try 
-            { 
-                conexao.close(); 
-            } 
-            catch (SQLException e) 
-            { 
-                e.printStackTrace();
-            } 
-        }
-    }
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
-    public ArrayList<NotaFiscalXmlVO> obterTodos() {
-        ArrayList<NotaFiscalXmlVO> list = new ArrayList<>();
-        String sql = "SELECT * FROM nota_fiscal_xml";
-        Connection conexao = null;
-        try {
-            conexao = DriverManager.getConnection("","","");
-            PreparedStatement p = conexao.prepareStatement(sql);
-            ResultSet rs = p.executeQuery();
             while (rs.next()) {
-                NotaFiscalXmlVO vo = new NotaFiscalXmlVO();
-                vo.setId(rs.getLong("id"));
-                vo.setHash(rs.getString("hash"));
-                vo.setConteudo(rs.getString("conteudo"));
-                list.add(vo);
+                NotaFiscalXmlVO xml = new NotaFiscalXmlVO();
+                xml.setId(rs.getLong("id"));
+                xml.setHash(rs.getString("hash"));
+                xml.setConteudo(rs.getString("conteudo"));
+                lista.add(xml);
             }
-        } catch (SQLException e) { 
-            e.printStackTrace(); 
         }
-        finally 
-        { 
-            try 
-            { 
-                conexao.close(); 
-            } 
-            catch (SQLException e) 
-            { 
-                e.printStackTrace();
-            } 
-        }
-        return list;
+
+        return lista;
     }
 }

@@ -6,6 +6,8 @@ package br.edu.ifsp.hto.cooperativa.notafiscal.controlador;
 
 import br.edu.ifsp.hto.cooperativa.notafiscal.controlador.API.IAssociadoControlador;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.dto.AssociadoTO;
+import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.negocios.NegociosFactory;
+
 import java.util.List;
 
 public class AssociadoControlador implements IAssociadoControlador {
@@ -16,8 +18,9 @@ public class AssociadoControlador implements IAssociadoControlador {
     }
 
     @Override
-    public AssociadoTO obter(int id) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public AssociadoTO obter(long id) {
+        var negociosFactory = NegociosFactory.getInstance();
+        return negociosFactory.getAssociado().buscarId(id);
     }
 
     @Override

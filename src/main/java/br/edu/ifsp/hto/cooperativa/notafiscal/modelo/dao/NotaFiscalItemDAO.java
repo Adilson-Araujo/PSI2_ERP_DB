@@ -1,190 +1,147 @@
 package br.edu.ifsp.hto.cooperativa.notafiscal.modelo.dao;
 
+import br.edu.ifsp.hto.cooperativa.ConnectionFactory;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.vo.NotaFiscalItemVO;
+
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
 
 public class NotaFiscalItemDAO {
 
-    public NotaFiscalItemDAO() {}
+    // ------------------------------------------------------------
+    // Buscar por ID
+    // ------------------------------------------------------------
+    public NotaFiscalItemVO buscarId(Long id) {
+        String sql = """
+            SELECT id, nota_fiscal_eletronica_id, produto_id, cfop, ncm,
+                   quantidade, valor_unitario, valor_total
+            FROM nota_fiscal_item
+            WHERE id = ?
+            """;
 
-    public NotaFiscalItemVO buscarId(long id) {
-        NotaFiscalItemVO vo = null;
-        String sql = "SELECT * FROM nota_fiscal_item WHERE id = ?";
-        Connection conexao = null;
-        try {
-            conexao = DriverManager.getConnection("","","");
-            PreparedStatement p = conexao.prepareStatement(sql);
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement p = conn.prepareStatement(sql)) {
+
             p.setLong(1, id);
-            try (ResultSet rs = p.executeQuery()) {
-                if (rs.next()) {
-                    vo = new NotaFiscalItemVO();
-                    vo.setId(rs.getLong("id"));
-                    vo.setProdutoId(rs.getInt("produto_id"));
-                    vo.setNotaFiscalEletronicaId(rs.getLong("nota_fiscal_eletronica_id"));
-                    vo.setCfop(rs.getString("cfop"));
-                    vo.setNcm(rs.getString("ncm"));
-                    vo.setQuantidade(rs.getInt("quantidade"));
-                    vo.setValorUnitario(rs.getBigDecimal("valor_unitario"));
-                    vo.setValorTotal(rs.getBigDecimal("valor_total"));
-                    return vo;
-                }
-            }
-        } catch (SQLException e) {
-             e.printStackTrace(); 
-        }
-        finally 
-        { 
-            try 
-            { 
-                conexao.close(); 
-            } 
-            catch (SQLException e) 
-            { 
-                e.printStackTrace();
-            } 
-        }
-        return null;
-    }
-
-    public String adicionar(NotaFiscalItemVO vo) {
-        String sql = "INSERT INTO nota_fiscal_item (produto_id, nota_fiscal_eletronica_id, cfop, ncm, quantidade, valor_unitario, valor_total) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id";
-        Connection conexao = null;
-        try {
-            conexao = DriverManager.getConnection("","","");
-            PreparedStatement p = conexao.prepareStatement(sql);
-            p.setInt(1, vo.getProdutoId()==null?0:vo.getProdutoId());
-            if (vo.getNotaFiscalEletronicaId() == null) {
-                p.setNull(2, Types.BIGINT); 
-            } else { 
-                p.setLong(2, vo.getNotaFiscalEletronicaId());
-            }
-            p.setString(3, vo.getCfop());
-            p.setString(4, vo.getNcm());
-            p.setInt(5, vo.getQuantidade()==null?0:vo.getQuantidade());
-            p.setBigDecimal(6, vo.getValorUnitario());
-            p.setBigDecimal(7, vo.getValorTotal());
-            try (ResultSet rs = p.executeQuery()) { 
-                if (rs.next()) { 
-                    vo.setId(rs.getLong("id")); 
-                    return "OK"; 
-                } 
-            }
-        } catch (SQLException e) { 
-            e.printStackTrace(); 
-            return e.getMessage(); 
-        }
-        finally 
-        { 
-            try 
-            { 
-                conexao.close(); 
-            } 
-            catch (SQLException e) 
-            { 
-                e.printStackTrace();
-            } 
-        }
-        return "ERROR";
-    }
-
-    public String remover(long id) {
-        String sql = "DELETE FROM nota_fiscal_item WHERE id = ?";
-        Connection conexao = null;
-        try {
-            conexao = DriverManager.getConnection("","","");
-            PreparedStatement p = conexao.prepareStatement(sql);
-            p.setLong(1, id);
-            int changed = p.executeUpdate();
-            return changed > 0 ? "OK" : "NAO_ENCONTRADO";
-        } catch (SQLException e) { 
-            e.printStackTrace(); 
-            return e.getMessage(); 
-        }
-        finally 
-        { 
-            try 
-            { 
-                conexao.close(); 
-            } 
-            catch (SQLException e) 
-            { 
-                e.printStackTrace();
-            } 
-        }
-    }
-
-    public String atualizar(NotaFiscalItemVO vo) {
-        String sql = "UPDATE nota_fiscal_item SET produto_id = ?, nota_fiscal_eletronica_id = ?, cfop = ?, ncm = ?, quantidade = ?, valor_unitario = ?, valor_total = ? WHERE id = ?";
-        Connection conexao = null;
-        try {
-            conexao = DriverManager.getConnection("","","");
-            PreparedStatement p = conexao.prepareStatement(sql);
-            p.setInt(1, vo.getProdutoId()==null?0:vo.getProdutoId());
-            if (vo.getNotaFiscalEletronicaId() == null) {
-                p.setNull(2, Types.BIGINT); 
-            } else { 
-                p.setLong(2, vo.getNotaFiscalEletronicaId());
-            }
-            p.setString(3, vo.getCfop());
-            p.setString(4, vo.getNcm());
-            p.setInt(5, vo.getQuantidade()==null?0:vo.getQuantidade());
-            p.setBigDecimal(6, vo.getValorUnitario());
-            p.setBigDecimal(7, vo.getValorTotal());
-            p.setLong(8, vo.getId());
-            int changed = p.executeUpdate();
-            return changed > 0 ? "OK" : "NAO_ATUALIZADO";
-        } catch (SQLException e) { 
-            e.printStackTrace(); 
-            return e.getMessage(); 
-        }
-        finally 
-        { 
-            try 
-            { 
-                conexao.close(); 
-            } 
-            catch (SQLException e) 
-            { 
-                e.printStackTrace();
-            } 
-        }
-    }
-
-    public ArrayList<NotaFiscalItemVO> obterTodos() {
-        ArrayList<NotaFiscalItemVO> list = new ArrayList<>();
-        String sql = "SELECT * FROM nota_fiscal_item";
-        Connection conexao = null;
-        try {
-            conexao = DriverManager.getConnection("","","");
-            PreparedStatement p = conexao.prepareStatement(sql);
             ResultSet rs = p.executeQuery();
-            while (rs.next()) {
+
+            if (rs.next()) {
                 NotaFiscalItemVO vo = new NotaFiscalItemVO();
                 vo.setId(rs.getLong("id"));
-                vo.setProdutoId(rs.getInt("produto_id"));
                 vo.setNotaFiscalEletronicaId(rs.getLong("nota_fiscal_eletronica_id"));
+                vo.setProdutoId(rs.getInt("produto_id"));
                 vo.setCfop(rs.getString("cfop"));
                 vo.setNcm(rs.getString("ncm"));
                 vo.setQuantidade(rs.getInt("quantidade"));
                 vo.setValorUnitario(rs.getBigDecimal("valor_unitario"));
                 vo.setValorTotal(rs.getBigDecimal("valor_total"));
-                list.add(vo);
+                return vo;
             }
-        } catch (SQLException e) { 
-            e.printStackTrace(); 
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        finally 
-        { 
-            try 
-            { 
-                conexao.close(); 
-            } 
-            catch (SQLException e) 
-            { 
-                e.printStackTrace();
-            } 
+        return null;
+    }
+
+    // ------------------------------------------------------------
+    // Adicionar
+    // ------------------------------------------------------------
+    public void adicionar(NotaFiscalItemVO vo) {
+        String sql = """
+            INSERT INTO nota_fiscal_item
+                (nota_fiscal_eletronica_id, produto_id, cfop, ncm,
+                 quantidade, valor_unitario, valor_total)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """;
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement p = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            p.setLong(1, vo.getNotaFiscalEletronicaId());
+            p.setInt(2, vo.getProdutoId());
+            p.setString(3, vo.getCfop());
+            p.setString(4, vo.getNcm());
+            p.setInt(5, vo.getQuantidade());
+            p.setBigDecimal(6, vo.getValorUnitario());
+            p.setBigDecimal(7, vo.getValorTotal());
+
+            p.executeUpdate();
+
+            ResultSet keys = p.getGeneratedKeys();
+            if (keys.next()) {
+                vo.setId(keys.getLong(1));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        return list;
+    }
+
+    // ------------------------------------------------------------
+    // Atualizar
+    // ------------------------------------------------------------
+    public void atualizar(NotaFiscalItemVO vo) {
+        String sql = """
+            UPDATE nota_fiscal_item
+            SET nota_fiscal_eletronica_id = ?, produto_id = ?, cfop = ?, ncm = ?,
+                quantidade = ?, valor_unitario = ?, valor_total = ?
+            WHERE id = ?
+            """;
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement p = conn.prepareStatement(sql)) {
+
+            p.setLong(1, vo.getNotaFiscalEletronicaId());
+            p.setInt(2, vo.getProdutoId());
+            p.setString(3, vo.getCfop());
+            p.setString(4, vo.getNcm());
+            p.setInt(5, vo.getQuantidade());
+            p.setBigDecimal(6, vo.getValorUnitario());
+            p.setBigDecimal(7, vo.getValorTotal());
+            p.setLong(8, vo.getId());
+
+            p.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ------------------------------------------------------------
+    // Obter todos
+    // ------------------------------------------------------------
+    public ArrayList<NotaFiscalItemVO> obterTodos() {
+        ArrayList<NotaFiscalItemVO> lista = new ArrayList<>();
+
+        String sql = """
+            SELECT id, nota_fiscal_eletronica_id, produto_id, cfop, ncm,
+                   quantidade, valor_unitario, valor_total
+            FROM nota_fiscal_item
+            ORDER BY id
+            """;
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement p = conn.prepareStatement(sql);
+             ResultSet rs = p.executeQuery()) {
+
+            while (rs.next()) {
+                NotaFiscalItemVO vo = new NotaFiscalItemVO();
+                vo.setId(rs.getLong("id"));
+                vo.setNotaFiscalEletronicaId(rs.getLong("nota_fiscal_eletronica_id"));
+                vo.setProdutoId(rs.getInt("produto_id"));
+                vo.setCfop(rs.getString("cfop"));
+                vo.setNcm(rs.getString("ncm"));
+                vo.setQuantidade(rs.getInt("quantidade"));
+                vo.setValorUnitario(rs.getBigDecimal("valor_unitario"));
+                vo.setValorTotal(rs.getBigDecimal("valor_total"));
+                lista.add(vo);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return lista;
     }
 }

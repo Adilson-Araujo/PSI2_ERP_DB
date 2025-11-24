@@ -19,7 +19,7 @@ public class Associado extends BaseNegocios{
         //if (associado.endereco != null)    
     }
     
-    public AssociadoTO buscarId(int id){
+    public AssociadoTO buscarId(long id){
         if (id == 0)
             return null;
         var resultado = new AssociadoTO();

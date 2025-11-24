@@ -9,7 +9,7 @@ import java.util.List;
 public interface IAssociadoControlador{
 
     public List<AssociadoTO> buscar();
-    public AssociadoTO obter(int id);
+    public AssociadoTO obter(long id);
     public AssociadoTO obter(String cnpj);
     public void cadastrar(AssociadoTO associado);
 }

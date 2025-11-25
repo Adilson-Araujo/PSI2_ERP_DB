@@ -54,7 +54,7 @@ public class PrecoPPADAO {
          * buscarPorId procurar pelo preço vigente de uma especie
          * em uma data definida.
          */
-        String sql = "SELECT data_inicio, especie_id, data_final, valor FROM preco_ppa WHERE especie_id = ? AND data_inicio <= ? AND data_final >= ? ORDER BY data_inicio DESC LIMIT 1";
+        String sql = "SELECT data_inicio, especie_id, data_final, valor FROM preco_ppa WHERE especie_id = ? AND data_inicio <= ? AND data_final >= ? ORDER BY data_inicio DESC";
         PrecoPPA precoppa = null;
 
         try (Connection conn = ConnectionFactory.getConnection();

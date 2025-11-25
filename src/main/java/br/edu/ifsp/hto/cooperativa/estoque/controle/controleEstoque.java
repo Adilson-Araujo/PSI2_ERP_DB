@@ -9,7 +9,8 @@ import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.OrigemDAO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.PrecoPPADAO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.ProdutoDAO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.TipoDAO;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.to.AssociadoProdutoTO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.to.EstoqueTO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.to.ProdutoPrecificadoTO;
 
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Armazem;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Categoria;
@@ -32,9 +33,9 @@ import java.util.List;
  * <p>Implementa o padrão Singleton para garantir apenas uma instância durante
  * a execução do sistema.</p>
  */
-public class controleEstoque {
+public class ControleEstoque {
     /** Instância única do controlador de estoque. */
-    private static controleEstoque instancia = null;
+    private static ControleEstoque instancia = null;
     /** DAO responsável por operações com armazéns. */
     private final ArmazemDAO armazemDAO;
     /** DAO responsável por operações com categoria. */
@@ -57,7 +58,7 @@ public class controleEstoque {
     /**
      * Construtor privado do Singleton. Inicializa as referências aos DAOs.
      */
-    private controleEstoque(){
+    private ControleEstoque(){
         this.armazemDAO       =  ArmazemDAO.getInstance();
         this.categoriaDAO     =  CategoriaDAO.getInstance();
         this.especieDAO       =  EspecieDAO.getInstance();
@@ -74,8 +75,8 @@ public class controleEstoque {
      *
      * @return instância de {@code controleEstoque}
      */
-    public static controleEstoque getInstance(){
-        if(instancia == null) instancia = new controleEstoque();
+    public static ControleEstoque getInstance(){
+        if(instancia == null) instancia = new ControleEstoque();
         return instancia;
     }
     
@@ -135,6 +136,29 @@ public class controleEstoque {
     // READ GERAL
     // //////////////////////////////////////////
     // AUXILIAR DE OUTROS MÓDULOS
+    
+    /**
+     * Retorna um lista de TOs que contem Produto e Especie
+     * com Preço do PPA em uma Data definida.
+     * 
+     * @param data    Timestamp a qual se quer o preço.
+     * @return        List contendo ProdutoPreficadoTO s.
+     */
+    public List<ProdutoPrecificadoTO> listarPrecos(Timestamp data){
+        return produtoDAO.listarTodosPrecificados(data);
+    }
+    
+    /**
+     * Retorna um TO que contem Produto e Especie
+     * com Preço do PPA em uma Data definida.
+     * 
+     * @param produto_id int do id do produto a qual se quer o preço.
+     * @param data       Timestamp a qual se quer o preço.
+     * @return           List contendo ProdutoPreficadoTO s.
+     */
+    public ProdutoPrecificadoTO buscarPrecos(int produto_id, Timestamp data){
+        return produtoDAO.buscarPrecificadoPorId(produto_id, data);
+    }
 
     /**
      * Retorna o estoque Produto e Quantidade de um dado Associado.
@@ -142,7 +166,7 @@ public class controleEstoque {
      * @param associado_id    identificador do associado
      * @return List de AssociadoProdutoTO com relação Produto e Quantidade
      */    
-    public List<AssociadoProdutoTO> listarEstoque(int associado_id){
+    public List<EstoqueTO> listarEstoque(int associado_id){
         return estoqueAtualDAO.listarEstoque(associado_id);
     }
     
@@ -153,7 +177,7 @@ public class controleEstoque {
      * @param produto_id      identificador do produto
      * @return List de AssociadoProdutoTO com relação Produto e Quantidade
      */    
-    public AssociadoProdutoTO buscarEstoque(int associado_id, int produto_id){
+    public EstoqueTO buscarEstoque(int associado_id, int produto_id){
         return estoqueAtualDAO.buscarEstoque(associado_id, produto_id);
     }
     
@@ -164,7 +188,7 @@ public class controleEstoque {
      * @param area_produzida área produzida em m²
      * @return quantidade estimada em kg
      */
-    public float calculaQuantidade(int especie_id, float area_produzida){
+    public float calcularQuantidade(int especie_id, float area_produzida){
         return area_produzida * especieDAO.buscarPorId(especie_id).getRendimento_kg_m2();
     }
 
@@ -205,7 +229,7 @@ public class controleEstoque {
      */
     public Movimentacao novaProducao(int especie_id, int associado_id, float area_produzida){
         int produto_id = produtoDAO.buscarPorEspecieId(especie_id).getId();
-        float quantidade = calculaQuantidade(especie_id, area_produzida);
+        float quantidade = calcularQuantidade(especie_id, area_produzida);
         return novaMovimentacao(1, 1, produto_id, 1, associado_id, quantidade);
     }
     

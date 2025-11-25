@@ -1,7 +1,7 @@
 package br.edu.ifsp.hto.cooperativa.estoque.modelo.dao;
 
 import br.edu.ifsp.hto.cooperativa.ConnectionFactory;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.to.AssociadoProdutoTO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.to.EstoqueTO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Produto;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Armazem;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.EstoqueAtual;
@@ -160,8 +160,8 @@ public class EstoqueAtualDAO {
     
     // Outros para alem do crud básico
 
-    public List<AssociadoProdutoTO> listarEstoque(int associado_id) {
-        List<AssociadoProdutoTO> estoquesAtuais = new ArrayList<>();
+    public List<EstoqueTO> listarEstoque(int associado_id) {
+        List<EstoqueTO> estoquesAtuais = new ArrayList<>();
         String sql = "SELECT associado_id, produto_id, SUM(quantidade) AS quantidade FROM estoque_atual WHERE associado_id = ? GROUP BY associado_id, produto_id;";
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -174,7 +174,7 @@ public class EstoqueAtualDAO {
                 int produto_id = rs.getInt("produto_id");
                 Produto produto = DAO_produto.buscarPorId(produto_id);
 
-                AssociadoProdutoTO estoqueAtual = new AssociadoProdutoTO(
+                EstoqueTO estoqueAtual = new EstoqueTO(
                     associado_id,
                     produto,
                     rs.getFloat("quantidade"));
@@ -188,9 +188,9 @@ public class EstoqueAtualDAO {
         return estoquesAtuais;
     }
     
-    public AssociadoProdutoTO buscarEstoque(int associado_id, int produto_id) {
-        String sql = "SELECT associado_id, produto_id, SUM(quantidade) AS quantidade FROM estoque_atual WHERE associado_id = ? AND produto_id GROUP BY associado_id, produto_id;";
-        AssociadoProdutoTO estoqueAtual = null;
+    public EstoqueTO buscarEstoque(int associado_id, int produto_id) {
+        String sql = "SELECT associado_id, produto_id, SUM(quantidade) AS quantidade FROM estoque_atual WHERE associado_id = ? AND produto_id = ? GROUP BY associado_id, produto_id;";
+        EstoqueTO estoqueAtual = null;
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -202,7 +202,7 @@ public class EstoqueAtualDAO {
             if (rs.next()) {
                 Produto produto = DAO_produto.buscarPorId(produto_id);
                 
-                estoqueAtual = new AssociadoProdutoTO(
+                estoqueAtual = new EstoqueTO(
                         associado_id,
                         produto,
                         rs.getFloat("quantidade"));

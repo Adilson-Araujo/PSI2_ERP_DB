@@ -1,6 +1,6 @@
 package br.edu.ifsp.hto.cooperativa.estoque.visao;
 
-import br.edu.ifsp.hto.cooperativa.estoque.controle.controleEstoque;
+import br.edu.ifsp.hto.cooperativa.estoque.controle.ControleEstoque;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Armazem;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -13,7 +13,7 @@ import java.util.List;
 public class TelaDeEntrada {
 
     public static void main(String[] args) {
-        controleEstoque controle = controleEstoque.getInstance();
+        ControleEstoque controle = ControleEstoque.getInstance();
 
         final JFrame janela = new JFrame("Entrada no Estoque");
         janela.setSize(700, 500); 

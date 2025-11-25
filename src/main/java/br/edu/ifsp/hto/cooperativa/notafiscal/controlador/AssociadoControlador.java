@@ -25,8 +25,8 @@ public class AssociadoControlador implements IAssociadoControlador {
 
     @Override
     public AssociadoTO obter(String cnpj) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+        var negociosFactory = NegociosFactory.getInstance();
+        return negociosFactory.getAssociado().buscarCnpj(cnpj);    }
 
     @Override
     public void cadastrar(AssociadoTO associado) {

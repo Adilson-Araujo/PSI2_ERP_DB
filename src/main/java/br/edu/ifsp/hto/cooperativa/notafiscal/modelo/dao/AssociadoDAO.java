@@ -199,4 +199,51 @@ public class AssociadoDAO {
             e.printStackTrace();
         }
     }
+
+    public AssociadoVO buscarCnpj(String cnpj) {
+        String sql = """
+            SELECT
+                id,
+                endereco_id,
+                cnpj,
+                razao_social,
+                nome_fantasia,
+                inscricao_estadual,
+                inscricao_municipal,
+                telefone,
+                email,
+                data_cadastrado,
+                ativo
+            FROM associado
+            WHERE cnpj = ?
+        """;
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, cnpj);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                AssociadoVO vo = new AssociadoVO();
+                vo.setId(rs.getLong("id"));
+                vo.setEnderecoId(rs.getLong("endereco_id"));
+                vo.setCnpj(rs.getString("cnpj"));
+                vo.setRazaoSocial(rs.getString("razao_social"));
+                vo.setNomeFantasia(rs.getString("nome_fantasia"));
+                vo.setInscricaoEstadual(rs.getString("inscricao_estadual"));
+                vo.setInscricaoMunicipal(rs.getString("inscricao_municipal"));
+                vo.setTelefone(rs.getString("telefone"));
+                vo.setEmail(rs.getString("email"));
+                vo.setDataCadastrado(rs.getTimestamp("data_cadastrado").toLocalDateTime());
+                vo.setAtivo(rs.getBoolean("ativo"));
+                return vo;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 }

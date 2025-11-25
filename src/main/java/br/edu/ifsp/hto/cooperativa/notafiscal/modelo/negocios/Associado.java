@@ -29,9 +29,9 @@ public class Associado extends BaseNegocios{
 
         resultado.associado = associado;
         if (associado.getEnderecoId() != 0)
-            resultado.endereco = DAOFactory.getEnderecoDAO().buscarId(id);
+            resultado.endereco = DAOFactory.getEnderecoDAO().buscarId(associado.getEnderecoId());
 
-        return new AssociadoTO();
+        return resultado;
     }
     
     public List<AssociadoTO> obterTodos()
@@ -46,6 +46,21 @@ public class Associado extends BaseNegocios{
             if (endereco != null)
                 associadoTO.endereco = endereco;
         }
+        return resultado;
+    }
+
+    public AssociadoTO buscarCnpj(String cnpj) {
+        if (cnpj == null)
+            return null;
+        var resultado = new AssociadoTO();
+        var associado = DAOFactory.getAssociadoDAO().buscarCnpj(cnpj);
+        if (associado == null)
+            return null;
+
+        resultado.associado = associado;
+        if (associado.getEnderecoId() != 0)
+            resultado.endereco = DAOFactory.getEnderecoDAO().buscarId(associado.getEnderecoId());
+
         return resultado;
     }
 }

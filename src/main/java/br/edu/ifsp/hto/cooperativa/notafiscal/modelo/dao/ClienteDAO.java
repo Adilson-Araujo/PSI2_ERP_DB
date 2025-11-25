@@ -183,4 +183,47 @@ public class ClienteDAO {
             e.printStackTrace();
         }
     }
+
+    public ClienteVO buscarCnpj(String cpfCnpj) {
+        String sql = """
+            SELECT
+                id,
+                endereco_id,
+                nome_fantasia,
+                razao_social,
+                telefone,
+                email,
+                data_cadastro,
+                ativo,
+                cpf_cnpj
+            FROM cliente
+            WHERE cpf_cnpj = ?
+        """;
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, cpfCnpj);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                ClienteVO vo = new ClienteVO();
+                vo.setId(rs.getLong("id"));
+                vo.setEnderecoId(rs.getLong("endereco_id"));
+                vo.setNomeFantasia(rs.getString("nome_fantasia"));
+                vo.setRazaoSocial(rs.getString("razao_social"));
+                vo.setTelefone(rs.getString("telefone"));
+                vo.setEmail(rs.getString("email"));
+                vo.setDataCadastro(rs.getTimestamp("data_cadastro").toLocalDateTime());
+                vo.setAtivo(rs.getBoolean("ativo"));
+                vo.setCpfCnpj(rs.getString("cpf_cnpj"));
+                return vo;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 }

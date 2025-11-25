@@ -4,10 +4,22 @@
  */
 package br.edu.ifsp.hto.cooperativa.notafiscal.modelo.negocios;
 
-/**
- *
- * @author ht3036979
- */
-public class Cliente {
-    
+import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.dto.AssociadoTO;
+import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.dto.ClienteTO;
+
+public class Cliente extends BaseNegocios {
+    public ClienteTO buscarCpfCnpj(String cpfCnpj){
+        if (cpfCnpj == null)
+            return null;
+        var resultado = new ClienteTO();
+        var cliente = DAOFactory.getClienteDAO().buscarCnpj(cpfCnpj);
+        if (cliente == null)
+            return null;
+
+        resultado.cliente = cliente;
+        if (cliente.getEnderecoId() != 0)
+            resultado.endereco = DAOFactory.getEnderecoDAO().buscarId(cliente.getEnderecoId());
+
+        return resultado;
+    }
 }

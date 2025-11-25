@@ -7,42 +7,83 @@ package br.edu.ifsp.hto.cooperativa.notafiscal.modelo.negocios;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.dto.*;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.nfeSchema.nfe.*;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.vo.*;
+import br.edu.ifsp.hto.cooperativa.vendas.modelo.vo.VendaVO;
 import jakarta.xml.bind.*;
+import br.com.swconsultoria.impressao.model.Impressao;
+import br.com.swconsultoria.impressao.service.ImpressaoService;
+import br.com.swconsultoria.impressao.util.ImpressaoUtil;
 
+import java.io.File;
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.awt.Desktop;
 
 public class NotaFiscalEletronica {
-        public String gerarXml(NotaFiscalEletronicaTO nfe) {
-            try {
-                var context = JAXBContext.newInstance(TNFe.class);
-                var marshaller = context.createMarshaller();
-                marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 
-                TNFe tnFe = new TNFe();
-                TNFe.InfNFe inf = new TNFe.InfNFe();
-                tnFe.setInfNFe(inf);
+    public void gerarNfeVenda(VendaVO venda)
+    {
 
-                // Ajustar id e versão, id deve ser a sigla NFe seguida da chave de acesso
-                // Se for possivel assinar no futuro, deverá ser usado na tag <Signature>
-                inf.setId("NFe" + nfe.notaFiscalEletronica.getChaveAcesso());
-                inf.setVersao("4.00");
+    }
+    public void gerarDanfeNfe(NotaFiscalEletronicaTO nfe)
+    {
+        gerarXml(nfe);
+        imprimirDanfePdf(nfe);
 
-                inf.setIde(buildIde(nfe));
-                inf.setEmit(buildEmit(nfe));
-                inf.setDest(buildDest(nfe));
+    }
 
-                buildItens(nfe, inf);
-                buildTotais(nfe, inf);
-
-                var sw = new StringWriter();
-                marshaller.marshal(tnFe, sw);
-                return sw.toString();
-
-            } catch (Exception e) {
-                throw new RuntimeException("Erro ao gerar XML da NFe", e);
-            }
+    public byte[] imprimirDanfeByte(String xml){
+        try {
+            Impressao impressao = ImpressaoUtil.impressaoPadraoNFe(xml);
+            return ImpressaoService.impressaoPdfByte(impressao);
         }
+        catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
+    public void imprimirDanfePdf(NotaFiscalEletronicaTO nfe){
+        try {
+            Impressao impressao = ImpressaoUtil.impressaoPadraoNFe(nfe.notaFiscalXml.getConteudo());
+            var destino = "/c/temp/nfe/nfe-" + nfe.notaFiscalEletronica.getNumeroNotaFiscal() + ".pdf";
+            ImpressaoService.impressaoPdfArquivo(impressao, destino);
+            File arquivo = new File(destino);
+            Desktop.getDesktop().open(arquivo);
+        }
+        catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    public void gerarXml(NotaFiscalEletronicaTO nfe) {
+        try {
+            var context = JAXBContext.newInstance(TNFe.class);
+            var marshaller = context.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
+            TNFe tnFe = new TNFe();
+            TNFe.InfNFe inf = new TNFe.InfNFe();
+            tnFe.setInfNFe(inf);
+
+            // Ajustar id e versão, id deve ser a sigla NFe seguida da chave de acesso
+            // Se for possivel assinar no futuro, deverá ser usado na tag <Signature>
+            inf.setId("NFe" + nfe.notaFiscalEletronica.getChaveAcesso());
+            inf.setVersao("4.00");
+
+            inf.setIde(buildIde(nfe));
+            inf.setEmit(buildEmit(nfe));
+            inf.setDest(buildDest(nfe));
+
+            buildItens(nfe, inf);
+            buildTotais(nfe, inf);
+
+            var sw = new StringWriter();
+            marshaller.marshal(tnFe, sw);
+            nfe.notaFiscalXml.setConteudo(sw.toString());
+
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao gerar XML da NFe", e);
+        }
+    }
 
     private TNFe.InfNFe.Ide buildIde(NotaFiscalEletronicaTO nfe) {
         var vo = nfe.notaFiscalEletronica;

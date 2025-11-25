@@ -11,7 +11,7 @@ public class EnderecoVO {
 
     public EnderecoVO() {}
 
-    public EnderecoVO(Long id, String estado, String cidade, String bairro, String rua, Integer numero, String cep) {
+    public EnderecoVO(String estado, String cidade, String bairro, String rua, Integer numero, String cep) {
         this.id = id; this.estado = estado; this.cidade = cidade; this.bairro = bairro;
         this.rua = rua; this.numero = numero; this.cep = cep;
     }

@@ -60,29 +60,13 @@
             <artifactId>postgresql</artifactId>
             <version>42.7.7</version>
         </dependency>
-    </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jaxb2-maven-plugin</artifactId>
-                <version>4.0.0</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>xjc</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <sources>
-                        <source>${project.basedir}/src/main/java/br/edu/ifsp/hto/cooperativa/notafiscal/recursos/xsd/nfe/nfe_v4.00.xsd</source>
-                    </sources>
-                    <packageName>br.edu.ifsp.hto.cooperativa.notafiscal.modelo.nfeSchema.nfe</packageName>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+        <dependency>
+            <groupId>br.com.swconsultoria</groupId>
+            <artifactId>java-danfe</artifactId>
+            <version>1.8</version>
+        </dependency>
+
+    </dependencies>
 
 </project>

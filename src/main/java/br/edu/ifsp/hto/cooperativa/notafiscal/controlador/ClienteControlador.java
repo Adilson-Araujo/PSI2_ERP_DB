@@ -6,6 +6,8 @@ package br.edu.ifsp.hto.cooperativa.notafiscal.controlador;
 
 import br.edu.ifsp.hto.cooperativa.notafiscal.controlador.API.IClienteControlador;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.dto.ClienteTO;
+import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.negocios.NegociosFactory;
+
 import java.util.List;
 
 public class ClienteControlador implements IClienteControlador {
@@ -22,7 +24,8 @@ public class ClienteControlador implements IClienteControlador {
 
     @Override
     public ClienteTO obter(String cpfCnpj) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        var negociosFactory = NegociosFactory.getInstance();
+        return negociosFactory.getCliente().buscarCpfCnpj(cpfCnpj);
     }
     
 }

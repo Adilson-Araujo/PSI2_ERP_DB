@@ -1,5 +1,12 @@
 package br.edu.ifsp.hto.cooperativa.notafiscal.visao;
 
+import br.edu.ifsp.hto.cooperativa.notafiscal.controlador.AssociadoControlador;
+import br.edu.ifsp.hto.cooperativa.notafiscal.controlador.ClienteControlador;
+import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.dto.AssociadoTO;
+import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.dto.NotaFiscalEletronicaTO;
+import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.vo.AssociadoVO;
+import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.vo.EnderecoVO;
+import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.vo.NotaFiscalEletronicaVO;
 import br.edu.ifsp.hto.cooperativa.notafiscal.visao.ClassesBase.Button;
 import br.edu.ifsp.hto.cooperativa.notafiscal.visao.ClassesBase.ViewBase;
 
@@ -9,6 +16,9 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.util.ArrayList;
+
+import br.edu.ifsp.hto.cooperativa.sessao.controlador.SessaoControlador;
 import com.toedter.calendar.JDateChooser;
 
 
@@ -19,11 +29,11 @@ public class TelaCadastroVenda extends ViewBase {
 
     // Emitente
     private JTextField txtEmitCnpj, txtEmitRazao, txtEmitFantasia,
-            txtEmitUf, txtEmitCidade, txtEmitBairro, txtEmitRua, txtEmitNumero;
+            txtEmitUf, txtEmitCidade, txtEmitBairro, txtEmitRua, txtEmitNumero, txtEmitCep;
 
     // Destinatário
     private JTextField txtDestCpfCnpj, txtDestRazao,
-            txtDestUf, txtDestCidade, txtDestBairro, txtDestRua, txtDestNumero;
+            txtDestUf, txtDestCidade, txtDestBairro, txtDestRua, txtDestNumero, txtDestCep;
 
     // Produtos
     private JTextField txtProdCodigo, txtProdDescricao, txtProdNcm, txtProdCfop, txtProdQtd, txtProdVlrUnit;
@@ -93,6 +103,7 @@ public class TelaCadastroVenda extends ViewBase {
         txtEmitBairro = new JTextField(18);
         txtEmitRua = new JTextField(24);
         txtEmitNumero = new JTextField(6);
+        txtEmitCep = new JTextField(8);
 
         addField(p, gbc, 0, "CNPJ:", txtEmitCnpj);
         addField(p, gbc, 1, "Razão Social:", txtEmitRazao);
@@ -102,19 +113,57 @@ public class TelaCadastroVenda extends ViewBase {
         addField(p, gbc, 5, "Bairro:", txtEmitBairro);
         addField(p, gbc, 6, "Rua:", txtEmitRua);
         addField(p, gbc, 7, "Número:", txtEmitNumero);
+        addField(p, gbc, 8, "CEP", txtEmitCep);
 
         br.edu.ifsp.hto.cooperativa.notafiscal.visao.ClassesBase.Button btnSalvar = new br.edu.ifsp.hto.cooperativa.notafiscal.visao.ClassesBase.Button("Salvar Emitente");
         gbc.gridx = 0;
-        gbc.gridy = 8;
+        gbc.gridy = 9;
         p.add(btnSalvar, gbc);
 
-        br.edu.ifsp.hto.cooperativa.notafiscal.visao.ClassesBase.Button btnImportar = new br.edu.ifsp.hto.cooperativa.notafiscal.visao.ClassesBase.Button("Importar Emitente");
+        br.edu.ifsp.hto.cooperativa.notafiscal.visao.ClassesBase.Button btnImportarEmitente = new br.edu.ifsp.hto.cooperativa.notafiscal.visao.ClassesBase.Button("Importar Emitente");
         gbc.gridx = 1;
-        gbc.gridy = 8;
-        p.add(btnImportar, gbc);
-
+        gbc.gridy = 9;
+        p.add(btnImportarEmitente, gbc);
+        btnImportarEmitente.addActionListener(e -> btnImportarEmitente_click());
         addTopGlue(p, gbc, 8);
         return p;
+    }
+
+    private void btnImportarEmitente_click() {
+        try {
+            AssociadoTO associado = null;
+            var sessaoControlador = new SessaoControlador();
+            var usuarioLogado = sessaoControlador.obterUsuarioLogado();
+            if (usuarioLogado == null){
+                if (txtEmitCnpj.getText().isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Digite o CNPJ do emitente", "Aviso", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                var associadoControlador = new AssociadoControlador();
+                associado = associadoControlador.obter(txtEmitCnpj.getText());
+                if (associado == null)
+                {
+                    JOptionPane.showMessageDialog(this, "Emitente com cnpj: " + txtEmitCnpj.getText() + " não está cadastrado", "Aviso", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+            }
+            else {
+                associado = usuarioLogado.associadoTO;
+            }
+            txtEmitCnpj.setText(associado.associado.getCnpj());
+            txtEmitFantasia.setText(associado.associado.getNomeFantasia());
+            txtEmitRazao.setText(associado.associado.getRazaoSocial());
+            txtEmitUf.setText(associado.endereco.getEstado());
+            txtEmitCep.setText(associado.endereco.getCep());
+            txtEmitBairro.setText(associado.endereco.getBairro());
+            txtEmitCidade.setText(associado.endereco.getCidade());
+            txtEmitRua.setText(associado.endereco.getRua());
+            txtEmitNumero.setText(associado.endereco.getNumero().toString());
+        }
+        catch(Exception ex)
+        {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private JPanel criarPainelDestinatario() {
@@ -129,6 +178,7 @@ public class TelaCadastroVenda extends ViewBase {
         txtDestBairro = new JTextField(18);
         txtDestRua = new JTextField(24);
         txtDestNumero = new JTextField(6);
+        txtDestCep = new JTextField(8);
 
         addField(p, gbc, 0, "CNPJ/CPF:", txtDestCpfCnpj);
         addField(p, gbc, 1, "Nome/Razão Social:", txtDestRazao);
@@ -137,19 +187,50 @@ public class TelaCadastroVenda extends ViewBase {
         addField(p, gbc, 4, "Bairro:", txtDestBairro);
         addField(p, gbc, 5, "Rua:", txtDestRua);
         addField(p, gbc, 6, "Número:", txtDestNumero);
+        addField(p, gbc, 7, "CEP", txtDestCep);
+
 
         br.edu.ifsp.hto.cooperativa.notafiscal.visao.ClassesBase.Button btnSalvar = new br.edu.ifsp.hto.cooperativa.notafiscal.visao.ClassesBase.Button("Salvar Destinatário");
         gbc.gridx = 0;
-        gbc.gridy = 7;
+        gbc.gridy = 8;
         p.add(btnSalvar, gbc);
 
-        br.edu.ifsp.hto.cooperativa.notafiscal.visao.ClassesBase.Button btnImportar = new br.edu.ifsp.hto.cooperativa.notafiscal.visao.ClassesBase.Button("Importar Destinatário");
+        br.edu.ifsp.hto.cooperativa.notafiscal.visao.ClassesBase.Button btnImportarDestinatario = new br.edu.ifsp.hto.cooperativa.notafiscal.visao.ClassesBase.Button("Importar Destinatário");
         gbc.gridx = 1;
-        gbc.gridy = 7;
-        p.add(btnImportar, gbc);
+        gbc.gridy = 8;
+        p.add(btnImportarDestinatario, gbc);
 
+        btnImportarDestinatario.addActionListener(e -> btnImportarDestinatario_click());
         addTopGlue(p, gbc, 7);
         return p;
+    }
+
+    private void btnImportarDestinatario_click() {
+        try{
+            if (txtDestCpfCnpj.getText().isEmpty())
+            {
+                JOptionPane.showMessageDialog(this, "Digite o CPF / CNPJ do destinatário", "Aviso", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            var clienteControlador = new ClienteControlador();
+            var cliente = clienteControlador.obter(txtDestCpfCnpj.getText());
+            if (cliente == null)
+            {
+                JOptionPane.showMessageDialog(this, "Destinatário / cliente com cpf ou cnpj: " + txtEmitCnpj.getText() + " não está cadastrado", "Aviso", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            txtDestBairro.setText(cliente.endereco.getBairro());
+            txtDestCep.setText(cliente.endereco.getCep());
+            txtDestRua.setText(cliente.endereco.getRua());
+            txtDestCidade.setText(cliente.endereco.getCidade());
+            txtDestNumero.setText(cliente.endereco.getNumero().toString());
+            txtDestUf.setText(cliente.endereco.getEstado());
+            txtDestRazao.setText(cliente.cliente.getRazaoSocial());
+        }
+        catch(Exception ex)
+        {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private JPanel criarPainelProdutos() {
@@ -242,7 +323,7 @@ public class TelaCadastroVenda extends ViewBase {
         // Recalcular totais quando valores mudarem
         addRecalcOnChange(txtVlrFrete, txtVlrSeguro, txtDesconto, txtVlrIPI, txtVlrICMS, txtVlrICMSST);
 
-        btnSalvar.addActionListener(e -> JOptionPane.showMessageDialog(this, "Nota Fiscal salva (simulação)."));
+        btnSalvar.addActionListener(e -> salvarNfe());
         return p;
     }
 
@@ -313,6 +394,27 @@ public class TelaCadastroVenda extends ViewBase {
         for (JTextField f : fields) {
             f.getDocument().addDocumentListener(dl);
         }
+    }
+
+    private void salvarNfe(){
+        var associadoControlador = new AssociadoControlador();
+        var clienteControlador = new ClienteControlador();
+        var notaFiscalEletronicaTO = new NotaFiscalEletronicaTO();
+        notaFiscalEletronicaTO.notaFiscalEletronica = new NotaFiscalEletronicaVO();
+        notaFiscalEletronicaTO.notaFiscalItens = new ArrayList<>();
+        notaFiscalEletronicaTO.associadoTO = associadoControlador.obter(txtEmitCnpj.getText());
+        if (notaFiscalEletronicaTO.associadoTO == null)
+        {
+            var associadoTO = new AssociadoTO();
+            associadoTO.associado = new AssociadoVO();
+            associadoTO.associado.setCnpj(txtEmitCnpj.getText());
+            associadoTO.associado.setNomeFantasia(txtEmitFantasia.getText());
+            associadoTO.associado.setRazaoSocial(txtEmitRazao.getText());
+            associadoTO.associado.setAtivo(true);
+            var enderecoEmit = new EnderecoVO("SP", txtEmitCidade.getText(), txtEmitBairro.getText(), txtEmitRua.getText(), Integer.parseInt(txtEmitNumero.getText()), txtDestCep.getText());
+            associadoTO.endereco = enderecoEmit;
+        }
+        notaFiscalEletronicaTO.clienteTO = clienteControlador.obter(txtDestCpfCnpj.getText());
     }
 }
 

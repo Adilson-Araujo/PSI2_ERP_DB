@@ -235,7 +235,7 @@ public class CanteiroDAO {
         CanteiroVO canteiro = new CanteiroVO();
 
         canteiro.setId(rs.getInt("id"));
-        canteiro.setOrdemProducaoId(rs.getInt("plano_id"));
+        canteiro.setOrdemProducaoId(rs.getInt("ordem_producao_id"));
         canteiro.setNome(rs.getString("nome"));
         canteiro.setAreaCanteiroM2(rs.getFloat("area_canteiro_m2"));
         canteiro.setObservacoes(rs.getString("observacoes"));

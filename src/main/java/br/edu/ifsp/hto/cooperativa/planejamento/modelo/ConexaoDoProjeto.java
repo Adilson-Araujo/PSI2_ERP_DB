@@ -10,7 +10,7 @@ import java.sql.SQLException;
  * TODO: implementar um arquivo que guarde essas informações!
  */
 public class ConexaoDoProjeto {
-    public static final String URL = "jdbc:postgresql://localhost:5432/planejamento";
+    public static final String URL = "jdbc:postgresql://localhost:5432/teste";
     public static final String USER = "postgres";
     public static final String PSWD = "root";
 

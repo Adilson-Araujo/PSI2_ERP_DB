@@ -14,7 +14,7 @@ public class MaterialDAOTest {
 
         materialC.atualizar(new MaterialVO(6, 1, "TESTE TESTE", 20, "km²"));
 
-        System.out.println(materialC.buscarMaterialPorId(1).getNome());
+        System.out.println(materialC.buscarMaterialPorId(2).getNome());
 
         materialC.deletarMaterial(1);
 

@@ -111,7 +111,7 @@ public class MaterialDAO {
         try {
             Connection conn = ConexaoDoProjeto.connect();
 
-            String sql = "SELECT * FROM material_atividade WHERE atividade_id = ? AND ativo = true";
+            String sql = "SELECT * FROM atividade_has_material WHERE atividade_id = ? AND ativo = true";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, atividadeId);
             ResultSet rs = stmt.executeQuery();
@@ -171,7 +171,7 @@ public class MaterialDAO {
             stmt.setInt(1, id);
             stmt.executeUpdate();
 
-            sql = "UPDATE material_atividade SET ativo = false WHERE material_id = ?";
+            sql = "UPDATE atividade_has_material SET ativo = false WHERE material_id = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, id);
             stmt.executeUpdate();

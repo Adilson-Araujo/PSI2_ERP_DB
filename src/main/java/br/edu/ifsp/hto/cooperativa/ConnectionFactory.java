@@ -9,7 +9,7 @@ public class ConnectionFactory {
     // Dados de conexão (EXEMPLO)
     private static final String URL = "jdbc:postgresql://localhost:5432/teste";
     private static final String USUARIO = "postgres";
-    private static final String SENHA = "postgres";
+    private static final String SENHA = "root";
 
     // Método que retorna uma conexão.
     public static Connection getConnection() {

@@ -2,10 +2,22 @@ package br.edu.ifsp.hto.cooperativa.producao.visao;
 
 import java.awt.*;
 import javax.swing.*;
+import java.util.List;
+
+import br.edu.ifsp.hto.cooperativa.producao.controle.GerenciarAreaController;
+import br.edu.ifsp.hto.cooperativa.producao.modelo.Area;
 
 public class TelaGerenciarArea extends JFrame {
+    
+    private long associadoId;
 
-    public TelaGerenciarArea() {
+    public TelaGerenciarArea(long associadoId) {
+        this.associadoId = associadoId;
+        initComponents();
+    }
+
+
+    public void initComponents() {
         setTitle("Gerenciar Área");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(1200, 800);
@@ -96,7 +108,12 @@ public class TelaGerenciarArea extends JFrame {
         gbc.gridy = 0;
         painelForm.add(lblSelecionar, gbc);
 
-        JComboBox<String> comboArea = new JComboBox<>(new String[] { "", "Área 1", "Área 2", "Área 3" });
+        // Carregar áreas do banco de dados
+        GerenciarAreaController controller = new GerenciarAreaController();
+        List<Area> lista = controller.carregarAreas(associadoId);
+        JComboBox<Area> comboArea = new JComboBox<>(lista.toArray(new Area[0]));
+
+
         comboArea.setFont(new Font("Arial", Font.PLAIN, 16));
         comboArea.setPreferredSize(new Dimension(350, 45));
         comboArea.setBackground(Color.WHITE);
@@ -104,7 +121,16 @@ public class TelaGerenciarArea extends JFrame {
         gbc.gridy = 1;
         painelForm.add(comboArea, gbc);
 
+
         JButton btnSalvar = new JButton("SALVAR");
+        btnSalvar.addActionListener(e -> {
+            Area selecionada = (Area) comboArea.getSelectedItem();
+            if (selecionada != null) {
+                new TelaTalhao(selecionada).setVisible(true);
+                dispose();
+            }
+        });
+
         btnSalvar.setBackground(verdeClaro);
         btnSalvar.setForeground(Color.WHITE);
         btnSalvar.setFont(new Font("Arial", Font.BOLD, 18));
@@ -129,8 +155,9 @@ public class TelaGerenciarArea extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            TelaGerenciarArea tela = new TelaGerenciarArea();
+            TelaGerenciarArea tela = new TelaGerenciarArea(1); // só para testar
             tela.setVisible(true);
         });
     }
+
 }

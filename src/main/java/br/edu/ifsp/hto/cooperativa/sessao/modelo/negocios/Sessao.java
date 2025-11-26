@@ -42,4 +42,11 @@ public class Sessao {
         return usuarioLogado;
     }
 
+    public static long getAssociadoIdLogado() {
+        if (usuarioLogado == null || usuarioLogado.usuarioVO == null)
+            throw new RuntimeException("Nenhum usuário logado no sistema");
+
+        return usuarioLogado.usuarioVO.getAssociadoId();  
+    }
+
 }

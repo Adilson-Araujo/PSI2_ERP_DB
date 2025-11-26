@@ -1,17 +1,25 @@
 package br.edu.ifsp.hto.cooperativa.producao.visao;
 
 import javax.swing.*;
+
+import br.edu.ifsp.hto.cooperativa.producao.modelo.Area;
+
 // import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class TelaTalhao extends JFrame {
 
-    public TelaTalhao() {
-        setTitle("Área - Produção");
+    private Area area;
+
+    public TelaTalhao(Area area) {
+        this.area = area;
+
+        setTitle("Área - " + area.getNome());
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(1200, 800);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+
 
         // cores (mesmas da TelaInicial)
         Color verdeEscuro = new Color(63, 72, 23);
@@ -93,7 +101,7 @@ public class TelaTalhao extends JFrame {
         conteudo.add(leftButtons, gbc);
 
         // --- Título na mesma linha, mas ocupando espaço restante ---
-        JLabel lblTitulo = new JLabel("Área", SwingConstants.CENTER);
+        JLabel lblTitulo = new JLabel(area.getNome(), SwingConstants.CENTER);
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 40));
         lblTitulo.setForeground(verdeEscuro);
 
@@ -122,7 +130,7 @@ public class TelaTalhao extends JFrame {
         containerResumo.add(painelResumo);
 
         String[] textosResumo = {
-                "Nome: Área 1",
+                "Nome: " + area.getNome(),
                 "Área: 100m²",
                 "pH do solo: 7",
         };
@@ -358,10 +366,10 @@ public class TelaTalhao extends JFrame {
         return b;
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            TelaTalhao t = new TelaTalhao();
-            t.setVisible(true);
-        });
-    }
+    // public static void main(String[] args) {
+    //     SwingUtilities.invokeLater(() -> {
+    //         TelaTalhao t = new TelaTalhao("Área de Teste");
+    //         t.setVisible(true);
+    //     });
+    // }
 }

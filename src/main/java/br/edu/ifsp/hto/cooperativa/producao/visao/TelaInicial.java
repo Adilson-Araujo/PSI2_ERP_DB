@@ -3,11 +3,20 @@ package br.edu.ifsp.hto.cooperativa.producao.visao;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
+import br.edu.ifsp.hto.cooperativa.sessao.modelo.vo.UsuarioVO;
+
 import java.awt.*;
 
 public class TelaInicial extends JFrame {
 
-    public TelaInicial() {
+    private long associadoId;
+
+    public TelaInicial(Long associadoId) {
+        this.associadoId = associadoId;
+        initializeComponents();
+    }
+
+    public void initializeComponents() {
         setTitle("Tela Inicial - Produção");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(1200, 800);
@@ -41,19 +50,40 @@ public class TelaInicial extends JFrame {
 
         String[] botoes = {"Área de plantio", "Registrar problemas", "Relatório de produção"};
         for (String texto : botoes) {
-            JButton botao = new JButton(texto);
-            botao.setFont(new Font("Arial", Font.BOLD, 15));
-            botao.setBackground(Color.WHITE);
-            botao.setForeground(Color.BLACK);
-            botao.setFocusPainted(false);
-            botao.setAlignmentX(Component.CENTER_ALIGNMENT);
-            botao.setMaximumSize(new Dimension(180, 50));
-            botao.setPreferredSize(new Dimension(180, 50));
-            botao.setBorder(BorderFactory.createLineBorder(verdeEscuro, 2));
-            botao.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            menuLateral.add(botao);
-            menuLateral.add(Box.createVerticalStrut(20));
-        }
+        JButton botao = new JButton(texto);
+        botao.setFont(new Font("Arial", Font.BOLD, 15));
+        botao.setBackground(Color.WHITE);
+        botao.setForeground(Color.BLACK);
+        botao.setFocusPainted(false);
+        botao.setAlignmentX(Component.CENTER_ALIGNMENT);
+        botao.setMaximumSize(new Dimension(180, 50));
+        botao.setPreferredSize(new Dimension(180, 50));
+        botao.setBorder(BorderFactory.createLineBorder(verdeEscuro, 2));
+        botao.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        // ======= AÇÃO DOS BOTÕES =======
+        botao.addActionListener(e -> {
+
+            if (texto.equals("Área de plantio")) {
+            // passa o associadoId que recebemos no construtor da TelaInicial
+            new br.edu.ifsp.hto.cooperativa.producao.visao.TelaGerenciarArea(this.associadoId).setVisible(true);
+            dispose(); // opcional: fecha a TelaInicial
+            }
+
+            if (texto.equals("Registrar problemas")) {
+                // depois criamos isso
+            }
+
+            if (texto.equals("Relatório de produção")) {
+                // depois criamos isso
+            }
+        });
+
+        menuLateral.add(botao);
+        menuLateral.add(Box.createVerticalStrut(20));
+        
+    }
+
 
         add(menuLateral, BorderLayout.WEST);
 
@@ -149,11 +179,11 @@ public class TelaInicial extends JFrame {
         gbc.weighty = 1;
         conteudo.add(scrollTabela, gbc);
     }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            TelaInicial tela = new TelaInicial();
-            tela.setVisible(true);
-        });
-    }
+    //ABRIR SOMENTE APÓS LOGIN
+    // public static void main(String[] args) {
+    //     SwingUtilities.invokeLater(() -> {
+    //         TelaInicial tela = new TelaInicial(0);
+    //         tela.setVisible(true);
+    //     });
+    // }
 }

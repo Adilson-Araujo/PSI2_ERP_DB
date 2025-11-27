@@ -85,6 +85,17 @@ public class ControleEstoque {
     // READ GERAL
 
     /**
+     * Lista todos as movimentações cadastrados.
+     *
+     * @param  associado_id referente ao associado escolhido.
+     * @param  produto_id referente ao produto escolhido.
+     * @return lista de {@code Movimentacao}
+     */
+    public List<Movimentacao> listarMovimentacoes(int associado_id, int produto_id) {
+        return movimentacaoDAO.listarPorProduto(associado_id, produto_id);
+    }
+    
+    /**
      * Lista todos os armazens cadastrados.
      *
      * @return lista de {@code Armazem}

@@ -10,6 +10,7 @@ public class Movimentacao{
     private Armazem armazem;
     private int associado_id;
     private float quantidade;
+    private float quantidade_salva;
     private Timestamp data;
     
     public Movimentacao(int id, Tipo tipo, Origem origem, Produto produto, Armazem armazem, int associado_id, float quantidade, Timestamp data){
@@ -20,6 +21,7 @@ public class Movimentacao{
         this.armazem = armazem;
         this.associado_id = associado_id;
         this.quantidade = quantidade;
+        this.quantidade_salva = quantidade;
         this.data = data;
     }
     
@@ -85,5 +87,13 @@ public class Movimentacao{
 
     public void setData_(Timestamp data) {
         this.data = data;
+    }
+    
+    // Fora do padrão VO
+    
+    public float getMudanca(){
+        float mudanca = this.quantidade - this.quantidade_salva;
+        this.quantidade_salva = quantidade;
+        return mudanca;
     }
 }

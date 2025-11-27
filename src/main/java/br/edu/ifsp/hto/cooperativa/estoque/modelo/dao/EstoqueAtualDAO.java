@@ -214,4 +214,17 @@ public class EstoqueAtualDAO {
 
         return estoqueAtual;
     }
+    
+    // Outros para alem do CRUD básico.
+    
+    public void movimentaSaldo(int associado_id, Produto produto, Armazem armazem, float quantidade){
+        EstoqueAtual estoqueAtual = buscarPorId(associado_id, produto.getId(), armazem.getId());
+        if(estoqueAtual != null){
+            estoqueAtual.setQuantidade(estoqueAtual.getQuantidade() + quantidade);
+            atualizar(estoqueAtual);
+        } else {
+            estoqueAtual = new EstoqueAtual(associado_id, produto, armazem, quantidade);
+            inserir(estoqueAtual);
+        }
+    }
 }

@@ -11,6 +11,8 @@ import br.edu.ifsp.hto.cooperativa.planejamento.visao.telas.VisaoHome;
 
 public abstract class VisaoBase extends JFrame implements NavegadorTelas {
 
+    private Cabecalho cabecalho;
+
     public VisaoBase(String tituloPagina) {
         super("Planejamento de Produção"); // Título da Janela
         configurarJanela();
@@ -24,6 +26,10 @@ public abstract class VisaoBase extends JFrame implements NavegadorTelas {
         setLocationRelativeTo(null); // Centraliza na tela
     }
 
+    public void setTitulo(String titulo) {
+        cabecalho.getTitulo().setText(titulo);
+    }
+
     private void montarLayoutBase(String tituloPagina) {
         // 1. Menu Lateral (Esquerda)
         add(new MenuLateral(this), BorderLayout.WEST);
@@ -31,8 +37,10 @@ public abstract class VisaoBase extends JFrame implements NavegadorTelas {
         // 2. Painel Central (Direita)
         JPanel painelDireito = new JPanel(new BorderLayout());
         
+        cabecalho = new Cabecalho(tituloPagina);
+
         // 2.1 Cabeçalho (Topo do painel direito)
-        painelDireito.add(new Cabecalho(tituloPagina), BorderLayout.NORTH);
+        painelDireito.add(cabecalho, BorderLayout.NORTH);
 
         // 2.2 Conteúdo Específico (Centro do painel direito)
         JPanel containerConteudo = new JPanel(new BorderLayout());

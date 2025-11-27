@@ -30,7 +30,6 @@ public class MenuLateral extends JPanel {
         adicionarBotao("Início", navegador::abrirInicio);
         
         adicionarBotao("Áreas", navegador::abrirAreas);
-        adicionarBotao("Materiais", navegador::abrirMateriais);
     }
 
     private void adicionarBotao(String texto, Runnable acao) {

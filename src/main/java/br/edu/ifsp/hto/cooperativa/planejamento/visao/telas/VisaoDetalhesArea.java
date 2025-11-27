@@ -16,7 +16,7 @@ public class VisaoDetalhesArea extends VisaoBase {
 
     // --- Controladores e Dados ---
     private final PlanejamentoControle controle = new PlanejamentoControle();
-    private final int areaId; // ID da Área que "donos" desses talhões
+    private int areaId; // ID da Área que "donos" desses talhões
     private Integer idEmEdicao = null;
 
     // --- Componentes de Interface (Baseados no TalhaoVO) ---
@@ -29,8 +29,12 @@ public class VisaoDetalhesArea extends VisaoBase {
     private DefaultTableModel modeloTabela;
 
     public VisaoDetalhesArea(int areaId) {
-        super("Carregando...");
+        super("Area: ");
         this.areaId = areaId;
+        AreaVO area = controle.buscarAreaPorId(this.areaId);
+        String nome = area.getNome();
+        setTitulo("Área: " + nome);
+
         
         atualizarTitulo();
         carregarDados();
@@ -173,10 +177,33 @@ public class VisaoDetalhesArea extends VisaoBase {
             }
         });
 
+        tabelaTalhoes.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                // Se for duplo clique (clickCount == 2) e tiver linha selecionada
+                if (e.getClickCount() == 2 && tabelaTalhoes.getSelectedRow() != -1) {
+                    abrirDetalhesTalhao();
+                }
+            }
+        });
+
         JScrollPane scroll = new JScrollPane(tabelaTalhoes);
         scroll.getViewport().setBackground(Color.WHITE);
         scroll.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
         return scroll;
+    }
+
+    private void abrirDetalhesTalhao() {
+        int linha = tabelaTalhoes.getSelectedRow();
+        
+        // Pega o ID do Talhão (que está na coluna 0)
+        int idTalhao = (Integer) modeloTabela.getValueAt(linha, 0); 
+        
+        // Fecha a tela atual (Lista de Talhões)
+        this.dispose();
+        
+        // Abre a tela de Planos passando o ID do Talhão
+        new VisaoDetalhesTalhao(idTalhao).setVisible(true); 
     }
 
     // =================================================================================

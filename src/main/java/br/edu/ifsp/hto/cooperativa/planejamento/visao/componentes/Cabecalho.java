@@ -8,12 +8,18 @@ import java.awt.*;
 
 public class Cabecalho extends JPanel {
     
+    private JLabel titulo;
+
+    public JLabel getTitulo() {
+        return titulo;
+    }
+
     public Cabecalho(String tituloTexto) {
         setLayout(new BorderLayout());
         setBackground(Tema.COR_SECUNDARIA);
         setPreferredSize(new Dimension(0, 80));
 
-        JLabel titulo = new JLabel(tituloTexto);
+        titulo = new JLabel(tituloTexto);
         titulo.setFont(Tema.FONTE_TITULO);
         titulo.setForeground(Tema.COR_PRIMARIA);
         

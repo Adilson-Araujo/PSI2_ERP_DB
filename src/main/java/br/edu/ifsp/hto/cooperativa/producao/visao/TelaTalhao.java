@@ -130,9 +130,13 @@ public class TelaTalhao extends JFrame {
         containerResumo.add(painelResumo);
 
         String[] textosResumo = {
-                "Nome: " + area.getNome(),
-                "Área: 100m²",
-                "pH do solo: 7",
+            "Nome: " + area.getNome(),
+            // Área Total
+            "Área Total: " + String.format("%.2f", area.getAreaTotal()) + " ha", 
+            // Área Restante (Cálculo dinâmico)
+            "Área Restante: " + String.format("%.2f", area.getAreaTotal() - area.getAreaUtilizada()) + " ha",
+            // Área Utilizada (Aparentemente você queria mostrar o pH aqui)
+            "pH do solo: " + String.format("%.1f", area.getPh()),
         };
 
         for (String texto : textosResumo) {

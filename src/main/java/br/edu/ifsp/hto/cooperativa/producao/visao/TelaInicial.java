@@ -3,7 +3,7 @@ package br.edu.ifsp.hto.cooperativa.producao.visao;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
-import br.edu.ifsp.hto.cooperativa.sessao.modelo.vo.UsuarioVO;
+// import br.edu.ifsp.hto.cooperativa.sessao.modelo.vo.UsuarioVO;
 
 import java.awt.*;
 

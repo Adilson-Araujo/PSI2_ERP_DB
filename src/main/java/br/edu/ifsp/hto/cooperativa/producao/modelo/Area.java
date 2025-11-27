@@ -5,10 +5,23 @@ public class Area {
     private long id;
     private String nome;
     private long associadoId;
+    private double areaTotal; 
+    private double areaUtilizada; 
+    private double ph; 
 
+    // Construtor original (mantido por compatibilidade, mas o novo será mais útil)
     public Area(long id, String nome) {
         this.id = id;
         this.nome = nome;
+    }
+    
+    // NOVO CONSTRUTOR COMPLETO
+    public Area(long id, String nome, double areaTotal, double areaUtilizada, double ph) {
+        this.id = id;
+        this.nome = nome;
+        this.areaTotal = areaTotal;
+        this.areaUtilizada = areaUtilizada;
+        this.ph = ph;
     }
 
     public long getId() {
@@ -26,11 +39,35 @@ public class Area {
     public void setNome(String nome) {
         this.nome = nome;
     }
+    
+    // NOVOS GETTERS E SETTERS
+    public double getAreaTotal() {
+        return areaTotal;
+    }
+    
+    public void setAreaTotal(double areaTotal) {
+        this.areaTotal = areaTotal;
+    }
+    
+    public double getAreaUtilizada() {
+        return areaUtilizada;
+    }
+    
+    public void setAreaUtilizada(double areaUtilizada) {
+        this.areaUtilizada = areaUtilizada;
+    }
+    
+    public double getPh() {
+        return ph;
+    }
+    
+    public void setPh(double ph) {
+        this.ph = ph;
+    }
 
     @Override
     public String toString() {
-        return nome;  
-        // IMPORTANTE: Isso faz o ComboBox mostrar o nome da área
+        return nome;
     }
 
     public long getAssociadoId() { return associadoId; }

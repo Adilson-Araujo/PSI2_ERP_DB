@@ -18,6 +18,38 @@ public class GerenciarAreaController {
         this.areaDAO = new AreaDAO();
     }
 
+    // Método para carregar UMA ÁREA COMPLETA pelo ID (útil para a TelaTalhao)
+    public Area carregarAreaCompletaPorId(long areaId) {
+        Area area = null;
+        
+        // Agora busca todos os campos da tabela AREA
+        String sql = "SELECT id, nome, area_total, area_utilizada, ph FROM area WHERE id = ?"; 
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, areaId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                long id = rs.getLong("id"); 
+                String nome = rs.getString("nome");
+                // Puxando os valores DECIMAL/DOUBLE do banco
+                double areaTotal = rs.getDouble("area_total");
+                double areaUtilizada = rs.getDouble("area_utilizada");
+                double ph = rs.getDouble("ph");
+
+                // Usando o construtor COMPLETO da classe Area
+                area = new Area(id, nome, areaTotal, areaUtilizada, ph);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao carregar área completa: " + e.getMessage());
+        }
+
+        return area;
+    }
+
     public List<Area> carregarAreas(long associadoId) {
         List<Area> lista = new ArrayList<>();
 

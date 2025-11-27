@@ -1,5 +1,6 @@
 package br.edu.ifsp.hto.cooperativa.sessao.visao;
 
+import br.edu.ifsp.hto.cooperativa.Cooperativa;
 import br.edu.ifsp.hto.cooperativa.notafiscal.visao.ClassesBase.Button;
 import br.edu.ifsp.hto.cooperativa.notafiscal.visao.ClassesBase.PaletaCores;
 import br.edu.ifsp.hto.cooperativa.sessao.controlador.SessaoControlador;
@@ -83,12 +84,15 @@ public class TelaLogin extends JFrame {
             long associadoId = Sessao.getAssociadoIdLogado();
             if (usuarioLogado != null)
             {
-                // Altere aqui para sua tela para teste antes de integrarmos tudo
-                new br.edu.ifsp.hto.cooperativa.notafiscal.visao.TelaPrincipal().setVisible(true);
+                Cooperativa  cooperativa = new br.edu.ifsp.hto.cooperativa.Cooperativa();
 
                 // NÃO MEXER EH A INTEGRAÇÃO DA TELA DE PRODUÇÃO PARA A GENTE TESTAR NOSSAS TELAS NO BD
                 // new br.edu.ifsp.hto.cooperativa.producao.visao.TelaInicial(associadoId).setVisible(true);
 
+                cooperativa.setResizable(true);
+                cooperativa.setSize( 800, 1000 ); // set frame size
+                cooperativa.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                cooperativa.setVisible(true);
                 dispose(); // Fecha a tela de login
             }
         }

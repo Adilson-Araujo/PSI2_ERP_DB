@@ -124,10 +124,21 @@ public class TelaGerenciarArea extends JFrame {
 
         JButton btnSalvar = new JButton("SALVAR");
         btnSalvar.addActionListener(e -> {
-            Area selecionada = (Area) comboArea.getSelectedItem();
-            if (selecionada != null) {
-                new TelaTalhao(selecionada).setVisible(true);
-                dispose();
+            Area areaIncompleta = (Area) comboArea.getSelectedItem();
+            
+            if (areaIncompleta != null) {
+                // Instancia o controller novamente
+                GerenciarAreaController ctrl = new GerenciarAreaController();
+                
+                // *** 🔑 A CORREÇÃO ESTÁ AQUI: RECUPERAR A ÁREA COMPLETA PELO ID ***
+                Area areaCompleta = ctrl.carregarAreaCompletaPorId(areaIncompleta.getId());
+                
+                if (areaCompleta != null) {
+                    new TelaTalhao(areaCompleta).setVisible(true); // Abre a tela com a área COMPLETA
+                    dispose();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Erro ao carregar os detalhes da área.", "Erro", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 

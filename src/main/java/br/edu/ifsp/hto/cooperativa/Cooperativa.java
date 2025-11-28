@@ -12,6 +12,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
+import br.edu.ifsp.hto.cooperativa.planejamento.visao.telas.VisaoAreas;
 import br.edu.ifsp.hto.cooperativa.planejamento.visao.telas.VisaoHome;
 
 public class Cooperativa extends JFrame{
@@ -47,16 +48,12 @@ public class Cooperativa extends JFrame{
 
 		
 		//Grupo Planejamento adicionar as opcoes do subMneu (JMenuItem) de Planejamento aqui
-		JMenuItem planejamentoItemMenu1 = new JMenuItem( "Janela1" );
-		JMenuItem planejamentoItemMenu2 = new JMenuItem( "Janela2" );
-		JMenuItem planejamentoItemMenu3 = new JMenuItem( "Janela3" );
-		JMenuItem planejamentoItemMenu4 = new JMenuItem( "Janela4" );
+		JMenuItem planejamentoItemMenu1 = new JMenuItem( "Home" );
+		JMenuItem planejamentoItemMenu2 = new JMenuItem( "Areas" );
 		
 		//adcionar os itens de menu do Planejamento
 		planejamentoMenu.add(planejamentoItemMenu1);
 		planejamentoMenu.add(planejamentoItemMenu2);
-		planejamentoMenu.add(planejamentoItemMenu3);
-		planejamentoMenu.add(planejamentoItemMenu4);
 		planejamentoMenu.addSeparator();
 		//Adicionar o Sair na Primeira Opcao do Menu
 		planejamentoMenu.add(sairItem);
@@ -140,9 +137,8 @@ public class Cooperativa extends JFrame{
 		
 		//GRUPOS - Adicionar os eventos de menu para chamar as InternalFrame
 		//Exemplo - TRATAMENTO DOS EVENTOS DOS ITENS DO MENU PARA A SUA CHANELA
-		planejamentoItemMenu1.addActionListener(ev -> {
-			new VisaoHome(desktop);
-		}); // fim chamada para addActionListener
+		planejamentoItemMenu1.addActionListener(ev -> new VisaoHome(desktop));
+		planejamentoItemMenu2.addActionListener(ev -> new VisaoAreas(desktop));
 
 
 		sairItem.addActionListener(

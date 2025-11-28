@@ -29,8 +29,10 @@ public class VisaoAreas extends VisaoBase {
     private JTable tabelaAreas;
     private DefaultTableModel modeloTabela;
 
-    public VisaoAreas() {
-        super("Gerenciamento de Áreas");
+    public VisaoAreas(JDesktopPane parent) {
+        super("Gerenciamento de Áreas", parent);
+        this.parent = parent;
+        parent.add(this);
         carregarDados();
     }
 
@@ -175,7 +177,7 @@ public class VisaoAreas extends VisaoBase {
         this.dispose();
         
         // Abre a nova tela passando o nome
-        new VisaoDetalhesArea(idArea).setVisible(true);
+        new VisaoDetalhesArea(idArea, parent).setVisible(true);
     }
 
     // =================================================================================

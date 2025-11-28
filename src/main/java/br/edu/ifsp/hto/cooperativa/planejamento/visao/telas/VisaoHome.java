@@ -4,6 +4,7 @@ import java.awt.GridLayout;
 
 import java.util.List;
 
+import javax.swing.JDesktopPane;
 import javax.swing.JPanel;
 
 import br.edu.ifsp.hto.cooperativa.planejamento.controle.PlanejamentoControle;
@@ -17,8 +18,9 @@ import br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.AtividadeVO;
 
 public class VisaoHome extends VisaoBase {
 
-    public VisaoHome() {
-        super("Início");  // Título da Janela
+    public VisaoHome(JDesktopPane parent) {
+        super("Início", parent);  // Título da Janela
+        parent.add(this);
     }
 
     @Override

@@ -33,8 +33,12 @@ public class VisaoDetalhesTalhao extends VisaoBase {
     private JTable tabelaPlanos;
     private DefaultTableModel modeloTabela;
 
-    public VisaoDetalhesTalhao(int talhaoId) {
-        super("Talhão: ");
+    private JDesktopPane parent;
+
+    public VisaoDetalhesTalhao(int talhaoId, JDesktopPane parent) {
+        super("Talhão: ", parent);
+        this.parent = parent;
+        parent.add(this);
         this.talhaoId = talhaoId;
         TalhaoVO talhao = controle.buscarTalhaoPorId(this.talhaoId);
         String nome = talhao.getNome();
@@ -82,9 +86,9 @@ public class VisaoDetalhesTalhao extends VisaoBase {
     private void voltarParaTalhoes() {
         this.dispose(); 
         if (this.areaIdVinculada != -1) {
-            new VisaoDetalhesArea(this.areaIdVinculada).setVisible(true);
+            new VisaoDetalhesArea(this.areaIdVinculada, parent).setVisible(true);
         } else {
-            new VisaoAreas().setVisible(true);
+            new VisaoAreas(parent).setVisible(true);
         }
     }
 

@@ -28,9 +28,13 @@ public class VisaoDetalhesArea extends VisaoBase {
     private JTable tabelaTalhoes;
     private DefaultTableModel modeloTabela;
 
-    public VisaoDetalhesArea(int areaId) {
-        super("Area: ");
+    private JDesktopPane parent;
+
+    public VisaoDetalhesArea(int areaId, JDesktopPane parent) {
+        super("Area: ", parent);
+        this.parent = parent;
         this.areaId = areaId;
+        parent.add(this);
         AreaVO area = controle.buscarAreaPorId(this.areaId);
         String nome = area.getNome();
         setTitulo("Área: " + nome);
@@ -203,7 +207,7 @@ public class VisaoDetalhesArea extends VisaoBase {
         this.dispose();
         
         // Abre a tela de Planos passando o ID do Talhão
-        new VisaoDetalhesTalhao(idTalhao).setVisible(true); 
+        new VisaoDetalhesTalhao(idTalhao, parent).setVisible(true); 
     }
 
     // =================================================================================

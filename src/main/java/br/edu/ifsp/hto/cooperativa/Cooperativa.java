@@ -12,6 +12,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
+import br.edu.ifsp.hto.cooperativa.planejamento.visao.telas.VisaoHome;
+
 public class Cooperativa extends JFrame{
 
 	private JDesktopPane desktop; //Janela PAI para uso InternalFrame
@@ -138,25 +140,9 @@ public class Cooperativa extends JFrame{
 		
 		//GRUPOS - Adicionar os eventos de menu para chamar as InternalFrame
 		//Exemplo - TRATAMENTO DOS EVENTOS DOS ITENS DO MENU PARA A SUA CHANELA
-		planejamentoItemMenu1.addActionListener(
-				new ActionListener(){ // classe interna anonima
-					public void actionPerformed( ActionEvent event ){
-						
-						// Aqui cria a o InternalFrame
-						//ModuloVisaoInternalFrame moduloAddInterFrame = new ModuloVisaoInternalFrame();
-						//Configurar o Internal Frame conforme a necessidade
-						//Nao permite alterar tamanho
-						//moduloAddInterFrame.setResizable(false);
-						//Tamanho da Janela
-						//moduloAddInterFrame.setSize( 300, 300 ); // set frame size
-						//Fechar a janela
-						//moduloAddInterFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-						//Adiciona a janela para ser gerenciado pelo desktop
-						//desktop.add(moduloAddInterFrame);
-						//moduloAddInterFrame.setVisible(true);
-					} // fim  metodo actionPerformed
-				} // fim classe interna anonima 
-				); // fim chamada para addActionListener
+		planejamentoItemMenu1.addActionListener(ev -> {
+			new VisaoHome(desktop);
+		}); // fim chamada para addActionListener
 
 
 		sairItem.addActionListener(

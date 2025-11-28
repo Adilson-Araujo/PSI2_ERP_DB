@@ -9,12 +9,14 @@ import br.edu.ifsp.hto.cooperativa.planejamento.visao.estilo.Tema;
 import br.edu.ifsp.hto.cooperativa.planejamento.visao.telas.VisaoAreas;
 import br.edu.ifsp.hto.cooperativa.planejamento.visao.telas.VisaoHome;
 
-public abstract class VisaoBase extends JFrame implements NavegadorTelas {
+public abstract class VisaoBase extends JInternalFrame implements NavegadorTelas {
 
     private Cabecalho cabecalho;
+    public JDesktopPane parent;
 
-    public VisaoBase(String tituloPagina) {
+    public VisaoBase(String tituloPagina, JDesktopPane parent) {
         super("Planejamento de Produção"); // Título da Janela
+        this.parent = parent;
         configurarJanela();
         montarLayoutBase(tituloPagina);
     }
@@ -23,7 +25,7 @@ public abstract class VisaoBase extends JFrame implements NavegadorTelas {
         setSize(1024, 768); // Tamanho HD padrão
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-        setLocationRelativeTo(null); // Centraliza na tela
+        setVisible(true);
     }
 
     public void setTitulo(String titulo) {
@@ -65,7 +67,7 @@ public abstract class VisaoBase extends JFrame implements NavegadorTelas {
         // Verifica se JÁ ESTOU na Home para não recarregar à toa
         if (!(this instanceof VisaoHome)) {
             this.dispose();
-            new VisaoHome().setVisible(true);
+            new VisaoHome(parent).setVisible(true);
         }
     }
 
@@ -74,7 +76,7 @@ public abstract class VisaoBase extends JFrame implements NavegadorTelas {
         // Verifica se JÁ ESTOU em Áreas
         if (!(this instanceof VisaoAreas)) {
             this.dispose();
-            new VisaoAreas().setVisible(true);
+            new VisaoAreas(parent).setVisible(true);
         }
     }
 

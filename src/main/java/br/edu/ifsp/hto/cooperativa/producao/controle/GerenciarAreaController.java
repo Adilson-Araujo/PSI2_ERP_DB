@@ -22,6 +22,20 @@ public class GerenciarAreaController {
         this.talhaoDAO = new TalhaoDAO(); // 🔑 Inicialização
         this.canteiroDAO = new CanteiroDAO(); // 🔑 Inicialização
     }
+
+    /**
+     * Marca um talhão como Inativo através do DAO.
+     * Retorna true em sucesso, false em erro.
+     */
+    public boolean removerTalhao(Long talhaoId) {
+        try {
+            talhaoDAO.inativarTalhao(talhaoId);
+            return true;
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Erro ao inativar talhão: " + e.getMessage(), "Erro de Banco de Dados", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+    }
     
     // Método que você já tem para listar áreas (sem detalhes aninhados)
     public List<AreaVO> carregarAreas(long associadoId) {

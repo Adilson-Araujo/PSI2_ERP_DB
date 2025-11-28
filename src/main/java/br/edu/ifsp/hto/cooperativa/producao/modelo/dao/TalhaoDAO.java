@@ -23,6 +23,7 @@ public class TalhaoDAO {
                 status
             FROM talhao
             WHERE Area_id = ?
+              AND status = 'Ativo'
             ORDER BY nome
         """;
 
@@ -50,4 +51,16 @@ public class TalhaoDAO {
     }
     
     // Implemente inserir, atualizar, remover conforme a sua necessidade...
+
+    /**
+     * Marca o talhão como Inativo no banco de dados.
+     */
+    public void inativarTalhao(Long talhaoId) throws SQLException {
+        String sql = "UPDATE talhao SET status = 'Inativo' WHERE id = ?";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, talhaoId);
+            ps.executeUpdate();
+        }
+    }
 }

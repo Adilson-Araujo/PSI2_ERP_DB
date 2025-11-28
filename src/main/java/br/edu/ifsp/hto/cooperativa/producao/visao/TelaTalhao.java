@@ -9,10 +9,12 @@ import br.edu.ifsp.hto.cooperativa.producao.modelo.vo.CanteiroVO; // 🔑 NOVO I
 import java.awt.*;
 import java.util.List; // Import necessário para lidar com List<TalhaoVO>
 import java.awt.event.ActionListener; // Import necessário para o listener
+import br.edu.ifsp.hto.cooperativa.producao.controle.GerenciarAreaController; // Controller
 
 public class TelaTalhao extends JFrame {
 
     private AreaVO area;
+    private GerenciarAreaController controller = new GerenciarAreaController();
     // Cores definidas como campos da classe para acesso em todos os métodos
     private final Color verdeEscuro = new Color(63, 72, 23);
     private final Color verdeClaro = new Color(157, 170, 61);
@@ -99,34 +101,97 @@ public class TelaTalhao extends JFrame {
         gbc.weighty = 0;
 
         // ... (Configurações e adição dos botões (Voltar, Editar, Adicionar)) ...
-        JPanel leftButtons = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        leftButtons.setOpaque(false);
+        // Linha superior: somente o botão Voltar
+        JPanel leftButtonsTop = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        leftButtonsTop.setOpaque(false);
 
         JButton btnVoltar = criarBotaoPadrao("Voltar", verdeClaro);
-        // Em TelaTalhao.java
         btnVoltar.addActionListener(e -> {
-            // CORRIGIDO PARA USAR O CONSTRUTOR PADRÃO
             new br.edu.ifsp.hto.cooperativa.producao.visao.TelaGerenciarArea().setVisible(true);
-            dispose(); 
-            
+            dispose();
         });
-        JButton btnEditar = criarBotaoPadrao("Remover Talhão", verdeClaro);
+
+        Dimension tam = new Dimension(180, 45);
+        btnVoltar.setPreferredSize(tam); btnVoltar.setMaximumSize(tam);
+
+        leftButtonsTop.add(btnVoltar);
+
+        gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.WEST; gbc.weightx = 0; gbc.gridwidth = 1;
+        conteudo.add(leftButtonsTop, gbc);
+
+        // Linha abaixo: os demais botões (remover, adicionar, editar, plano)
+        JPanel leftButtonsBelow = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        leftButtonsBelow.setOpaque(false);
+
+        JButton btnRemover = criarBotaoPadrao("Remover Talhão", verdeClaro);
         JButton btnAdicionar = criarBotaoPadrao("Novo Talhão", verdeClaro);
+        JButton btnEditar = criarBotaoPadrao("Editar Talhão", verdeClaro);
         JButton btnPlano = criarBotaoPadrao("Usar Plano", verdeClaro);
 
-        Dimension tam = new Dimension(200, 45);
-        btnVoltar.setPreferredSize(tam); btnVoltar.setMaximumSize(tam);
+        btnRemover.setPreferredSize(tam); btnRemover.setMaximumSize(tam);
         btnEditar.setPreferredSize(tam); btnEditar.setMaximumSize(tam);
         btnAdicionar.setPreferredSize(tam); btnAdicionar.setMaximumSize(tam);
         btnPlano.setPreferredSize(tam); btnPlano.setMaximumSize(tam);
 
-        leftButtons.add(btnVoltar);
-        leftButtons.add(btnEditar);
-        leftButtons.add(btnAdicionar);
-        leftButtons.add(btnPlano);
+        leftButtonsBelow.add(btnRemover);
+        leftButtonsBelow.add(btnAdicionar);
+        leftButtonsBelow.add(btnEditar);
+        leftButtonsBelow.add(btnPlano);
 
-        gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.WEST; gbc.weightx = 0; gbc.gridwidth = 1;
-        conteudo.add(leftButtons, gbc);
+        // Ação do botão Remover: chama o controller para inativar e atualiza a view
+        btnRemover.addActionListener(e -> {
+            if (area.getTalhoes() == null || area.getTalhoes().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Não há talhões para remover.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            // Mostra apenas talhões ativos (por segurança)
+            java.util.List<TalhaoVO> ativos = new java.util.ArrayList<>();
+            for (TalhaoVO t : area.getTalhoes()) {
+                if (t != null && (t.getStatus() == null || !t.getStatus().equalsIgnoreCase("Inativo"))) {
+                    ativos.add(t);
+                }
+            }
+
+            if (ativos.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Não há talhões ativos para remover.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            String[] nomes = new String[ativos.size()];
+            for (int i = 0; i < ativos.size(); i++) nomes[i] = ativos.get(i).getNome();
+
+            String escolhido = (String) JOptionPane.showInputDialog(this, "Selecione o talhão a remover:", "Remover Talhão",
+                    JOptionPane.PLAIN_MESSAGE, null, nomes, nomes[0]);
+
+            if (escolhido == null) return; // cancelou
+
+            TalhaoVO talhaoEscolhido = null;
+            for (TalhaoVO t : ativos) if (escolhido.equals(t.getNome())) { talhaoEscolhido = t; break; }
+
+            if (talhaoEscolhido == null) return;
+
+            int conf = JOptionPane.showConfirmDialog(this, "Confirma marcar o talhão '" + talhaoEscolhido.getNome() + "' como Inativo?", "Confirmar", JOptionPane.YES_NO_OPTION);
+            if (conf != JOptionPane.YES_OPTION) return;
+
+            boolean ok = controller.removerTalhao(talhaoEscolhido.getId());
+            if (ok) {
+                // Recarrega a área completa (o DAO agora filtra por status='Ativo')
+                AreaVO nova = controller.carregarAreaCompletaPorId(area.getId());
+                if (nova != null) {
+                    this.area = nova;
+                    getContentPane().removeAll();
+                    initComponents();
+                    revalidate();
+                    repaint();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Talhão inativado, porém falha ao recarregar área.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
+
+        gbc.gridx = 0; gbc.gridy = 1; gbc.anchor = GridBagConstraints.WEST; gbc.weightx = 0; gbc.gridwidth = 1;
+        conteudo.add(leftButtonsBelow, gbc);
 
         JLabel lblTitulo = new JLabel(area.getNome(), SwingConstants.CENTER);
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 40));
@@ -168,7 +233,7 @@ public class TelaTalhao extends JFrame {
             painelResumo.add(box);
         }
 
-        gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 4; gbc.weighty = 0; gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 4; gbc.weighty = 0; gbc.fill = GridBagConstraints.HORIZONTAL;
         conteudo.add(containerResumo, gbc);
 
 
@@ -176,13 +241,13 @@ public class TelaTalhao extends JFrame {
         JLabel lblAFazer = new JLabel("Talhões Ativos:");
         lblAFazer.setFont(new Font("Arial", Font.BOLD, 22));
         lblAFazer.setForeground(verdeEscuro);
-        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 4; gbc.weighty = 0; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 4; gbc.weighty = 0; gbc.anchor = GridBagConstraints.WEST;
         conteudo.add(lblAFazer, gbc);
 
         // ===============================================
         // 🔑 ITERAÇÃO DINÂMICA SOBRE TALHÕES E CANTEIROS
         // ===============================================
-        int linhaAtual = 3; 
+        int linhaAtual = 4; 
 
         if (area.getTalhoes() != null && !area.getTalhoes().isEmpty()) {
             for (TalhaoVO talhao : area.getTalhoes()) {

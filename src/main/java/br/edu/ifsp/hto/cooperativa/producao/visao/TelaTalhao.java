@@ -2,29 +2,38 @@ package br.edu.ifsp.hto.cooperativa.producao.visao;
 
 import javax.swing.*;
 
-import br.edu.ifsp.hto.cooperativa.producao.modelo.Area;
+import br.edu.ifsp.hto.cooperativa.producao.modelo.vo.AreaVO;
+import br.edu.ifsp.hto.cooperativa.producao.modelo.vo.TalhaoVO; // 🔑 NOVO IMPORT
+import br.edu.ifsp.hto.cooperativa.producao.modelo.vo.CanteiroVO; // 🔑 NOVO IMPORT
 
-// import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.util.List; // Import necessário para lidar com List<TalhaoVO>
+import java.awt.event.ActionListener; // Import necessário para o listener
 
 public class TelaTalhao extends JFrame {
 
-    private Area area;
+    private AreaVO area;
+    // Cores definidas como campos da classe para acesso em todos os métodos
+    private final Color verdeEscuro = new Color(63, 72, 23);
+    private final Color verdeClaro = new Color(157, 170, 61);
+    private final Color cinzaFundo = new Color(240, 240, 240);
+    
+    // Supondo que você tenha a classe TelaGerenciarArea
+    // private TelaGerenciarArea telaAnterior; 
 
-    public TelaTalhao(Area area) {
+    // O construtor é o mesmo, mas o conteúdo é movido para initComponents()
+    public TelaTalhao(AreaVO area) {
         this.area = area;
-
+        initComponents();
+    }
+    
+    // Se você migrou para o padrão initComponents, encapsule todo o corpo do construtor nele.
+    private void initComponents() { 
         setTitle("Área - " + area.getNome());
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(1200, 800);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
-
-
-        // cores (mesmas da TelaInicial)
-        Color verdeEscuro = new Color(63, 72, 23);
-        Color verdeClaro = new Color(157, 170, 61);
-        Color cinzaFundo = new Color(240, 240, 240);
 
         // ======= NAVBAR SUPERIOR =======
         NavBarSuperior navBar = new NavBarSuperior();
@@ -33,7 +42,7 @@ public class TelaTalhao extends JFrame {
         // ======= MENU LATERAL (idêntico à TelaInicial) =======
         JPanel menuLateral = new JPanel();
         menuLateral.setBackground(verdeEscuro);
-        menuLateral.setPreferredSize(new Dimension(220, 800)); // não usar getHeight() no construtor
+        menuLateral.setPreferredSize(new Dimension(220, 800));
         menuLateral.setLayout(new BoxLayout(menuLateral, BoxLayout.Y_AXIS));
         menuLateral.add(Box.createVerticalStrut(30));
         JLabel tituloMenu = new JLabel("Produção", SwingConstants.CENTER);
@@ -42,7 +51,7 @@ public class TelaTalhao extends JFrame {
         tituloMenu.setAlignmentX(Component.CENTER_ALIGNMENT);
         menuLateral.add(tituloMenu);
         menuLateral.add(Box.createVerticalStrut(40));
-        String[] botoes = {"Área de plantio", "Registrar problemas", "Relatório de produção"};
+        String[] botoes = {"Tela inicial", "Área de plantio", "Registrar problemas", "Relatório de produção"};
         for (String texto : botoes) {
             JButton botao = new JButton(texto);
             botao.setFont(new Font("Arial", Font.BOLD, 15));
@@ -54,6 +63,24 @@ public class TelaTalhao extends JFrame {
             botao.setPreferredSize(new Dimension(180, 50));
             botao.setBorder(BorderFactory.createLineBorder(verdeEscuro, 2));
             botao.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            // 🔑 ADIÇÃO: Listener de Evento para o botão
+            botao.addActionListener(e -> {
+                if (texto.equals("Tela inicial")) {
+                    // AÇÃO CORRETA para o botão "Tela inicial"
+                    new br.edu.ifsp.hto.cooperativa.producao.visao.TelaInicial().setVisible(true);
+                    dispose(); // Fecha a tela atual (TelaGerenciarArea)
+
+                } else if (texto.equals("Área de plantio")) {
+                    new br.edu.ifsp.hto.cooperativa.producao.visao.TelaGerenciarArea().setVisible(true);
+                    dispose();
+
+                } else if (texto.equals("Registrar problemas")) {
+                    // Adicionar lógica para Registrar problemas
+                
+                } else if (texto.equals("Relatório de produção")) {
+                    // Adicionar lógica para Relatório de produção
+                }
+            });
             menuLateral.add(botao);
             menuLateral.add(Box.createVerticalStrut(20));
         }
@@ -62,7 +89,8 @@ public class TelaTalhao extends JFrame {
         // ======= CONTEÚDO PRINCIPAL =======
         JPanel conteudo = new JPanel(new GridBagLayout());
         conteudo.setBackground(cinzaFundo);
-        add(conteudo, BorderLayout.CENTER);
+        // Não adicionamos o 'conteudo' diretamente ao frame aqui, mas sim o ScrollPane
+        // add(conteudo, BorderLayout.CENTER); 
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(20, 20, 10, 20);
@@ -70,60 +98,52 @@ public class TelaTalhao extends JFrame {
         gbc.weightx = 0;
         gbc.weighty = 0;
 
-        // --- Painel esquerdo só com botões (FlowLayout.LEFT) ---
+        // ... (Configurações e adição dos botões (Voltar, Editar, Adicionar)) ...
         JPanel leftButtons = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         leftButtons.setOpaque(false);
 
         JButton btnVoltar = criarBotaoPadrao("Voltar", verdeClaro);
-        JButton btnEditar = criarBotaoPadrao("Editar Talhão", verdeClaro);
-        JButton btnAdicionar = criarBotaoPadrao("Adicionar Talhão", verdeClaro);
+        // Em TelaTalhao.java
+        btnVoltar.addActionListener(e -> {
+            // CORRIGIDO PARA USAR O CONSTRUTOR PADRÃO
+            new br.edu.ifsp.hto.cooperativa.producao.visao.TelaGerenciarArea().setVisible(true);
+            dispose(); 
+            
+        });
+        JButton btnEditar = criarBotaoPadrao("Remover Talhão", verdeClaro);
+        JButton btnAdicionar = criarBotaoPadrao("Novo Talhão", verdeClaro);
+        JButton btnPlano = criarBotaoPadrao("Usar Plano", verdeClaro);
 
-        // Define tamanho máximo (para garantir que não cresçam além disso)
         Dimension tam = new Dimension(200, 45);
-        btnVoltar.setPreferredSize(tam);
-        btnVoltar.setMaximumSize(tam);
-        btnEditar.setPreferredSize(tam);
-        btnEditar.setMaximumSize(tam);
-        btnAdicionar.setPreferredSize(tam);
-        btnAdicionar.setMaximumSize(tam);
+        btnVoltar.setPreferredSize(tam); btnVoltar.setMaximumSize(tam);
+        btnEditar.setPreferredSize(tam); btnEditar.setMaximumSize(tam);
+        btnAdicionar.setPreferredSize(tam); btnAdicionar.setMaximumSize(tam);
+        btnPlano.setPreferredSize(tam); btnPlano.setMaximumSize(tam);
 
         leftButtons.add(btnVoltar);
         leftButtons.add(btnEditar);
         leftButtons.add(btnAdicionar);
+        leftButtons.add(btnPlano);
 
-        // Adiciona o painel de botões na coluna 0, mesma linha 0
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.WEST;
-        // Não deixamos weightx aqui para não "esticar" o painel de botões
-        gbc.weightx = 0;
-        gbc.gridwidth = 1;
+        gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.WEST; gbc.weightx = 0; gbc.gridwidth = 1;
         conteudo.add(leftButtons, gbc);
 
-        // --- Título na mesma linha, mas ocupando espaço restante ---
         JLabel lblTitulo = new JLabel(area.getNome(), SwingConstants.CENTER);
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 40));
         lblTitulo.setForeground(verdeEscuro);
 
-        gbc.gridx = 1;
-        gbc.gridy = 0;
-        gbc.weightx = 1.0;  // ocupa espaço restante
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.EAST; // faz o título ficar mais à direita (mude para CENTER se quiser centralizar)
-        gbc.gridwidth = 2; // espaço para "respirar" (ajuste conforme necessidade)
+        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.anchor = GridBagConstraints.EAST; gbc.gridwidth = 2;
         conteudo.add(lblTitulo, gbc);
 
         // --- Painel resumo (igual à TelaInicial) ---
         JPanel painelResumo = new JPanel(new GridLayout(1, 3, 40, 20));
         painelResumo.setOpaque(false);
 
-        // Altura máxima desejada (exemplo: 120px)
         int alturaMax = 100;
         painelResumo.setPreferredSize(new Dimension(0, alturaMax));
         painelResumo.setMaximumSize(new Dimension(Integer.MAX_VALUE, alturaMax));
         painelResumo.setMinimumSize(new Dimension(0, alturaMax));
 
-        // Painel container para segurar o tamanho
         JPanel containerResumo = new JPanel();
         containerResumo.setLayout(new BoxLayout(containerResumo, BoxLayout.Y_AXIS));
         containerResumo.setOpaque(false);
@@ -131,11 +151,9 @@ public class TelaTalhao extends JFrame {
 
         String[] textosResumo = {
             "Nome: " + area.getNome(),
-            // Área Total
-            "Área Total: " + String.format("%.2f", area.getAreaTotal()) + " ha", 
-            // Área Restante (Cálculo dinâmico)
-            "Área Restante: " + String.format("%.2f", area.getAreaTotal() - area.getAreaUtilizada()) + " ha",
-            // Área Utilizada (Aparentemente você queria mostrar o pH aqui)
+            "Área Total: " + String.format("%.2f", area.getAreaTotal()) + " m²", 
+            // Cálculo dinâmico, já que areaTotal e areaUtilizada são double/BigDecimal
+            "Área Restante: " + String.format("%.2f", area.getAreaTotal() - area.getAreaUtilizada()) + " m²",
             "pH do solo: " + String.format("%.1f", area.getPh()),
         };
 
@@ -150,59 +168,61 @@ public class TelaTalhao extends JFrame {
             painelResumo.add(box);
         }
 
-        // GridBag constraints corretos
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.gridwidth = 4;
-        gbc.weighty = 0;           // ← IMPORTANTE! NÃO DEIXAR EXPANDIR
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 4; gbc.weighty = 0; gbc.fill = GridBagConstraints.HORIZONTAL;
         conteudo.add(containerResumo, gbc);
 
 
-        // --- Resto: "A fazer" e tabela (igual ao exemplo original) ---
+        // --- Resto: "Talhões Ativos" ---
         JLabel lblAFazer = new JLabel("Talhões Ativos:");
         lblAFazer.setFont(new Font("Arial", Font.BOLD, 22));
         lblAFazer.setForeground(verdeEscuro);
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        gbc.gridwidth = 4;
-        gbc.weighty = 0;
-        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 4; gbc.weighty = 0; gbc.anchor = GridBagConstraints.WEST;
         conteudo.add(lblAFazer, gbc);
 
-        GridBagConstraints gbcFim = new GridBagConstraints();
-        gbcFim.gridx = 0;
-        gbcFim.gridy = 99; // linha muito abaixo de tudo
-        gbcFim.weighty = 1; // ocupa 
-        gbcFim.fill = GridBagConstraints.VERTICAL;
+        // ===============================================
+        // 🔑 ITERAÇÃO DINÂMICA SOBRE TALHÕES E CANTEIROS
+        // ===============================================
+        int linhaAtual = 3; 
 
-        conteudo.add(Box.createVerticalGlue(), gbcFim);
+        if (area.getTalhoes() != null && !area.getTalhoes().isEmpty()) {
+            for (TalhaoVO talhao : area.getTalhoes()) {
+                
+                // Cria o painel do Talhão (que contém o cabeçalho e os canteiros)
+                JPanel painelTalhao = criarPainelTalhao(talhao); 
+                
+                GridBagConstraints gbcTalhao = new GridBagConstraints();
+                gbcTalhao.gridx = 0;
+                gbcTalhao.gridy = linhaAtual++; // Incrementa a linha
+                gbcTalhao.gridwidth = 4;
+                gbcTalhao.weightx = 1;
+                gbcTalhao.weighty = 0;
+                gbcTalhao.insets = new Insets(10, 20, 10, 20);
+                gbcTalhao.fill = GridBagConstraints.HORIZONTAL;
+                gbcTalhao.anchor = GridBagConstraints.NORTHWEST;
 
-        // =============================
-        //  TALHÃO 1 (EXPANDIDO)
-        // =============================
-        GridBagConstraints gbcTalhao = new GridBagConstraints();
-        gbcTalhao.gridx = 0;
-        gbcTalhao.gridy = 3;         // PRIMEIRO TALHÃO NA LINHA 3
-        gbcTalhao.gridwidth = 4;
-        gbcTalhao.weightx = 1;
-        gbcTalhao.weighty = 0;
-        gbcTalhao.insets = new Insets(10, 20, 10, 20);
-        gbcTalhao.fill = GridBagConstraints.HORIZONTAL;
-        gbcTalhao.anchor = GridBagConstraints.NORTHWEST;
-
-        conteudo.add(criarPainelTalhaoExpandido(), gbcTalhao);
-
-        // =============================
-        //  TALHÕES FECHADOS
-        // =============================
-
-
+                conteudo.add(painelTalhao, gbcTalhao);
+            }
+        } else {
+            // Exibir mensagem se não houver talhões
+            JLabel lblSemTalhoes = new JLabel("Não há talhões cadastrados para esta área.", SwingConstants.CENTER);
+            lblSemTalhoes.setFont(new Font("Arial", Font.ITALIC, 18));
+            lblSemTalhoes.setForeground(new Color(100, 100, 100));
+            
+            GridBagConstraints gbcVazio = new GridBagConstraints();
+            gbcVazio.gridx = 0;
+            gbcVazio.gridy = linhaAtual++;
+            gbcVazio.gridwidth = 4;
+            gbcVazio.insets = new Insets(40, 20, 40, 20);
+            gbcVazio.anchor = GridBagConstraints.CENTER;
+            
+            conteudo.add(lblSemTalhoes, gbcVazio);
+        }
+        
         // Para empurrar o rodapé para baixo (espaço)
         GridBagConstraints gbcEspaco = new GridBagConstraints();
         gbcEspaco.gridx = 0;
-        gbcEspaco.gridy = 99;
-        gbcEspaco.weighty = 1;
+        gbcEspaco.gridy = linhaAtual + 1; // Coloca o espaçador logo após o último talhão
+        gbcEspaco.weighty = 1; // Faz ele expandir e empurrar o conteúdo para cima
         gbcEspaco.fill = GridBagConstraints.VERTICAL;
 
         conteudo.add(Box.createVerticalGlue(), gbcEspaco);
@@ -212,55 +232,36 @@ public class TelaTalhao extends JFrame {
         scroll.setBorder(null);
 
         add(scroll, BorderLayout.CENTER);
-    }
+    } // Fim de initComponents()
 
-    // =============================
-    //  COMPONENTES AUXILIARES
-    // =============================
+    // ====================================================================
+    // 🔑 NOVO COMPONENTE: CRIAR PAINEL TALHÃO (Substitui criarPainelTalhaoExpandido)
+    // ====================================================================
 
-    // private JPanel criarTalhaoFechado(String titulo) {
-    //     JPanel p = new JPanel(new BorderLayout());
-    //     p.setMinimumSize(new Dimension(0, 80));
-    //     p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 90));
-    //     p.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-
-    //     JButton arrow = new JButton("\u25BC");
-    //     arrow.setFocusPainted(false);
-    //     arrow.setBorder(null);
-
-    //     JLabel lbl = new JLabel(titulo);
-    //     lbl.setFont(new Font("Arial", Font.BOLD, 16));
-    //     lbl.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 0));
-
-    //     p.add(lbl, BorderLayout.WEST);
-    //     p.add(arrow, BorderLayout.EAST);
-    //     return p;
-    // }
-
-    private JPanel criarPainelTalhaoExpandido() {
-
+    private JPanel criarPainelTalhao(TalhaoVO talhao) {
+        
         // Painel principal do talhão (contém header + conteúdo)
         JPanel bloco = new JPanel();
         bloco.setLayout(new BoxLayout(bloco, BoxLayout.Y_AXIS));
         bloco.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
-        // ================================
-        // CABEÇALHO (sempre visível)
-        // ================================
+        // --- 1. CABEÇALHO (sempre visível) ---
         JPanel cabecalho = new JPanel(new BorderLayout());
         cabecalho.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
         cabecalho.setBackground(new Color(230, 230, 230));
         cabecalho.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        JLabel lbl = new JLabel("Talhão 1");
+        // Nome e Status do Talhão vindo do VO
+        JLabel lbl = new JLabel(talhao.getNome() + " | Status: " + talhao.getStatus() + " | Área: " + String.format("%.2f", talhao.getAreaTalhao()) + " m²");
         lbl.setFont(new Font("Arial", Font.BOLD, 16));
 
-        // Botão Nova Atividade
+        // Botão Novo Canteiro
         JButton novaAtv = new JButton("Novo Canteiro");
         novaAtv.setPreferredSize(new Dimension(130, 24));
+        // 🔑 Ação: Implementar abertura de TelaNovoCanteiro(talhao.getId())
 
         // Seta do drop-down
-        JButton arrow = new JButton("\u25BC");   // ▼
+        JButton arrow = new JButton("\u25BC"); 
         arrow.setFocusPainted(false);
         arrow.setBorderPainted(false);
         arrow.setContentAreaFilled(false);
@@ -275,46 +276,48 @@ public class TelaTalhao extends JFrame {
 
         cabecalho.add(lbl, BorderLayout.WEST);
         cabecalho.add(rightPanel, BorderLayout.EAST);
-
         bloco.add(cabecalho);
 
-
-        // ================================
-        // CONTEÚDO EXPANDIDO (começa visível)
-        // ================================
+        // --- 2. CONTEÚDO EXPANDIDO (Canteiros) ---
         JPanel conteudoExpandido = new JPanel();
         conteudoExpandido.setLayout(new BoxLayout(conteudoExpandido, BoxLayout.Y_AXIS));
         conteudoExpandido.setBackground(Color.WHITE);
         conteudoExpandido.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
 
-        // Painel para alinhar o título à ESQUERDA
         JPanel painelTitulo = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         painelTitulo.setBackground(Color.WHITE);
 
-        // Texto "Canteiros"
-        JLabel lblCanteiros = new JLabel("Canteiros");
+        JLabel lblCanteiros = new JLabel("Canteiros em " + talhao.getNome() + ":");
         lblCanteiros.setFont(new Font("Arial", Font.BOLD, 16));
-
         painelTitulo.add(lblCanteiros);
         conteudoExpandido.add(painelTitulo);
 
         conteudoExpandido.add(Box.createVerticalStrut(10));
 
-        // Cards dentro do fundo branco
+        // Painel de cards
         JPanel cards = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 10));
         cards.setBackground(Color.WHITE);
 
-        cards.add(criarCard("Canteiro 1", "Milho"));
-        cards.add(criarCard("Canteiro 2", "Soja"));
-        cards.add(criarCard("Canteiro 3", "Alface"));
+        // 🔑 ITERAÇÃO DINÂMICA SOBRE CANTEIROS
+        if (talhao.getCanteiros() != null && !talhao.getCanteiros().isEmpty()) {
+            for (CanteiroVO canteiro : talhao.getCanteiros()) {
+                // Monta a string de conteúdo (Exemplo: Nome da cultura + Kg gerados)
+                String infoCanteiro = String.format("%.2f", canteiro.getKgGerados()) + " kg"; 
+                cards.add(criarCard(canteiro.getNome(), infoCanteiro, canteiro.getStatus())); 
+            }
+        } else {
+            JLabel lblVazio = new JLabel("Nenhum canteiro cadastrado neste talhão.");
+            cards.add(lblVazio);
+        }
 
         conteudoExpandido.add(cards);
-
         bloco.add(conteudoExpandido);
+        
+        // Garante que o painel começa FECHADO (opcional, mas bom padrão)
+        conteudoExpandido.setVisible(false);
+        arrow.setText("\u25B6"); // ▶ (Seta para a direita, indicando que está fechado)
 
-        // ================================
-        // TOGGLE — clicar na seta abre/fecha
-        // ================================
+        // --- 3. TOGGLE ---
         arrow.addActionListener(e -> {
             boolean visivel = conteudoExpandido.isVisible();
             conteudoExpandido.setVisible(!visivel);
@@ -326,9 +329,13 @@ public class TelaTalhao extends JFrame {
         return bloco;
     }
 
-    private JPanel criarCard(String titulo, String cultura) {
+    // ====================================================================
+    // COMPONENTES AUXILIARES (Pequenas modificações no criarCard)
+    // ====================================================================
+
+    private JPanel criarCard(String titulo, String info, String status) {
         JPanel p = new JPanel();
-        p.setPreferredSize(new Dimension(200, 120));
+        p.setPreferredSize(new Dimension(200, 130)); // Aumenta um pouco para caber o status
         p.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.setBackground(new Color(240, 240, 230));
@@ -337,24 +344,30 @@ public class TelaTalhao extends JFrame {
         l1.setFont(new Font("Arial", Font.BOLD, 16));
         l1.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel l2 = new JLabel(cultura, SwingConstants.CENTER);
-        l2.setFont(new Font("Arial", Font.BOLD, 14));
+        JLabel l2 = new JLabel(info, SwingConstants.CENTER);
+        l2.setFont(new Font("Arial", Font.PLAIN, 14)); // Muda para PLAIN ou ITALIC
         l2.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        JLabel lStatus = new JLabel("Status: " + status, SwingConstants.CENTER);
+        lStatus.setFont(new Font("Arial", Font.ITALIC, 12));
+        lStatus.setForeground(Color.GRAY);
+        lStatus.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JButton ver = new JButton("Ver");
+        JButton ver = new JButton("Ver Detalhes");
         ver.setAlignmentX(Component.CENTER_ALIGNMENT);
         ver.setBackground(new Color(150, 160, 80));
         ver.setForeground(Color.WHITE);
         ver.setFont(new Font("Arial", Font.BOLD, 14));
         ver.setFocusPainted(false);
-        ver.setPreferredSize(new Dimension(150, 35));
-        ver.setMaximumSize(new Dimension(150, 35));  // impede esticar
+        ver.setPreferredSize(new Dimension(150, 25));
+        ver.setMaximumSize(new Dimension(150, 25));
 
-        p.add(Box.createVerticalStrut(10));
+        p.add(Box.createVerticalStrut(5));
         p.add(l1);
-        p.add(Box.createVerticalStrut(10));
+        p.add(Box.createVerticalStrut(5));
         p.add(l2);
-        p.add(Box.createVerticalStrut(15));
+        p.add(lStatus); // Adicionando o status
+        p.add(Box.createVerticalStrut(10));
         p.add(ver);
 
         return p;
@@ -369,11 +382,6 @@ public class TelaTalhao extends JFrame {
         b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return b;
     }
-
-    // public static void main(String[] args) {
-    //     SwingUtilities.invokeLater(() -> {
-    //         TelaTalhao t = new TelaTalhao("Área de Teste");
-    //         t.setVisible(true);
-    //     });
-    // }
+    
+    // ... (main method for testing, if applicable)
 }

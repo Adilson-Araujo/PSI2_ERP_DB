@@ -5,19 +5,43 @@ import javax.swing.*;
 import java.util.List;
 
 import br.edu.ifsp.hto.cooperativa.producao.controle.GerenciarAreaController;
-import br.edu.ifsp.hto.cooperativa.producao.modelo.Area;
+import br.edu.ifsp.hto.cooperativa.producao.modelo.vo.AreaVO;
+import br.edu.ifsp.hto.cooperativa.sessao.modelo.negocios.Sessao;
 
 public class TelaGerenciarArea extends JFrame {
-    
-    private long associadoId;
 
-    public TelaGerenciarArea(long associadoId) {
-        this.associadoId = associadoId;
-        initComponents();
+    // Campo para guardar o ID do Associado
+    private long associadoId; 
+    private GerenciarAreaController controller;
+
+    // 🔑 NOVO CONSTRUTOR NECESSÁRIO
+    public TelaGerenciarArea() {
+        // Busca o ID do associado logado na Sessão estática
+        try {
+            this.associadoId = Sessao.getAssociadoIdLogado(); 
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Erro: Nenhum usuário logado. Retornando ao login.", "Erro de Sessão", JOptionPane.ERROR_MESSAGE);
+            // new TelaLogin().setVisible(true); // Se tiver uma tela de login
+            return; // Impede a continuação se a sessão falhar
+        }
+        this.controller = new GerenciarAreaController();
+        initComponents(); 
     }
 
-
     public void initComponents() {
+        // 1. *** 🔑 CHAVE: Recuperar o associadoId da Sessão no início ***
+        long associadoId;
+        try {
+            // Chama o método estático para obter o ID
+            associadoId = Sessao.getAssociadoIdLogado(); 
+        } catch (RuntimeException e) {
+            // Tratar erro caso não haja usuário logado (o Sessao.getAssociadoIdLogado() lança RuntimeException)
+            JOptionPane.showMessageDialog(this, e.getMessage() + ". Redirecionando para login.", "Erro de Sessão", JOptionPane.ERROR_MESSAGE);
+            // new TelaLogin().setVisible(true); // Exemplo de redirecionamento
+            dispose();
+            return;
+        }
+
         setTitle("Gerenciar Área");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(1200, 800);
@@ -49,7 +73,7 @@ public class TelaGerenciarArea extends JFrame {
 
         menuLateral.add(Box.createVerticalStrut(40));
 
-        String[] botoes = { "Área de plantio", "Registrar problemas", "Relatório de produção" };
+        String[] botoes = { "Tela inicial", "Área de plantio", "Registrar problemas", "Relatório de produção" };
         for (String texto : botoes) {
             JButton botao = new JButton(texto);
             botao.setFont(new Font("Arial", Font.BOLD, 15));
@@ -61,6 +85,28 @@ public class TelaGerenciarArea extends JFrame {
             botao.setPreferredSize(new Dimension(180, 50));
             botao.setBorder(BorderFactory.createLineBorder(verdeEscuro, 2));
             botao.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+            // 🔑 ADIÇÃO: Listener de Evento para o botão
+            botao.addActionListener(e -> {
+                if (texto.equals("Tela inicial")) {
+                    // AÇÃO CORRETA para o botão "Tela inicial"
+                    new br.edu.ifsp.hto.cooperativa.producao.visao.TelaInicial().setVisible(true);
+                    dispose(); // Fecha a tela atual (TelaGerenciarArea)
+
+                } else if (texto.equals("Área de plantio")) {
+                    // Ação para o botão "Área de plantio"
+                    // Como você já está na TelaGerenciarArea, esta ação deve apenas fechar
+                    // e reabrir (se quisesse forçar um refresh) ou não fazer nada.
+                    // Para evitar abrir duas telas, é melhor não fazer nada aqui ou apenas focar na tela:
+                    // JOptionPane.showMessageDialog(this, "Você já está em Gerenciar Área!"); 
+
+                } else if (texto.equals("Registrar problemas")) {
+                    // Adicionar lógica para Registrar problemas
+                
+                } else if (texto.equals("Relatório de produção")) {
+                    // Adicionar lógica para Relatório de produção
+                }
+            });
             menuLateral.add(botao);
             menuLateral.add(Box.createVerticalStrut(20));
         }
@@ -84,6 +130,14 @@ public class TelaGerenciarArea extends JFrame {
         btnVoltar.setFocusPainted(false);
         btnVoltar.setPreferredSize(new Dimension(120, 45));
         painelTopo.add(btnVoltar, BorderLayout.WEST);
+        // 🔑 Adicionar Ação ao Botão Voltar
+        btnVoltar.addActionListener(e -> {
+            // Fecha a tela atual
+            dispose(); 
+
+            // CORRIGIDO PARA USAR O CONSTRUTOR PADRÃO
+            new br.edu.ifsp.hto.cooperativa.producao.visao.TelaInicial().setVisible(true);
+        });
 
         JLabel lblTitulo = new JLabel("Gerenciar Área");
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 32));
@@ -110,8 +164,8 @@ public class TelaGerenciarArea extends JFrame {
 
         // Carregar áreas do banco de dados
         GerenciarAreaController controller = new GerenciarAreaController();
-        List<Area> lista = controller.carregarAreas(associadoId);
-        JComboBox<Area> comboArea = new JComboBox<>(lista.toArray(new Area[0]));
+        List<AreaVO> lista = controller.carregarAreas(associadoId);
+        JComboBox<AreaVO> comboArea = new JComboBox<>(lista.toArray(new AreaVO[0]));
 
 
         comboArea.setFont(new Font("Arial", Font.PLAIN, 16));
@@ -124,14 +178,14 @@ public class TelaGerenciarArea extends JFrame {
 
         JButton btnSalvar = new JButton("SALVAR");
         btnSalvar.addActionListener(e -> {
-            Area areaIncompleta = (Area) comboArea.getSelectedItem();
+            AreaVO areaIncompleta = (AreaVO) comboArea.getSelectedItem();
             
             if (areaIncompleta != null) {
                 // Instancia o controller novamente
                 GerenciarAreaController ctrl = new GerenciarAreaController();
                 
                 // *** 🔑 A CORREÇÃO ESTÁ AQUI: RECUPERAR A ÁREA COMPLETA PELO ID ***
-                Area areaCompleta = ctrl.carregarAreaCompletaPorId(areaIncompleta.getId());
+                AreaVO areaCompleta = ctrl.carregarAreaCompletaPorId(areaIncompleta.getId());
                 
                 if (areaCompleta != null) {
                     new TelaTalhao(areaCompleta).setVisible(true); // Abre a tela com a área COMPLETA
@@ -164,11 +218,11 @@ public class TelaGerenciarArea extends JFrame {
 
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            TelaGerenciarArea tela = new TelaGerenciarArea(1); // só para testar
-            tela.setVisible(true);
-        });
-    }
+    // public static void main(String[] args) {
+    //     SwingUtilities.invokeLater(() -> {
+    //         // Exemplo de como funcionaria após um login real:
+    //         new TelaGerenciarArea().setVisible(true);
+    //     });
+    // }
 
 }

@@ -1,76 +1,84 @@
 package br.edu.ifsp.hto.cooperativa.producao.controle;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import br.edu.ifsp.hto.cooperativa.producao.modelo.dao.AreaDAO;
-import br.edu.ifsp.hto.cooperativa.producao.modelo.Area;
-import br.edu.ifsp.hto.cooperativa.ConnectionFactory; // ajusta o pacote conforme o seu projeto
+import br.edu.ifsp.hto.cooperativa.producao.modelo.dao.TalhaoDAO; // 🔑 Novo Import
+import br.edu.ifsp.hto.cooperativa.producao.modelo.dao.CanteiroDAO; // 🔑 Novo Import
+import br.edu.ifsp.hto.cooperativa.producao.modelo.vo.AreaVO;
+import br.edu.ifsp.hto.cooperativa.producao.modelo.vo.TalhaoVO; // 🔑 Novo Import
+import br.edu.ifsp.hto.cooperativa.producao.modelo.vo.CanteiroVO; // 🔑 Novo Import
+
+import javax.swing.JOptionPane;
+import java.sql.SQLException;
+import java.util.List;
 
 public class GerenciarAreaController {
 
     private AreaDAO areaDAO;
+    private TalhaoDAO talhaoDAO; // 🔑 Instância do TalhaoDAO
+    private CanteiroDAO canteiroDAO; // 🔑 Instância do CanteiroDAO
 
     public GerenciarAreaController() {
         this.areaDAO = new AreaDAO();
+        this.talhaoDAO = new TalhaoDAO(); // 🔑 Inicialização
+        this.canteiroDAO = new CanteiroDAO(); // 🔑 Inicialização
+    }
+    
+    // Método que você já tem para listar áreas (sem detalhes aninhados)
+    public List<AreaVO> carregarAreas(long associadoId) {
+        try {
+            return areaDAO.buscarPorAssociadoId(associadoId); 
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Erro ao carregar lista de áreas: " + e.getMessage(), "Erro de Banco de Dados", JOptionPane.ERROR_MESSAGE);
+            return List.of(); // Retorna lista vazia em caso de erro
+        }
+    }
+    
+    // Método que você já tem para buscar a área pelo ID, agora vamos expandi-lo
+    public AreaVO carregarAreaCompletaPorId(Long areaId) {
+        try {
+            // 🔑 1. FORÇA O RE-CÁLCULO E ATUALIZAÇÃO NO BANCO
+            // Isso corrige a inconsistência herdada das inserções antigas.
+            areaDAO.calcularEAtualizarAreaUtilizada(areaId); 
+
+            // 2. Busca a Área base (que agora tem o campo area_utilizada correto)
+            AreaVO area = areaDAO.buscarPorId(areaId);
+
+            if (area != null) {
+                // 3. Carrega os Talhões e Canteiros (lógica em cascata)
+                carregarTalhoes(area);
+            }
+            return area;
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Erro ao carregar detalhes da área: " + e.getMessage(), "Erro de Banco de Dados", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
     }
 
-    // Método para carregar UMA ÁREA COMPLETA pelo ID (útil para a TelaTalhao)
-    public Area carregarAreaCompletaPorId(long areaId) {
-        Area area = null;
+    /**
+     * Carrega a lista de Talhões de uma Área e, para cada Talhão, carrega seus Canteiros.
+     */
+    private void carregarTalhoes(AreaVO area) throws SQLException {
+        // Busca todos os Talhões ligados a esta Área
+        List<TalhaoVO> talhoes = talhaoDAO.buscarPorAreaId(area.getId());
         
-        // Agora busca todos os campos da tabela AREA
-        String sql = "SELECT id, nome, area_total, area_utilizada, ph FROM area WHERE id = ?"; 
-
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setLong(1, areaId);
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                long id = rs.getLong("id"); 
-                String nome = rs.getString("nome");
-                // Puxando os valores DECIMAL/DOUBLE do banco
-                double areaTotal = rs.getDouble("area_total");
-                double areaUtilizada = rs.getDouble("area_utilizada");
-                double ph = rs.getDouble("ph");
-
-                // Usando o construtor COMPLETO da classe Area
-                area = new Area(id, nome, areaTotal, areaUtilizada, ph);
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Erro ao carregar área completa: " + e.getMessage());
+        // 🔑 Itera sobre cada Talhão para carregar seus Canteiros
+        for (TalhaoVO talhao : talhoes) {
+            carregarCanteiros(talhao);
         }
 
-        return area;
+        // 🔑 Anexa a lista de Talhões (agora completa com Canteiros) à Área
+        area.setTalhoes(talhoes);
     }
 
-    public List<Area> carregarAreas(long associadoId) {
-        List<Area> lista = new ArrayList<>();
-
-        String sql = "SELECT id, nome FROM area WHERE associado_id = ?";
-
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setLong(1, associadoId);
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                int id = rs.getInt("id");
-                String nome = rs.getString("nome");
-                lista.add(new Area(id, nome));
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return lista;
+    /**
+     * Carrega a lista de Canteiros de um Talhão.
+     */
+    private void carregarCanteiros(TalhaoVO talhao) throws SQLException {
+        // Busca todos os Canteiros ligados a este Talhão (via plano, conforme modelamos no DAO)
+        List<CanteiroVO> canteiros = canteiroDAO.buscarPorTalhaoId(talhao.getId());
+        
+        // 🔑 Anexa a lista de Canteiros ao Talhão
+        talhao.setCanteiros(canteiros);
     }
 }

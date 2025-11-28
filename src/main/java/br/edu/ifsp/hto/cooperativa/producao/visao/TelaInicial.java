@@ -3,16 +3,25 @@ package br.edu.ifsp.hto.cooperativa.producao.visao;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
-// import br.edu.ifsp.hto.cooperativa.sessao.modelo.vo.UsuarioVO;
+import br.edu.ifsp.hto.cooperativa.sessao.modelo.negocios.Sessao;
 
 import java.awt.*;
 
 public class TelaInicial extends JFrame {
 
-    private long associadoId;
+    // 🔑 NOVO CAMPO para guardar o ID
+    private long associadoId; 
 
-    public TelaInicial(Long associadoId) {
-        this.associadoId = associadoId;
+    // 🔑 NOVO CONSTRUTOR para receber o ID
+    public TelaInicial() {
+        // Busca o ID do associado logado na Sessão estática
+        try {
+            this.associadoId = Sessao.getAssociadoIdLogado();
+        } catch (Exception e) {
+            // Se falhar, lide com o erro (ex: volte para a tela de login)
+            JOptionPane.showMessageDialog(null, "Sessão expirada. Faça login novamente.", "Erro de Sessão", JOptionPane.ERROR_MESSAGE);
+            // return; // Se for uma aplicação Single-View, pode ser necessário sair ou voltar
+        }
         initializeComponents();
     }
 
@@ -65,9 +74,9 @@ public class TelaInicial extends JFrame {
         botao.addActionListener(e -> {
 
             if (texto.equals("Área de plantio")) {
-            // passa o associadoId que recebemos no construtor da TelaInicial
-            new br.edu.ifsp.hto.cooperativa.producao.visao.TelaGerenciarArea(this.associadoId).setVisible(true);
-            dispose(); // opcional: fecha a TelaInicial
+                // CORRIGIDO PARA USAR O CONSTRUTOR PADRÃO
+                new br.edu.ifsp.hto.cooperativa.producao.visao.TelaGerenciarArea().setVisible(true);
+                dispose(); 
             }
 
             if (texto.equals("Registrar problemas")) {

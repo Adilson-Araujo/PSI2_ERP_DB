@@ -37,7 +37,7 @@ public class TelaEditarTalhao extends JFrame {
 
         menuLateral.add(Box.createVerticalStrut(40));
 
-        String[] botoes = { "Área de plantio", "Registrar problemas", "Relatório de produção" };
+        String[] botoes = { "Tela inicial", "Área de plantio", "Registrar problemas", "Relatório de produção" };
         for (String texto : botoes) {
             JButton botao = new JButton(texto);
             botao.setFont(new Font("Arial", Font.BOLD, 15));

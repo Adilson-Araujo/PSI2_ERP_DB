@@ -1,6 +1,8 @@
-package br.edu.ifsp.hto.cooperativa.producao.modelo;
+package br.edu.ifsp.hto.cooperativa.producao.modelo.vo;
 
-public class Area {
+import java.util.List;
+
+public class AreaVO {
 
     private long id;
     private String nome;
@@ -8,21 +10,29 @@ public class Area {
     private double areaTotal; 
     private double areaUtilizada; 
     private double ph; 
+    private List<TalhaoVO> talhoes;
 
-    // Construtor original (mantido por compatibilidade, mas o novo será mais útil)
-    public Area(long id, String nome) {
+    // 🔑 CONSTRUTOR PADRÃO ADICIONADO PARA O DAO
+    // Esta adição é NECESSÁRIA porque a existência de outros construtores remove o construtor padrão implícito.
+    public AreaVO() {
+    }
+
+    // Construtor original (mantido por compatibilidade)
+    public AreaVO(long id, String nome) {
         this.id = id;
         this.nome = nome;
     }
     
     // NOVO CONSTRUTOR COMPLETO
-    public Area(long id, String nome, double areaTotal, double areaUtilizada, double ph) {
+    public AreaVO(long id, String nome, double areaTotal, double areaUtilizada, double ph) {
         this.id = id;
         this.nome = nome;
         this.areaTotal = areaTotal;
         this.areaUtilizada = areaUtilizada;
         this.ph = ph;
     }
+
+    // --- GETTERS E SETTERS ---
 
     public long getId() {
         return id;
@@ -40,7 +50,6 @@ public class Area {
         this.nome = nome;
     }
     
-    // NOVOS GETTERS E SETTERS
     public double getAreaTotal() {
         return areaTotal;
     }
@@ -64,6 +73,9 @@ public class Area {
     public void setPh(double ph) {
         this.ph = ph;
     }
+
+    public List<TalhaoVO> getTalhoes() { return talhoes; }
+    public void setTalhoes(List<TalhaoVO> talhoes) { this.talhoes = talhoes; }
 
     @Override
     public String toString() {

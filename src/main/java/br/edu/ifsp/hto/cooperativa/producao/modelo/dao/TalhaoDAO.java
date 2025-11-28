@@ -63,4 +63,35 @@ public class TalhaoDAO {
             ps.executeUpdate();
         }
     }
+
+    /**
+     * Insere um novo talhão no banco e retorna o id gerado.
+     */
+    public Long inserir(TalhaoVO talhao) throws SQLException {
+        String sql = "INSERT INTO talhao (Area_id, nome, area_talhao, observacoes, status) VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            if (talhao.getAreaId() == null) throw new SQLException("AreaId é obrigatório");
+
+            ps.setLong(1, talhao.getAreaId());
+            ps.setString(2, talhao.getNome());
+            ps.setBigDecimal(3, talhao.getAreaTalhao());
+            ps.setString(4, talhao.getObservacoes());
+            ps.setString(5, talhao.getStatus());
+
+            int affected = ps.executeUpdate();
+            if (affected == 0) throw new SQLException("Inserção falhou, nenhuma linha afetada.");
+
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) {
+                    Long id = keys.getLong(1);
+                    talhao.setId(id);
+                    return id;
+                } else {
+                    throw new SQLException("Inserção falhou, nenhum ID gerado.");
+                }
+            }
+        }
+    }
 }

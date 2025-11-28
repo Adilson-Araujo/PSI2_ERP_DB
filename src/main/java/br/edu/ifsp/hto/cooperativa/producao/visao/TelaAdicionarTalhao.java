@@ -1,12 +1,22 @@
 package br.edu.ifsp.hto.cooperativa.producao.visao;
 
+import br.edu.ifsp.hto.cooperativa.producao.modelo.dao.TalhaoDAO;
+import br.edu.ifsp.hto.cooperativa.producao.modelo.vo.AreaVO;
+import br.edu.ifsp.hto.cooperativa.producao.modelo.vo.TalhaoVO;
+import br.edu.ifsp.hto.cooperativa.producao.controle.GerenciarAreaController;
+
 import java.awt.*;
 import javax.swing.*;
+import java.math.BigDecimal;
+import java.sql.SQLException;
 
 public class TelaAdicionarTalhao extends JFrame {
 
-    public TelaAdicionarTalhao() {
-        setTitle("Adicionar Talhão");
+    private final AreaVO area;
+
+    public TelaAdicionarTalhao(AreaVO area) {
+        this.area = area;
+        setTitle("Adicionar Talhão - Área: " + (area != null ? area.getNome() : "--"));
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(1200, 800);
         setLocationRelativeTo(null);
@@ -72,6 +82,13 @@ public class TelaAdicionarTalhao extends JFrame {
         btnVoltar.setFocusPainted(false);
         btnVoltar.setPreferredSize(new Dimension(120, 45));
         painelTopo.add(btnVoltar, BorderLayout.WEST);
+        btnVoltar.addActionListener(e -> {
+            // Volta para a TelaTalhao com a mesma área (recarregada)
+            GerenciarAreaController controller = new GerenciarAreaController();
+            AreaVO nova = controller.carregarAreaCompletaPorId(area.getId());
+            if (nova != null) new TelaTalhao(nova).setVisible(true);
+            dispose();
+        });
 
         JLabel lblTitulo = new JLabel("Adicionar Talhão");
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 32));
@@ -112,6 +129,21 @@ public class TelaAdicionarTalhao extends JFrame {
         painelForm.add(lblAreaTotal, gbc);
 
         JTextField txtAreaTotal = new JTextField();
+            // ======= Campo: Observações =======
+            JLabel lblObs = new JLabel("Observações:");
+            lblObs.setFont(new Font("Arial", Font.BOLD, 16));
+            lblObs.setForeground(verdeEscuro);
+            gbc.gridy = 4;
+            painelForm.add(lblObs, gbc);
+
+            JTextArea txtObs = new JTextArea(4, 30);
+            txtObs.setLineWrap(true);
+            txtObs.setWrapStyleWord(true);
+            txtObs.setFont(new Font("Arial", Font.PLAIN, 14));
+            JScrollPane spObs = new JScrollPane(txtObs);
+            gbc.gridy = 5;
+            painelForm.add(spObs, gbc);
+
         txtAreaTotal.setFont(new Font("Arial", Font.PLAIN, 16));
         txtAreaTotal.setPreferredSize(new Dimension(350, 45));
         txtAreaTotal.setBorder(BorderFactory.createLineBorder(verdeEscuro, 1));
@@ -125,8 +157,49 @@ public class TelaAdicionarTalhao extends JFrame {
         btnSalvar.setFont(new Font("Arial", Font.BOLD, 18));
         btnSalvar.setFocusPainted(false);
         btnSalvar.setPreferredSize(new Dimension(200, 50));
-        gbc.gridy = 4;
+        gbc.gridy = 6;
         painelForm.add(btnSalvar, gbc);
+
+        // Ação do salvar: valida, insere via TalhaoDAO, e reabre TelaTalhao com dados atualizados
+        btnSalvar.addActionListener(e -> {
+            String nome = txtNomeTalhao.getText().trim();
+            String areaStr = txtAreaTotal.getText().trim();
+            String observ = txtObs.getText().trim();
+
+            if (nome.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Nome do talhão é obrigatório.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            BigDecimal areaTalhao;
+            try {
+                areaTalhao = new BigDecimal(areaStr.replace(',', '.'));
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Área inválida. Use um número válido.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            TalhaoVO t = new TalhaoVO();
+            t.setAreaId(area.getId());
+            t.setNome(nome);
+            t.setAreaTalhao(areaTalhao);
+            t.setObservacoes(observ);
+            t.setStatus("Ativo");
+
+            TalhaoDAO dao = new TalhaoDAO();
+            try {
+                dao.inserir(t);
+                JOptionPane.showMessageDialog(this, "Talhão criado com sucesso.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+
+                // Recarrega área completa e reabre TelaTalhao
+                GerenciarAreaController controller = new GerenciarAreaController();
+                AreaVO nova = controller.carregarAreaCompletaPorId(area.getId());
+                if (nova != null) new TelaTalhao(nova).setVisible(true);
+                dispose();
+
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Erro ao salvar talhão: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        });
 
         // Painel centralizado, levemente deslocado para cima
         JPanel painelCentralizado = new JPanel(new GridBagLayout());
@@ -141,10 +214,10 @@ public class TelaAdicionarTalhao extends JFrame {
         conteudo.add(painelCentralizado, BorderLayout.CENTER);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            TelaAdicionarTalhao tela = new TelaAdicionarTalhao();
-            tela.setVisible(true);
-        });
-    }
+    // public static void main(String[] args) {
+    //     SwingUtilities.invokeLater(() -> {
+    //         TelaAdicionarTalhao tela = new TelaAdicionarTalhao();
+    //         tela.setVisible(true);
+    //     });
+    // }
 }

@@ -135,6 +135,11 @@ public class TelaTalhao extends JFrame {
 
         leftButtonsBelow.add(btnRemover);
         leftButtonsBelow.add(btnAdicionar);
+        // Ação do botão Adicionar: abrir TelaAdicionarTalhao
+        btnAdicionar.addActionListener(e -> {
+            new TelaAdicionarTalhao(area).setVisible(true);
+            dispose();
+        });
         leftButtonsBelow.add(btnEditar);
         leftButtonsBelow.add(btnPlano);
 

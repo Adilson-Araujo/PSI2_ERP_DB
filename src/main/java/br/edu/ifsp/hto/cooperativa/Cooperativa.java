@@ -19,7 +19,7 @@ public class Cooperativa extends JFrame{
 
 	// Construtor para inicializar o ArrayList 
 	public Cooperativa(){
-		super( "SGCC - Sistema Gest�o Coopasul-Cooperativa de Produ��o e Comercializa��o Assentamento de Sumar� " );     
+		super( "SGCC - Sistema Gestão Coopasul-Cooperativa de Produção e Comercialização Assentamento de Sumaré " );     
 
 		menu();
 	}
@@ -29,7 +29,7 @@ public class Cooperativa extends JFrame{
 		//Menus da barra:cadastro / Relatorios / Ajuda
 		JMenu planejamentoMenu = new JMenu( "Planejamento" ); // cria opcao menu Planejamento
 
-		JMenu producaoMenu = new JMenu( "Produ��o" ); // cria opcao menu Producao
+		JMenu producaoMenu = new JMenu( "Produção" ); // cria opcao menu Producao
 
 		JMenu vendaMenu = new JMenu( "Vendas" ); // cria opcao menu Producao
 
@@ -163,10 +163,10 @@ public class Cooperativa extends JFrame{
 				new ActionListener() {
 					public void actionPerformed( ActionEvent event ){
 						JOptionPane.showMessageDialog( Cooperativa.this,
-								"Saindo da aplica��o",
-										"Fechando aplica��o", JOptionPane.PLAIN_MESSAGE );
+								"Saindo da aplicação",
+										"Fechando aplicação", JOptionPane.PLAIN_MESSAGE );
 
-						System.exit( 0 ); // encerra aplica��o
+						System.exit( 0 ); // encerra aplicação
 					} // fim  metodo actionPerformed
 				} // fim classe interna anonima 
 				); // fim chamada para addActionListener
@@ -175,7 +175,7 @@ public class Cooperativa extends JFrame{
 				new ActionListener(){ // anonymous inner class
 					public void actionPerformed( ActionEvent event ){
 						JOptionPane.showMessageDialog( Cooperativa.this,
-								"Nesta op��o gostaria de colocar os grupos , componentes"
+								"Nesta opção gostaria de colocar os grupos , componentes"
 								+ "e o email",
 								"Sobre", JOptionPane.PLAIN_MESSAGE );
 					} // fim  metodo actionPerformed

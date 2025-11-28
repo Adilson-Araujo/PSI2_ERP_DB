@@ -81,7 +81,7 @@ public class TelaLogin extends JFrame {
         try{
             sessaoControlador.login(usuario, senha);
             var usuarioLogado = sessaoControlador.obterUsuarioLogado();
-            long associadoId = Sessao.getAssociadoIdLogado();
+            // long associadoId = Sessao.getAssociadoIdLogado();
             if (usuarioLogado != null)
             {
                 Cooperativa  cooperativa = new br.edu.ifsp.hto.cooperativa.Cooperativa();

@@ -18,9 +18,9 @@ public class ClienteControlador implements IClienteControlador {
     }
 
     @Override
-    public ClienteTO obter(int id) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+    public ClienteTO obter(long id) {
+        var negociosFactory = NegociosFactory.getInstance();
+        return negociosFactory.getCliente().buscarId(id);    }
 
     @Override
     public ClienteTO obter(String cpfCnpj) {

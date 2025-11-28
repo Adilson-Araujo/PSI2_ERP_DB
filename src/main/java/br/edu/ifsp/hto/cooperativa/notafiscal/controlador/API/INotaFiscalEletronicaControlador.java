@@ -5,7 +5,12 @@
 package br.edu.ifsp.hto.cooperativa.notafiscal.controlador.API;
 
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.dto.NotaFiscalEletronicaTO;
+import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.dto.NotaFiscalItemTO;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.vo.AssociadoVO;
+import br.edu.ifsp.hto.cooperativa.vendas.modelo.vo.ItemPedidoVO;
+import br.edu.ifsp.hto.cooperativa.vendas.modelo.vo.VendaVO;
+
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface INotaFiscalEletronicaControlador {
@@ -14,6 +19,5 @@ public interface INotaFiscalEletronicaControlador {
     public NotaFiscalEletronicaTO obter(String chaveAcesso);
     public List<NotaFiscalEletronicaTO> buscar(AssociadoVO associado);
     public List<NotaFiscalEletronicaTO> buscar();
-    //public NotaFiscalEletronicaTO emitirNotaFiscalEletronica(VendaTO venda)
-    
+    public NotaFiscalEletronicaTO emitirNotaFiscalEletronica(VendaVO venda, long ClienteId, List<ItemPedidoVO> produtosVendidos, BigDecimal valorFrete, String dadosAdicionais);
 }

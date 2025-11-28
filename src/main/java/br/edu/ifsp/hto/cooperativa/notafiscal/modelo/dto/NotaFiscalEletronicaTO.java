@@ -4,13 +4,14 @@
  */
 package br.edu.ifsp.hto.cooperativa.notafiscal.modelo.dto;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.vo.NotaFiscalEletronicaVO;
+import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.vo.NotaFiscalItemVO;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.vo.NotaFiscalXmlVO;
 import java.util.List;
 
 public class NotaFiscalEletronicaTO {
     public NotaFiscalEletronicaVO notaFiscalEletronica;
     public NotaFiscalXmlVO notaFiscalXml;
-    public List<NotaFiscalItemTO> notaFiscalItens;
+    public List<NotaFiscalItemVO> notaFiscalItens;
     public AssociadoTO associadoTO;
     public ClienteTO clienteTO;
     

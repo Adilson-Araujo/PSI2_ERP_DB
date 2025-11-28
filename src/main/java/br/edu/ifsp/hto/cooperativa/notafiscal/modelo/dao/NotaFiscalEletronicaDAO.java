@@ -82,30 +82,30 @@ public class NotaFiscalEletronicaDAO {
     // ------------------------------------------------------------
     public void adicionar(NotaFiscalEletronicaVO vo) {
         String sql = """
-            INSERT INTO nota_fiscal_eletronica (
-                associado_id,
-                cliente_id,
-                chave_acesso,
-                razao_social,
-                data_emissao,
-                valor_total,
-                tipo_ambiente,
-                tipo_operacao,
-                tipo_forma_emissao,
-                tipo_status_envio_sefaz,
-                numero_protocolo,
-                data_inclusao,
-                ativo,
-                numero_nota_fiscal,
-                numero_serie,
-                dados_adicionais,
-                valor_frete
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """;
+        INSERT INTO nota_fiscal_eletronica (
+            associado_id,
+            cliente_id,
+            chave_acesso,
+            razao_social,
+            data_emissao,
+            valor_total,
+            tipo_ambiente,
+            tipo_operacao,
+            tipo_forma_emissao,
+            tipo_status_envio_sefaz,
+            numero_protocolo,
+            data_inclusao,
+            ativo,
+            numero_nota_fiscal,
+            numero_serie,
+            dados_adicionais,
+            valor_frete
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """;
 
         try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement p = conn.prepareStatement(sql)) {
+             PreparedStatement p = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             p.setLong(1, vo.getAssociadoId());
             p.setLong(2, vo.getClienteId());
@@ -115,7 +115,7 @@ public class NotaFiscalEletronicaDAO {
             if (vo.getDataEmissao() != null)
                 p.setTimestamp(5, Timestamp.valueOf(vo.getDataEmissao()));
             else
-                p.setTimestamp(5, null);
+                p.setNull(5, Types.TIMESTAMP);
 
             p.setBigDecimal(6, vo.getValorTotal());
             p.setInt(7, vo.getTipoAmbiente());
@@ -127,7 +127,7 @@ public class NotaFiscalEletronicaDAO {
             if (vo.getDataInclusao() != null)
                 p.setTimestamp(12, Timestamp.valueOf(vo.getDataInclusao()));
             else
-                p.setTimestamp(12, null);
+                p.setNull(12, Types.TIMESTAMP);
 
             p.setBoolean(13, vo.getAtivo() != null ? vo.getAtivo() : true);
             p.setString(14, vo.getNumeroNotaFiscal());
@@ -137,8 +137,12 @@ public class NotaFiscalEletronicaDAO {
 
             p.executeUpdate();
 
+            ResultSet keys = p.getGeneratedKeys();
+            if (keys.next()) {
+                vo.setId(keys.getLong(1));
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Erro ao inserir Nota Fiscal", e);
         }
     }
 

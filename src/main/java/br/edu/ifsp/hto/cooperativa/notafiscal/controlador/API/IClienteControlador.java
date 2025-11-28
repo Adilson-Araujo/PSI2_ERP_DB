@@ -10,6 +10,6 @@ import java.util.List;
 public interface IClienteControlador {
     
     public List<ClienteTO> buscar();
-    public ClienteTO obter(int id);
+    public ClienteTO obter(long id);
     public ClienteTO obter(String cpfCnpj);
 }

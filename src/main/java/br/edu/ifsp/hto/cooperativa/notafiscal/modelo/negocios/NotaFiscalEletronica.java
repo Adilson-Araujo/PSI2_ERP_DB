@@ -5,8 +5,10 @@
 package br.edu.ifsp.hto.cooperativa.notafiscal.modelo.negocios;
 
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.dto.*;
+import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.nfeSchema.ChaveAcesso;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.nfeSchema.nfe.*;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.vo.*;
+import br.edu.ifsp.hto.cooperativa.vendas.modelo.vo.ItemPedidoVO;
 import br.edu.ifsp.hto.cooperativa.vendas.modelo.vo.VendaVO;
 import jakarta.xml.bind.*;
 import br.com.swconsultoria.impressao.model.Impressao;
@@ -17,18 +19,80 @@ import java.io.File;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.awt.Desktop;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 
-public class NotaFiscalEletronica {
+public class NotaFiscalEletronica extends BaseNegocios {
 
     public void gerarNfeVenda(VendaVO venda)
     {
 
     }
-    public void gerarDanfeNfe(NotaFiscalEletronicaTO nfe)
+    public void gerarDanfeNfe(NotaFiscalEletronicaTO nfe, List<ItemPedidoVO> produtos)
     {
+        nfe.associadoTO = Factory.getAssociado().buscarId(nfe.notaFiscalEletronica.getAssociadoId());
+        nfe.clienteTO = Factory.getCliente().buscarId(nfe.notaFiscalEletronica.getClienteId());
+        nfe.notaFiscalEletronica.setRazaoSocial(nfe.associadoTO.associado.getRazaoSocial());
+        incluirNotaFiscalEletronica(nfe.notaFiscalEletronica);
+        nfe.notaFiscalItens = new ArrayList<>();
+        for (var prod : produtos)
+        {
+            var item = new NotaFiscalItemVO();
+            item.setCfop("5101");
+            item.setNcm("0");
+            item.setQuantidade(Integer.parseInt(prod.getQuantidadeTotal().toString()));
+            item.setValorTotal(prod.getValorTotal());
+            item.setValorUnitario(prod.getValorUnitario());
+            item.setProdutoId((int)prod.getProdutoId());
+            item.setNotaFiscalEletronicaId(nfe.notaFiscalEletronica.getId());
+            Factory.getNotaFiscalItem().adicionar(item);
+            nfe.notaFiscalItens.add(item);
+        }
+
+        nfe.notaFiscalXml = new NotaFiscalXmlVO();
+        nfe.notaFiscalXml.setId(nfe.notaFiscalEletronica.getId());
+        nfe.notaFiscalEletronica.setNumeroNotaFiscal(String.valueOf(nfe.notaFiscalEletronica.getId()));
+        gerarChaveAcesso(nfe);
+        alterarNotaFiscalEletronica(nfe.notaFiscalEletronica);
         gerarXml(nfe);
         imprimirDanfePdf(nfe);
+    }
 
+    private void alterarNotaFiscalEletronica(NotaFiscalEletronicaVO nfe) {
+        if (nfe == null)
+            return;
+        DAOFactory.getNotaFiscalEletronicaDAO().atualizar(nfe);
+    }
+
+    public void gerarChaveAcesso(NotaFiscalEletronicaTO nfe)
+    {
+        var cUf = "35";
+        var mes = nfe.notaFiscalEletronica.getDataEmissao().getMonth().toString();
+        var ano = nfe.notaFiscalEletronica.getDataEmissao().getYear();
+        var cnpj = nfe.associadoTO.associado.getCnpj();
+        var serie = 1;
+        var modelo = "55";
+        var numeroNf = nfe.notaFiscalEletronica.getNumeroNotaFiscal();
+        var tpEmis = "1";
+        var cNf = gerarCodigoNotaFiscal();
+
+        var chaveAcesso = ChaveAcesso.fromComponents(cUf, ano + mes, cnpj, modelo, serie, Long.parseLong(numeroNf), tpEmis, cNf);
+        nfe.notaFiscalEletronica.setChaveAcesso(chaveAcesso.getChave44());
+    }
+
+    public String gerarCodigoNotaFiscal()
+    {
+        long seed = System.nanoTime() ^ (long) (Math.random() * 1000000000L);
+        long cnf = Math.abs(seed) % 100_000_000L; // garante 8 dígitos
+        return String.format("%08d", cnf);
+    }
+
+    public void incluirNotaFiscalEletronica(NotaFiscalEletronicaVO nfe){
+        if (nfe == null)
+            return;
+
+        DAOFactory.getNotaFiscalEletronicaDAO().adicionar(nfe);
     }
 
     public byte[] imprimirDanfeByte(String xml){
@@ -45,9 +109,13 @@ public class NotaFiscalEletronica {
     public void imprimirDanfePdf(NotaFiscalEletronicaTO nfe){
         try {
             Impressao impressao = ImpressaoUtil.impressaoPadraoNFe(nfe.notaFiscalXml.getConteudo());
-            var destino = "/c/temp/nfe/nfe-" + nfe.notaFiscalEletronica.getNumeroNotaFiscal() + ".pdf";
-            ImpressaoService.impressaoPdfArquivo(impressao, destino);
+            var caminho = Paths.get("c:/Temp/nfe/");
+            if (Files.notExists(caminho))
+                Files.createDirectories(caminho);
+            var destino = caminho + "/nfe-" + nfe.notaFiscalEletronica.getNumeroNotaFiscal() + ".pdf";
             File arquivo = new File(destino);
+            arquivo.createNewFile();
+            ImpressaoService.impressaoPdfArquivo(impressao, destino);
             Desktop.getDesktop().open(arquivo);
         }
         catch(Exception ex) {
@@ -156,8 +224,7 @@ public class NotaFiscalEletronica {
     private void buildItens(NotaFiscalEletronicaTO nfe, TNFe.InfNFe inf) {
 
         int n = 1;
-        for (NotaFiscalItemTO itemTO : nfe.notaFiscalItens) {
-            var it = itemTO.notaFiscalItem;
+        for (var it : nfe.notaFiscalItens) {
 
             TNFe.InfNFe.Det det = new TNFe.InfNFe.Det();
             det.setNItem(String.valueOf(n++));
@@ -183,8 +250,8 @@ public class NotaFiscalEletronica {
 
         var total = BigDecimal.ZERO;
 
-        for (NotaFiscalItemTO item : nfe.notaFiscalItens) {
-            total = total.add(item.notaFiscalItem.getValorTotal());
+        for (var item : nfe.notaFiscalItens) {
+            total = total.add(item.getValorTotal());
         }
 
         var totalNode = new TNFe.InfNFe.Total();

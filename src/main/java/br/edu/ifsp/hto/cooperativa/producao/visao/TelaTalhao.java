@@ -143,6 +143,60 @@ public class TelaTalhao extends JFrame {
         leftButtonsBelow.add(btnEditar);
         leftButtonsBelow.add(btnPlano);
 
+        // Ação do botão Usar Plano: mostra dropdown com planos
+        btnPlano.addActionListener(e -> {
+            try {
+                // Busca planos do planejamento
+                br.edu.ifsp.hto.cooperativa.planejamento.modelo.DAO.PlanoDAO planoDAO = 
+                    new br.edu.ifsp.hto.cooperativa.planejamento.modelo.DAO.PlanoDAO();
+                java.util.List<br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.PlanoVO> planos = planoDAO.listarPorAreaId(area.getId(), area.getAssociadoId());
+
+                if (planos == null || planos.isEmpty()) {
+                    JOptionPane.showMessageDialog(TelaTalhao.this, "Não há planos disponíveis.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
+
+                // Cria array de planos para exibir no dropdown
+                br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.PlanoVO[] planosArray = 
+                    planos.toArray(new br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.PlanoVO[0]);
+
+                // Exibe dropdown
+                br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.PlanoVO escolhido = 
+                    (br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.PlanoVO) JOptionPane.showInputDialog(
+                        TelaTalhao.this,
+                        "Selecione um plano para usar:",
+                        "Usar Plano",
+                        JOptionPane.PLAIN_MESSAGE,
+                        null,
+                        planosArray,
+                        planosArray.length > 0 ? planosArray[0] : null
+                    );
+
+                if (escolhido != null) {
+                    // Cria a ordem de produção a partir do plano selecionado
+                    boolean ok = controller.criarOrdemEProducao(area.getId(), escolhido.getId());
+                    if (ok) {
+                        // Recarrega a área completa
+                        AreaVO nova = controller.carregarAreaCompletaPorId(area.getId());
+                        if (nova != null) {
+                            TelaTalhao.this.area = nova;
+                            getContentPane().removeAll();
+                            initComponents();
+                            revalidate();
+                            repaint();
+                        }
+                    }
+                }
+
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(TelaTalhao.this, 
+                    "Erro ao buscar planos: " + ex.getMessage(), 
+                    "Erro", 
+                    JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
+            }
+        });
+
         // Ação do botão Remover: chama o controller para inativar e atualiza a view
         btnRemover.addActionListener(e -> {
             if (area.getTalhoes() == null || area.getTalhoes().isEmpty()) {

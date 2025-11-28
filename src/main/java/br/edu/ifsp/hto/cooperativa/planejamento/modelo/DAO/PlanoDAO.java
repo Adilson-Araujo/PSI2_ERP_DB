@@ -162,6 +162,38 @@ public class PlanoDAO {
     }
 
     /**
+     * Lista todos os planos que pertencem a talhões de uma determinada área.
+     *
+     * @param areaId identificador da área
+     * @param associadoId identificador do associado
+     * @return lista de {@code PlanoVO} associados àquela área
+     */
+    public List<PlanoVO> listarPorAreaId(long areaId, long associadoId) {
+        List<PlanoVO> planos = new ArrayList<>();
+
+        try {
+            Connection conn = ConnectionFactory.getConnection();
+
+            String sql = "SELECT p.* FROM plano p JOIN talhao t ON p.talhao_id = t.id JOIN area a ON t.area_id = a.id WHERE t.area_id = ? AND a.associado_id = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setLong(1, areaId);
+            stmt.setLong(2, associadoId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                planos.add(resultSetToPlano(rs));
+            }
+
+            rs.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return planos;
+    }
+
+    /**
      * Atualiza um plano presente no banco de dados
      * 
      * @param talhao objeto {@code PlanoVO} contendo os novos dados

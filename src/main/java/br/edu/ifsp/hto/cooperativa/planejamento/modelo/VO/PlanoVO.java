@@ -113,4 +113,9 @@ public class PlanoVO {
     public void setAreaCultivo(float areaCultivo) {
         this.areaCultivo = areaCultivo;
     }
+
+    @Override
+    public String toString() {
+        return nomePlano + " (ID: " + id + ")";
+    }
 }

@@ -22,7 +22,11 @@ public class OrdemProducaoDAO {
                 "observacoes, area_cultivo, data_execucao, quantidade_kg, status) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        PreparedStatement ps = conn.prepareStatement(sql);
+        System.out.println("[DEBUG] OrdemProducaoDAO.inserir - SQL: " + sql);
+        System.out.println("[DEBUG] Valores: planoId=" + vo.getPlanoId() + ", especieId=" + vo.getEspecieId() + 
+                           ", talhaoId=" + vo.getTalhaoId() + ", status=" + vo.getStatus());
+
+        PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
         ps.setObject(1, vo.getPlanoId());
         ps.setObject(2, vo.getEspecieId());
@@ -37,7 +41,21 @@ public class OrdemProducaoDAO {
         ps.setObject(11, vo.getQuantidadeKg());
         ps.setString(12, vo.getStatus());
 
+        System.out.println("[DEBUG] Executando INSERT...");
         ps.executeUpdate();
+        System.out.println("[DEBUG] INSERT executado com sucesso");
+
+        // Captura o ID gerado
+        try (ResultSet rs = ps.getGeneratedKeys()) {
+            if (rs.next()) {
+                Long geradoId = rs.getLong(1);
+                vo.setId(geradoId);
+                System.out.println("[DEBUG] ID gerado: " + geradoId);
+            } else {
+                System.out.println("[DEBUG] AVISO: Nenhuma chave gerada!");
+            }
+        }
+        
         ps.close();
     }
 

@@ -4,17 +4,21 @@ import java.math.BigDecimal;
 
 public class CanteiroVO {
     private Long id;
+    private Boolean ativo; // Mapeia ativo
     private Long ordemProducaoId; // Mapeia ordem_producao_id
-    private String nome;
-    private BigDecimal areaCanteiroM2;
-    private String observacoes;
-    private BigDecimal kgGerados;
-    private String status;
+    private String nome; // Nome do canteiro (preenchido com nome_plano da ordem)
+    private BigDecimal areaCanteiroM2; // Preenchido com area_cultivo da ordem
+    private String observacoes; // Preenchido com observacoes da ordem
+    private BigDecimal kgGerados; // Preenchido com quantidade_kg da ordem
+    private String status; // Sempre inicia com 'crescendo'
 
     public CanteiroVO() {}
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    public Boolean getAtivo() { return ativo; }
+    public void setAtivo(Boolean ativo) { this.ativo = ativo; }
 
     public Long getOrdemProducaoId() { return ordemProducaoId; }
     public void setOrdemProducaoId(Long ordemProducaoId) { this.ordemProducaoId = ordemProducaoId; }

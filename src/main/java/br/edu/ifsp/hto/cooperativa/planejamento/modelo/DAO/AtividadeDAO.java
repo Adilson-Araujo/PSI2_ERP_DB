@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.edu.ifsp.hto.cooperativa.planejamento.modelo.ConexaoDoProjeto;
+import br.edu.ifsp.hto.cooperativa.ConnectionFactory;
 import br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.AtividadeComMateriaisVO;
 import br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.AtividadeNoCanteiroVO;
 import br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.AtividadeVO;
@@ -24,7 +24,7 @@ public class AtividadeDAO {
     public void inserir(AtividadeVO atividade) {
 
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "INSERT INTO atividade (nome_atividade, descricao, observacoes, status) VALUES (?, ?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -49,7 +49,7 @@ public class AtividadeDAO {
      */
     public void adicionarMaterial(int materialId, int atividadeId, float quantidadeUtilizada) {
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
             
             String sql = "INSERT INTO material_atividade (material_id, atividade_id, quantidade_utilizada) VALUES (?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -73,7 +73,7 @@ public class AtividadeDAO {
         List<AtividadeVO> lista = new ArrayList<>();
 
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "SELECT * FROM atividade WHERE ativo = true";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -104,7 +104,7 @@ public class AtividadeDAO {
         AtividadeVO atividade = null;
 
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "SELECT * FROM atividade WHERE id = ? AND ativo = true";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -152,7 +152,7 @@ public class AtividadeDAO {
         List<AtividadeNoCanteiroVO> atividadesNoCanteiro = new ArrayList<>();
 
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
             String sql = "SELECT * FROM atividade_canteiro WHERE canteiro_id = ? AND ativo = true";
 
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -184,7 +184,7 @@ public class AtividadeDAO {
      */
     public void atualizar(AtividadeVO atividade) {
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "UPDATE atividade SET nome_atividade = ?, descricao = ?, observacoes = ?, status = ? WHERE id = ? AND ativo = true";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -209,14 +209,14 @@ public class AtividadeDAO {
      */
     public void deletar(int id) {
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "UPDATE atividade SET ativo = false WHERE id = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, id);
             stmt.executeUpdate();
 
-            sql = "UPDATE material_atividade SET ativo = false WHERE atividade_id = ?";
+            sql = "UPDATE atividade_has_material SET ativo = false WHERE atividade_id = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, id);
             stmt.executeUpdate();
@@ -241,7 +241,7 @@ public class AtividadeDAO {
      */
     public void removerMaterial(int materialId, int atividadeId) {
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
             
             String sql = "UPDATE material_atividade SET ativo = false WHERE material_id = ? AND atividade_id = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);

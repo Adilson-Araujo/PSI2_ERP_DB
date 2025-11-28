@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.edu.ifsp.hto.cooperativa.planejamento.modelo.ConexaoDoProjeto;
+import br.edu.ifsp.hto.cooperativa.ConnectionFactory;
 import br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.PlanoVO;
 
 public class PlanoDAO {
@@ -19,7 +19,7 @@ public class PlanoDAO {
      */
     public void inserir(PlanoVO plano) {
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn =ConnectionFactory.getConnection();
 
             String sql = "INSERT INTO plano (especie_id, talhao_id, nome_plano, descricao, data_inicio, data_fim, observacoes, area_cultivo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -40,6 +40,34 @@ public class PlanoDAO {
         }
     }
 
+    public int qtdPlanoAssociado(int associadoId) {
+        try {
+            Connection conn = ConnectionFactory.getConnection();
+
+            String sql = "SELECT COUNT(plano.id) as total_planos FROM associado " +
+                "INNER JOIN area ON associado.id = area.associado_id " + 
+                "INNER JOIN talhao ON area.id = talhao.area_id " + 
+                "INNER JOIN plano ON talhao.id = plano.talhao_id " +
+                "WHERE associado.id = ?";
+
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, associadoId);
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            int totalPlanos = rs.getInt("total_planos");
+
+            rs.close();
+            stmt.close();
+            conn.close();
+            
+            return totalPlanos;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
     /**
      * Lista todos os planos presentes no banco de dados
      * 
@@ -49,7 +77,7 @@ public class PlanoDAO {
         List<PlanoVO> lista = new ArrayList<>();
 
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "SELECT * FROM plano WHERE ativo = true";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -80,7 +108,7 @@ public class PlanoDAO {
         PlanoVO plano = null;
 
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "SELECT * FROM plano WHERE id = ? AND ativo = true";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -112,7 +140,7 @@ public class PlanoDAO {
         List<PlanoVO> planos = new ArrayList<>();
 
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "SELECT * FROM plano WHERE talhao_id = ? AND ativo = true";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -140,7 +168,7 @@ public class PlanoDAO {
      */
     public void atualizar(PlanoVO plano) {
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "UPDATE plano SET especie_id = ?, talhao_id = ?, nome_plano = ?, descricao = ?, data_inicio = ?, data_fim = ?, observacoes = ?, area_cultivo = ? WHERE id = ? AND ativo = true";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -169,7 +197,7 @@ public class PlanoDAO {
      */
     public void deletar(int id) {
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "UPDATE plano SET ativo = false WHERE id = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);

@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.edu.ifsp.hto.cooperativa.planejamento.modelo.ConexaoDoProjeto;
+import br.edu.ifsp.hto.cooperativa.ConnectionFactory;
 import br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.AtividadeNoCanteiroVO;
 import br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.CanteiroComAtividadesVO;
 import br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.CanteiroVO;
@@ -22,7 +22,7 @@ public class CanteiroDAO {
      */
     public void inserir(CanteiroVO canteiro) {
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "INSERT INTO canteiro (ordem_producao_id, nome, area_canteiro_m2, observacoes, kg_gerados, status) VALUES (?, ?, ?, ?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -51,7 +51,7 @@ public class CanteiroDAO {
      */
     public void adicionarAtividade(int canteiroId, int atividadeId, float tempoGastoHoras, Date dataAtividade) {
         try{
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "INSERT INTO atividade_canteiro (canteiro_id, atividade_id, tempo_gasto_horas, data_atividade) VALUES (?, ?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -77,7 +77,7 @@ public class CanteiroDAO {
         List<CanteiroVO> canteiros = new ArrayList<>();
 
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "SELECT * FROM canteiro WHERE ativo = true";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -108,7 +108,7 @@ public class CanteiroDAO {
         CanteiroVO canteiro = null;
 
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "SELECT * FROM canteiro WHERE id = ? AND ativo = true";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -152,7 +152,7 @@ public class CanteiroDAO {
      */
     public void atualizar(CanteiroVO canteiro) {
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "UPDATE canteiro SET ordem_producao_id = ?, nome = ?, area_canteiro_m2 = ?, observacoes = ?, kg_gerados = ?, status = ? WHERE id = ? AND ativo = true";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -179,7 +179,7 @@ public class CanteiroDAO {
      */
     public void deletar(int id) {
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "UPDATE canteiro SET ativo = false WHERE id = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -206,7 +206,7 @@ public class CanteiroDAO {
      */
     public void removerAtividade(int canteiroId, int atividadeId) {
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "UPDATE atividade_canteiro SET ativo = false WHERE canteiro_id = ? AND atividade_id = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -235,7 +235,7 @@ public class CanteiroDAO {
         CanteiroVO canteiro = new CanteiroVO();
 
         canteiro.setId(rs.getInt("id"));
-        canteiro.setOrdemProducaoId(rs.getInt("plano_id"));
+        canteiro.setOrdemProducaoId(rs.getInt("ordem_producao_id"));
         canteiro.setNome(rs.getString("nome"));
         canteiro.setAreaCanteiroM2(rs.getFloat("area_canteiro_m2"));
         canteiro.setObservacoes(rs.getString("observacoes"));

@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.edu.ifsp.hto.cooperativa.planejamento.modelo.ConexaoDoProjeto;
+import br.edu.ifsp.hto.cooperativa.ConnectionFactory;
 import br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.PlanoVO;
 import br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.TalhaoComPlanosVO;
 import br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.TalhaoVO;
@@ -21,7 +21,7 @@ public class TalhaoDAO {
      */
     public void inserir(TalhaoVO talhao) {
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "INSERT INTO talhao (area_id, nome, area_talhao, observacoes, status) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -48,7 +48,7 @@ public class TalhaoDAO {
         List<TalhaoVO> talhoes = new ArrayList<>();
 
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "SELECT * FROM talhao WHERE ativo = true";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -79,7 +79,7 @@ public class TalhaoDAO {
         TalhaoVO talhao = null;
 
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "SELECT * FROM talhao WHERE id = ? AND ativo = true";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -127,7 +127,7 @@ public class TalhaoDAO {
         List<TalhaoVO> talhoes = new ArrayList<>();
 
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "SELECT * FROM Talhao WHERE area_id = ? AND ativo = true";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -155,7 +155,7 @@ public class TalhaoDAO {
      */
     public void atualizar(TalhaoVO talhao) {
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "UPDATE talhao SET area_id = ?, nome = ?, area_talhao = ?, observacoes = ?, status = ? WHERE id = ? AND ativo = true";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -181,7 +181,7 @@ public class TalhaoDAO {
      */
     public void deletar(int id) {
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "UPDATE talhao SET ativo = false WHERE id = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);

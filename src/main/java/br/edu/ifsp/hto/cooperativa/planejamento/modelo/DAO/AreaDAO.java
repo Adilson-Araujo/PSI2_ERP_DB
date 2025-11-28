@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.edu.ifsp.hto.cooperativa.planejamento.modelo.ConexaoDoProjeto;
+import br.edu.ifsp.hto.cooperativa.ConnectionFactory;
 import br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.AreaComTalhoesVO;
 import br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.AreaVO;
 import br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.TalhaoVO;
@@ -21,7 +21,7 @@ public class AreaDAO {
      */
     public void inserir(AreaVO area) {
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "INSERT INTO area (associado_id, nome, area_total, area_utilizada, ph) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -43,7 +43,7 @@ public class AreaDAO {
         List<AreaVO> lista = new ArrayList<>();
 
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
             String sql = "SELECT * FROM area WHERE associado_id = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, associadoId);
@@ -74,7 +74,7 @@ public class AreaDAO {
         List<AreaVO> lista = new ArrayList<>();
 
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
             String sql = "SELECT * FROM area";
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
@@ -101,7 +101,7 @@ public class AreaDAO {
     public void deletar(int id) {
 
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
             String sql = "UPDATE area SET ativo = false WHERE id = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, id);
@@ -128,7 +128,7 @@ public class AreaDAO {
         AreaVO area = null;
 
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "SELECT * FROM area WHERE id = ? AND ativo = true";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -173,7 +173,7 @@ public class AreaDAO {
     public void atualizar(AreaVO area) {
 
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "UPDATE area SET associado_id = ?, nome = ?, area_total = ?, area_utilizada = ?, ph = ? WHERE id = ? AND ativo = true";
             PreparedStatement stmt = conn.prepareStatement(sql);

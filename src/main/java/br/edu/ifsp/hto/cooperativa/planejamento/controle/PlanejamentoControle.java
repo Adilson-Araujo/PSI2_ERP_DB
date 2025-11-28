@@ -49,6 +49,10 @@ public class PlanejamentoControle {
     }
 
 
+    public int qtdPlanoAssociado(int associadoId) { 
+        return planoDAO.qtdPlanoAssociado(associadoId);
+    }
+
     /**
      * Lista todas as áreas presentes no banco de dados
      * 

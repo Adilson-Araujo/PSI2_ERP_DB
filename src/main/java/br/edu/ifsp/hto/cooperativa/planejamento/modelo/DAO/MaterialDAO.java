@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.edu.ifsp.hto.cooperativa.planejamento.modelo.ConexaoDoProjeto;
+import br.edu.ifsp.hto.cooperativa.ConnectionFactory;
 import br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.MaterialNaAtividadeVO;
 import br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.MaterialVO;
 
@@ -20,7 +20,7 @@ public class MaterialDAO {
      */
     public void inserir(MaterialVO material) {
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "INSERT INTO material (associado_id, nome, quantidade, unidade_medida) VALUES (?, ?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -46,7 +46,7 @@ public class MaterialDAO {
         List<MaterialVO> lista = new ArrayList<>();
 
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "SELECT * FROM material WHERE ativo = true";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -77,7 +77,7 @@ public class MaterialDAO {
         MaterialVO material = null;
 
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "SELECT * FROM material WHERE id = ? AND ativo = true";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -109,9 +109,9 @@ public class MaterialDAO {
         List<MaterialNaAtividadeVO> materiais = new ArrayList<>();
         
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
-            String sql = "SELECT * FROM material_atividade WHERE atividade_id = ? AND ativo = true";
+            String sql = "SELECT * FROM atividade_has_material WHERE atividade_id = ? AND ativo = true";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, atividadeId);
             ResultSet rs = stmt.executeQuery();
@@ -139,7 +139,7 @@ public class MaterialDAO {
      */
     public void atualizar(MaterialVO material) {
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "UPDATE material SET associado_id = ?, nome = ?, quantidade = ?, unidade_medida = ? WHERE id = ? AND ativo = true";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -164,14 +164,14 @@ public class MaterialDAO {
      */
     public void deletar(int id) {
         try {
-            Connection conn = ConexaoDoProjeto.connect();
+            Connection conn = ConnectionFactory.getConnection();
 
             String sql = "UPDATE material SET ativo = false WHERE id = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, id);
             stmt.executeUpdate();
 
-            sql = "UPDATE material_atividade SET ativo = false WHERE material_id = ?";
+            sql = "UPDATE atividade_has_material SET ativo = false WHERE material_id = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, id);
             stmt.executeUpdate();

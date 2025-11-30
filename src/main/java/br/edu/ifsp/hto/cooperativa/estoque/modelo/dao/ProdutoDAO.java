@@ -210,7 +210,7 @@ public class ProdutoDAO {
                          AND pr.data_inicio <= ?
                          AND (pr.data_final IS NULL OR pr.data_final >= ?)
                      
-                     WHERE p.id = ?""";
+                     WHERE e.id = ?""";
         ProdutoPrecificadoTO produtoPrecificado = null;
         
         try (Connection conn = ConnectionFactory.getConnection();

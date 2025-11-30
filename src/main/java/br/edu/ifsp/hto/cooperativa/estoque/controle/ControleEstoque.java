@@ -163,12 +163,12 @@ public class ControleEstoque {
      * Retorna um TO que contem Produto e Especie
      * com Preço do PPA em uma Data definida.
      * 
-     * @param produto_id int do id do produto a qual se quer o preço.
+     * @param especie_id id da especie a qual se quer o preço.
      * @param data       Timestamp a qual se quer o preço.
      * @return           List contendo ProdutoPreficadoTO s.
      */
-    public ProdutoPrecificadoTO buscarPrecos(int produto_id, Timestamp data){
-        return produtoDAO.buscarPrecificadoPorId(produto_id, data);
+    public ProdutoPrecificadoTO buscarPrecos(int especie_id, Timestamp data){
+        return produtoDAO.buscarPrecificadoPorId(especie_id, data);
     }
 
     /**

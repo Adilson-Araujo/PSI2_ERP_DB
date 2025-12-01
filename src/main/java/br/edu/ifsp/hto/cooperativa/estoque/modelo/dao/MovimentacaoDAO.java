@@ -1,11 +1,11 @@
 package br.edu.ifsp.hto.cooperativa.estoque.modelo.dao;
 
 import br.edu.ifsp.hto.cooperativa.ConnectionFactory;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Armazem;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Produto;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Movimentacao;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Tipo;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Origem;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.ArmazemVO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.ProdutoVO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.MovimentacaoVO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.TipoVO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.OrigemVO;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,7 +19,7 @@ public class MovimentacaoDAO {
     private static final ProdutoDAO DAO_produto = ProdutoDAO.getInstance();
     private static final ArmazemDAO DAO_armazem = ArmazemDAO.getInstance();
     private static final EstoqueAtualDAO DAO_estoque_atual = EstoqueAtualDAO.getInstance();
-    private static final Map<Integer, Movimentacao> cache = new HashMap<>();
+    private static final Map<Integer, MovimentacaoVO> cache = new HashMap<>();
     
     private MovimentacaoDAO(){}
     public static MovimentacaoDAO getInstance(){
@@ -27,7 +27,7 @@ public class MovimentacaoDAO {
         return instancia;
     }
     
-    private void validarMovimentacao(Movimentacao movimentacao) throws Exception {
+    private void validarMovimentacao(MovimentacaoVO movimentacao) throws Exception {
         if (movimentacao == null) throw new Exception("Movimentação inválida.");
         if (movimentacao.getTipo() == null || movimentacao.getTipo().getId() <= 0) throw new Exception("Tipo inválido.");
         if (movimentacao.getOrigem() == null || movimentacao.getOrigem().getId() <= 0) throw new Exception("Origem inválida.");
@@ -37,7 +37,7 @@ public class MovimentacaoDAO {
         if (movimentacao.getQuantidade() <= 0) throw new Exception("Quantidade deve ser maior que zero.");
     }
     
-    public boolean inserir(Movimentacao movimentacao) throws Exception {
+    public boolean inserir(MovimentacaoVO movimentacao) throws Exception {
         validarMovimentacao(movimentacao);
         if(movimentacao.getId() != -1) throw new Exception("Registro já inserido. Tente atualiza-lo");
         
@@ -78,13 +78,13 @@ public class MovimentacaoDAO {
         }
     }
 
-    public Movimentacao buscarPorId(int id) {
+    public MovimentacaoVO buscarPorId(int id) {
         if (cache.containsKey(id)) {
             return cache.get(id);
         }
         
         String sql = "SELECT id, tipo_id, origem_id, produto_id, armazem_id, associado_id, quantidade, data_movimento FROM movimentacao WHERE id = ?";
-        Movimentacao movimentacao = null;
+        MovimentacaoVO movimentacao = null;
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -93,12 +93,12 @@ public class MovimentacaoDAO {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                Tipo tipo = DAO_tipo.buscarPorId(rs.getInt("tipo_id"));
-                Origem origem = DAO_origem.buscarPorId(rs.getInt("origem_id"));
-                Produto produto = DAO_produto.buscarPorId(rs.getInt("produto_id"));
-                Armazem armazem = DAO_armazem.buscarPorId(rs.getInt("armazem_id"));
+                TipoVO tipo = DAO_tipo.buscarPorId(rs.getInt("tipo_id"));
+                OrigemVO origem = DAO_origem.buscarPorId(rs.getInt("origem_id"));
+                ProdutoVO produto = DAO_produto.buscarPorId(rs.getInt("produto_id"));
+                ArmazemVO armazem = DAO_armazem.buscarPorId(rs.getInt("armazem_id"));
                 
-                movimentacao = new Movimentacao(
+                movimentacao = new MovimentacaoVO(
                         rs.getInt("id"),
                         tipo,
                         origem,
@@ -117,7 +117,7 @@ public class MovimentacaoDAO {
         return movimentacao;
     }
 
-    public boolean atualizar(Movimentacao movimentacao) throws Exception {
+    public boolean atualizar(MovimentacaoVO movimentacao) throws Exception {
         validarMovimentacao(movimentacao);
         
         String sql = "UPDATE movimentacao SET tipo_id = ?, origem_id = ?, produto_id = ?, armazem_id = ?, associado_id = ?, quantidade = ?, data_movimento = ?  WHERE id = ?";
@@ -137,7 +137,6 @@ public class MovimentacaoDAO {
             int linhasAfetadas = stmt.executeUpdate();
             
             // Informa DAO_estoque_atual sobre a modificação.
-            
             DAO_estoque_atual.movimentaSaldo(
                     movimentacao.getAssociadoId(), 
                     movimentacao.getProduto(),
@@ -153,18 +152,18 @@ public class MovimentacaoDAO {
     }
 
     public boolean excluir(int id) {
-        String sql = "DELETE FROM movimentacao WHERE id = ?";
+        String sql = "UPDATE movimentacao SET deletado = TRUE WHERE id = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             // Informa DAO_estoque_atual sobre a modificação.
-            Movimentacao movimentacao = buscarPorId(id);
+            MovimentacaoVO movimentacao = buscarPorId(id);
             DAO_estoque_atual.movimentaSaldo(
                     movimentacao.getAssociadoId(), 
                     movimentacao.getProduto(),
                     movimentacao.getArmazem(),
-                    movimentacao.getQuantidade());
+                    -movimentacao.getQuantidade());
             
             stmt.setInt(1, id);
             int linhasAfetadas = stmt.executeUpdate();
@@ -177,49 +176,11 @@ public class MovimentacaoDAO {
             return false;
         }
     }
-
-    public List<Movimentacao> listarTodas() {
-        List<Movimentacao> movimentacoes = new ArrayList<>();
-        String sql = "SELECT id, tipo_id, origem_id, produto_id, armazem_id, associado_id, quantidade, data_movimento FROM movimentacao";
-
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                int id = rs.getInt("id");
-                
-                Tipo tipo = DAO_tipo.buscarPorId(rs.getInt("tipo_id"));
-                Origem origem = DAO_origem.buscarPorId(rs.getInt("origem_id"));
-                Produto produto = DAO_produto.buscarPorId(rs.getInt("produto_id"));
-                Armazem armazem = DAO_armazem.buscarPorId(rs.getInt("armazem_id"));
-                
-                if (!cache.containsKey(id)) {
-                    Movimentacao movimentacao = new Movimentacao(
-                            id,
-                            tipo,
-                            origem,
-                            produto,
-                            armazem,
-                            rs.getInt("associado_id"),
-                            rs.getFloat("quantidade"),
-                            rs.getTimestamp("data_movimento"));
-                    cache.put(id, movimentacao);
-                }
-                movimentacoes.add(cache.get(id));
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Erro ao listar movimentações: " + e.getMessage());
-        }
-
-        return movimentacoes;
-    }
     
     // Outros além do CRUD básico.
     
-    public List<Movimentacao> listarPorProduto(int associado_id, int produto_id) {
-        List<Movimentacao> movimentacoes = new ArrayList<>();
+    public List<MovimentacaoVO> listarPorProduto(int associado_id, int produto_id) {
+        List<MovimentacaoVO> movimentacoes = new ArrayList<>();
         String sql = "SELECT id, tipo_id, origem_id, produto_id, armazem_id, associado_id, quantidade, data_movimento FROM movimentacao WHERE associado_id = ? AND produto_id = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -232,13 +193,13 @@ public class MovimentacaoDAO {
             while (rs.next()) {
                 int id = rs.getInt("id");
                 
-                Tipo tipo = DAO_tipo.buscarPorId(rs.getInt("tipo_id"));
-                Origem origem = DAO_origem.buscarPorId(rs.getInt("origem_id"));
-                Produto produto = DAO_produto.buscarPorId(rs.getInt("produto_id"));
-                Armazem armazem = DAO_armazem.buscarPorId(rs.getInt("armazem_id"));
+                TipoVO tipo = DAO_tipo.buscarPorId(rs.getInt("tipo_id"));
+                OrigemVO origem = DAO_origem.buscarPorId(rs.getInt("origem_id"));
+                ProdutoVO produto = DAO_produto.buscarPorId(rs.getInt("produto_id"));
+                ArmazemVO armazem = DAO_armazem.buscarPorId(rs.getInt("armazem_id"));
                 
                 if (!cache.containsKey(id)) {
-                    Movimentacao movimentacao = new Movimentacao(
+                    MovimentacaoVO movimentacao = new MovimentacaoVO(
                             id,
                             tipo,
                             origem,

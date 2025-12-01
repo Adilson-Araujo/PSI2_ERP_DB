@@ -1,8 +1,8 @@
 package br.edu.ifsp.hto.cooperativa.estoque.visao;
 
 import br.edu.ifsp.hto.cooperativa.estoque.controle.ControleEstoque;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Movimentacao;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Produto;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.MovimentacaoVO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.ProdutoVO;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
@@ -15,7 +15,7 @@ import java.util.List;
 
 public class TelaHistorico {
     static JPanel timelineContent;
-    static Produto produto;
+    static ProdutoVO produto;
     static String tempo;
     static String tipo = "Todos";
     static ControleEstoque controle = ControleEstoque.getInstance();
@@ -55,16 +55,16 @@ public class TelaHistorico {
         JLabel lblProduto = new JLabel("Produto");
         lblProduto.setBounds(180, 40, 200, 20);
 
-        List<Produto> produtos = controle.listarProdutos();
-        JComboBox<Produto> comboProduto = new JComboBox<>(
-            produtos.toArray(Produto[]::new)
+        List<ProdutoVO> produtos = controle.listarProdutos();
+        JComboBox<ProdutoVO> comboProduto = new JComboBox<>(
+            produtos.toArray(ProdutoVO[]::new)
         );
         comboProduto.setEditable(true);
         comboProduto.setBounds(180, 60, 260, 32);
         comboProduto.setBorder(new LineBorder(Color.GRAY));
         comboProduto.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
-                Produto item = (Produto) e.getItem();
+                ProdutoVO item = (ProdutoVO) e.getItem();
                 setProduto(item);
             }
         });
@@ -187,7 +187,7 @@ public class TelaHistorico {
         return linha;
     }
     
-    private static void setProduto(Produto produto){
+    private static void setProduto(ProdutoVO produto){
         TelaHistorico.produto = produto;
         recriarLista();
     }
@@ -219,9 +219,9 @@ public class TelaHistorico {
             }
         }
         
-        List<Movimentacao> movimentacoes = controle.listarMovimentacoes(1, produto.getId());
+        List<MovimentacaoVO> movimentacoes = controle.listarMovimentacoes(1, produto.getId());
         for(int i = 0; i < movimentacoes.size(); i++){
-            Movimentacao movimentacao = movimentacoes.get(i);
+            MovimentacaoVO movimentacao = movimentacoes.get(i);
             Timestamp dt = movimentacao.getData();
             String data = dt.toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
 

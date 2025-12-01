@@ -2,9 +2,9 @@ package br.edu.ifsp.hto.cooperativa.estoque.modelo.dao;
 
 import br.edu.ifsp.hto.cooperativa.ConnectionFactory;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.to.ProdutoPrecificadoTO;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Produto;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Especie;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.PrecoPPA;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.ProdutoVO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.EspecieVO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.PrecoPPAVO;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +15,7 @@ public class ProdutoDAO {
     private static ProdutoDAO instancia = null;
     private static final EspecieDAO DAO_especie = EspecieDAO.getInstance();
     private static final PrecoPPADAO DAO_preco_ppa = PrecoPPADAO.getInstance();
-    private static final Map<Integer, Produto> cache = new HashMap<>();
+    private static final Map<Integer, ProdutoVO> cache = new HashMap<>();
     
     private ProdutoDAO(){}
     public static ProdutoDAO getInstance(){
@@ -23,7 +23,7 @@ public class ProdutoDAO {
         return instancia;
     }
     
-    public boolean inserir(Produto produto) {
+    public boolean inserir(ProdutoVO produto) {
         String sql = "INSERT INTO produto (especie_id, nome, descricao) VALUES (?, ?, ?)";
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -49,13 +49,13 @@ public class ProdutoDAO {
         }
     }
 
-    public Produto buscarPorId(int id) {
+    public ProdutoVO buscarPorId(int id) {
         if (cache.containsKey(id)) {
             return cache.get(id);
         }
         
         String sql = "SELECT id, especie_id, nome, descricao FROM produto WHERE id = ?";
-        Produto produto = null;
+        ProdutoVO produto = null;
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -64,9 +64,9 @@ public class ProdutoDAO {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                Especie especie = DAO_especie.buscarPorId(rs.getInt("especie_id"));
+                EspecieVO especie = DAO_especie.buscarPorId(rs.getInt("especie_id"));
                 
-                produto = new Produto(
+                produto = new ProdutoVO(
                         rs.getInt("id"),
                         especie,
                         rs.getString("nome"),
@@ -82,7 +82,7 @@ public class ProdutoDAO {
         return produto;
     }
 
-    public boolean atualizar(Produto produto) {
+    public boolean atualizar(ProdutoVO produto) {
         String sql = "UPDATE produto SET id, especie_id, nome, descricao WHERE id = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -103,7 +103,7 @@ public class ProdutoDAO {
     }
 
     public boolean excluir(int id) {
-        String sql = "DELETE FROM produto WHERE id = ?";
+        String sql = "UPDATE produto SET deletado = TRUE WHERE id = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -118,8 +118,8 @@ public class ProdutoDAO {
         }
     }
 
-    public List<Produto> listarTodos() {
-        List<Produto> produtos = new ArrayList<>();
+    public List<ProdutoVO> listarTodos() {
+        List<ProdutoVO> produtos = new ArrayList<>();
         String sql = "SELECT id, especie_id, nome, descricao FROM produto";
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -129,8 +129,8 @@ public class ProdutoDAO {
             while (rs.next()) {
                 int id = rs.getInt("id");
                 if (!cache.containsKey(id)) {
-                    Especie especie = DAO_especie.buscarPorId(rs.getInt("especie_id"));
-                    Produto produto = new Produto(
+                    EspecieVO especie = DAO_especie.buscarPorId(rs.getInt("especie_id"));
+                    ProdutoVO produto = new ProdutoVO(
                             id,
                             especie,
                             rs.getString("nome"),
@@ -149,9 +149,9 @@ public class ProdutoDAO {
     
     // Outros para alem do CRUD básico.
     
-    public Produto buscarPorEspecieId(int especie_id) {
+    public ProdutoVO buscarPorEspecieId(int especie_id) {
         String sql = "SELECT id, especie_id, nome, descricao FROM produto WHERE especie_id = ?";
-        Produto produto = null;
+        ProdutoVO produto = null;
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -165,9 +165,9 @@ public class ProdutoDAO {
                     return cache.get(id);
                 }
                 
-                Especie especie = DAO_especie.buscarPorId(rs.getInt("especie_id"));
+                EspecieVO especie = DAO_especie.buscarPorId(rs.getInt("especie_id"));
                 
-                produto = new Produto(
+                produto = new ProdutoVO(
                         id,
                         especie,
                         rs.getString("nome"),
@@ -182,7 +182,7 @@ public class ProdutoDAO {
         return produto;
     }
     
-    public ProdutoPrecificadoTO buscarPrecificadoPorId(int id, Timestamp data) {
+    public ProdutoPrecificadoTO buscarPrecificadoPorEspecieId(int id, Timestamp data) {
         String sql = """
                      SELECT 
                          p.id AS produto_id,
@@ -222,9 +222,9 @@ public class ProdutoDAO {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                Produto produto;
-                Especie especie;
-                PrecoPPA preco_ppa;
+                ProdutoVO produto;
+                EspecieVO especie;
+                PrecoPPAVO preco_ppa;
                 
                 int esp_id = rs.getInt("especie_id");
                 especie = DAO_especie.buscarPorId(esp_id);
@@ -234,7 +234,7 @@ public class ProdutoDAO {
                 if (cache.containsKey(pdt_id)){
                     produto = cache.get(pdt_id);
                 } else {
-                    produto = new Produto(
+                    produto = new ProdutoVO(
                         pdt_id,
                         especie,
                         rs.getString("produto_nome"),
@@ -290,9 +290,9 @@ public class ProdutoDAO {
             ResultSet rs = stmt.executeQuery();
             
             while (rs.next()) {                
-                Produto produto;
-                Especie especie;
-                PrecoPPA preco_ppa;
+                ProdutoVO produto;
+                EspecieVO especie;
+                PrecoPPAVO preco_ppa;
                 
                 int esp_id = rs.getInt("especie_id");
                 especie = DAO_especie.buscarPorId(esp_id);
@@ -302,7 +302,7 @@ public class ProdutoDAO {
                 if (cache.containsKey(pdt_id)){
                     produto = cache.get(pdt_id);
                 } else {
-                    produto = new Produto(
+                    produto = new ProdutoVO(
                         pdt_id,
                         especie,
                         rs.getString("produto_nome"),

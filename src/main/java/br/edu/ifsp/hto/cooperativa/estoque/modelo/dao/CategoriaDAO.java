@@ -1,7 +1,7 @@
 package br.edu.ifsp.hto.cooperativa.estoque.modelo.dao;
 
 import br.edu.ifsp.hto.cooperativa.ConnectionFactory;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Categoria;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.CategoriaVO;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class CategoriaDAO {
     private static CategoriaDAO instancia = null;
-    private static final Map<Integer, Categoria> cache = new HashMap<>();
+    private static final Map<Integer, CategoriaVO> cache = new HashMap<>();
     
     private CategoriaDAO(){}
     public static CategoriaDAO getInstance(){
@@ -18,7 +18,7 @@ public class CategoriaDAO {
         return instancia;
     }
 
-    public boolean inserir(Categoria categoria) {
+    public boolean inserir(CategoriaVO categoria) {
         String sql = "INSERT INTO categoria (nome) VALUES (?)";
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -42,13 +42,13 @@ public class CategoriaDAO {
         }
     }
 
-    public Categoria buscarPorId(int id) {
+    public CategoriaVO buscarPorId(int id) {
         if (cache.containsKey(id)) {
             return cache.get(id);
         }
         
         String sql = "SELECT id, nome FROM categoria WHERE id = ?";
-        Categoria categoria = null;
+        CategoriaVO categoria = null;
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -57,7 +57,7 @@ public class CategoriaDAO {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                categoria = new Categoria(
+                categoria = new CategoriaVO(
                         rs.getInt("id"),
                         rs.getString("nome"));
                 cache.put(id, categoria);
@@ -70,7 +70,7 @@ public class CategoriaDAO {
         return categoria;
     }
 
-    public boolean atualizar(Categoria categoria) {
+    public boolean atualizar(CategoriaVO categoria) {
         String sql = "UPDATE categoria SET nome = ? WHERE id = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -89,7 +89,7 @@ public class CategoriaDAO {
     }
 
     public boolean excluir(int id) {
-        String sql = "DELETE FROM categoria WHERE id = ?";
+        String sql = "UPDATE categoria SET deletado = TRUE WHERE id = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -104,8 +104,8 @@ public class CategoriaDAO {
         }
     }
 
-    public List<Categoria> listarTodas() {
-        List<Categoria> categorias = new ArrayList<>();
+    public List<CategoriaVO> listarTodas() {
+        List<CategoriaVO> categorias = new ArrayList<>();
         String sql = "SELECT id, nome FROM categorias ORDER BY nome";
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -115,7 +115,7 @@ public class CategoriaDAO {
             while (rs.next()) {
                 int id = rs.getInt("id");
                 if (!cache.containsKey(id)) {
-                    Categoria categoria = new Categoria(
+                    CategoriaVO categoria = new CategoriaVO(
                         id,
                         rs.getString("nome")
                     );

@@ -1,7 +1,7 @@
 package br.edu.ifsp.hto.cooperativa.estoque.visao;
 
 import br.edu.ifsp.hto.cooperativa.estoque.controle.ControleEstoque;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Armazem;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.ArmazemVO;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -60,9 +60,9 @@ public class TelaDeEntrada {
         gbc.gridy = 1;
         painelCentral.add(lblArmazem, gbc);
 
-        List<Armazem> armazens = controle.listarArmazens();
-        JComboBox<Armazem> comboArmazem = new JComboBox<>(
-            armazens.toArray(Armazem[]::new)
+        List<ArmazemVO> armazens = controle.listarArmazens();
+        JComboBox<ArmazemVO> comboArmazem = new JComboBox<>(
+            armazens.toArray(ArmazemVO[]::new)
         );
         
         gbc.gridx = 1;
@@ -94,7 +94,7 @@ public class TelaDeEntrada {
         JButton btnExcluir = new JButton("Excluir");
         
         btnSalvar.addActionListener(e -> {
-            Armazem selecionado = (Armazem) comboArmazem.getSelectedItem();
+            ArmazemVO selecionado = (ArmazemVO) comboArmazem.getSelectedItem();
             if (selecionado != null) {
                 System.out.println(selecionado.getId());
             }

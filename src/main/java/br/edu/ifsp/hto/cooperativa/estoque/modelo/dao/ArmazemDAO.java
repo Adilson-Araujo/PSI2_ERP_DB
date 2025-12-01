@@ -1,7 +1,7 @@
 package br.edu.ifsp.hto.cooperativa.estoque.modelo.dao;
 
 import br.edu.ifsp.hto.cooperativa.ConnectionFactory;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Armazem;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.ArmazemVO;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class ArmazemDAO {
     private static ArmazemDAO instancia = null;
-    private static final Map<Integer, Armazem> cache = new HashMap<>();
+    private static final Map<Integer, ArmazemVO> cache = new HashMap<>();
     
     private ArmazemDAO(){}
     public static ArmazemDAO getInstance(){
@@ -18,7 +18,7 @@ public class ArmazemDAO {
         return instancia;
     }
 
-    public boolean inserir(Armazem armazem) {
+    public boolean inserir(ArmazemVO armazem) {
         String sql = "INSERT INTO armazem (nome, endereco_id) VALUES (?, ?)";
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -43,13 +43,13 @@ public class ArmazemDAO {
         }
     }
 
-    public Armazem buscarPorId(int id) {
+    public ArmazemVO buscarPorId(int id) {
         if (cache.containsKey(id)) {
             return cache.get(id);
         }
         
         String sql = "SELECT id, nome, endereco_id FROM armazem WHERE id = ?";
-        Armazem armazem = null;
+        ArmazemVO armazem = null;
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -58,7 +58,7 @@ public class ArmazemDAO {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                armazem = new Armazem(
+                armazem = new ArmazemVO(
                         rs.getInt("id"),
                         rs.getString("nome"),
                         rs.getInt("endereco_id"));
@@ -72,7 +72,7 @@ public class ArmazemDAO {
         return armazem;
     }
 
-    public boolean atualizar(Armazem armazem) {
+    public boolean atualizar(ArmazemVO armazem) {
         String sql = "UPDATE armazem SET nome = ?, endereco_id = ? WHERE id = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -92,7 +92,7 @@ public class ArmazemDAO {
     }
 
     public boolean excluir(int id) {
-        String sql = "DELETE FROM armazem WHERE id = ?";
+        String sql = "UPDATE produto SET deletado = TRUE WHERE id = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -107,8 +107,8 @@ public class ArmazemDAO {
         }
     }
 
-    public List<Armazem> listarTodos() {
-        List<Armazem> armazens = new ArrayList<>();
+    public List<ArmazemVO> listarTodos() {
+        List<ArmazemVO> armazens = new ArrayList<>();
         String sql = "SELECT id, nome, endereco_id FROM armazem";
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -118,7 +118,7 @@ public class ArmazemDAO {
             while (rs.next()) {
                 int id = rs.getInt("id");
                 if (!cache.containsKey(id)) {
-                    Armazem armazem = new Armazem(
+                    ArmazemVO armazem = new ArmazemVO(
                         id,
                         rs.getString("nome"),
                         rs.getInt("endereco_id")

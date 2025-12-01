@@ -1,8 +1,8 @@
 package br.edu.ifsp.hto.cooperativa.estoque.modelo.dao;
 
 import br.edu.ifsp.hto.cooperativa.ConnectionFactory;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Categoria;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Especie;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.CategoriaVO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.EspecieVO;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +12,7 @@ import java.util.Map;
 public class EspecieDAO {
     private static EspecieDAO instancia = null;
     private static final CategoriaDAO DAO_categoria = CategoriaDAO.getInstance();
-    private static final Map<Integer, Especie> cache = new HashMap<>();
+    private static final Map<Integer, EspecieVO> cache = new HashMap<>();
     
     private EspecieDAO(){}
     public static EspecieDAO getInstance(){
@@ -20,7 +20,7 @@ public class EspecieDAO {
         return instancia;
     }
     
-    public boolean inserir(Especie especie) {
+    public boolean inserir(EspecieVO especie) {
         String sql = "INSERT INTO especie (categoria_id, nome, descricao, tempo_colheita, rendimento_kg_m2) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -48,13 +48,13 @@ public class EspecieDAO {
         }
     }
 
-    public Especie buscarPorId(int id) {
+    public EspecieVO buscarPorId(int id) {
         if (cache.containsKey(id)) {
             return cache.get(id);
         }
         
         String sql = "SELECT id, categoria_id, nome, descricao, tempo_colheita, rendimento_kg_m2 FROM especie WHERE id = ?";
-        Especie especie = null;
+        EspecieVO especie = null;
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -63,9 +63,9 @@ public class EspecieDAO {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                Categoria categoria = DAO_categoria.buscarPorId(rs.getInt("categoria_id"));
+                CategoriaVO categoria = DAO_categoria.buscarPorId(rs.getInt("categoria_id"));
                 
-                especie = new Especie(
+                especie = new EspecieVO(
                         rs.getInt("id"),
                         categoria,
                         rs.getString("nome"),
@@ -82,7 +82,7 @@ public class EspecieDAO {
         return especie;
     }
 
-    public boolean atualizar(Especie especie) {
+    public boolean atualizar(EspecieVO especie) {
         String sql = "UPDATE especie SET categoria_id = ?, nome = ?, descricao = ?, tempo_colheita = ?, rendimento_kg_m2 = ? WHERE id = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -105,7 +105,7 @@ public class EspecieDAO {
     }
 
     public boolean excluir(int id) {
-        String sql = "DELETE FROM especie WHERE id = ?";
+        String sql = "UPDATE especie SET deletado = TRUE WHERE id = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -120,8 +120,8 @@ public class EspecieDAO {
         }
     }
 
-    public List<Especie> listarTodas() {
-        List<Especie> especies = new ArrayList<>();
+    public List<EspecieVO> listarTodas() {
+        List<EspecieVO> especies = new ArrayList<>();
         String sql = "SELECT id, categoria_id, nome, descricao, tempo_colheita, rendimento_kg_m2 FROM especie";
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -132,8 +132,8 @@ public class EspecieDAO {
                 int id = rs.getInt("id");
                 
                 if (!cache.containsKey(id)) {
-                    Categoria categoria = DAO_categoria.buscarPorId(rs.getInt("categoria_id"));
-                    Especie especie = new Especie(
+                    CategoriaVO categoria = DAO_categoria.buscarPorId(rs.getInt("categoria_id"));
+                    EspecieVO especie = new EspecieVO(
                             rs.getInt("id"),
                             categoria,
                             rs.getString("nome"),

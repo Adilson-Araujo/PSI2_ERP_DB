@@ -1,8 +1,8 @@
 package br.edu.ifsp.hto.cooperativa.estoque.modelo.dao;
 
 import br.edu.ifsp.hto.cooperativa.ConnectionFactory;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Especie;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.PrecoPPA;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.EspecieVO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.PrecoPPAVO;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +12,7 @@ import java.util.Map;
 public class PrecoPPADAO {
     private static PrecoPPADAO instancia = null;
     private static final EspecieDAO DAO_especie = EspecieDAO.getInstance();
-    private static final Map<String, PrecoPPA> cache = new HashMap<>();
+    private static final Map<String, PrecoPPAVO> cache = new HashMap<>();
     
     private PrecoPPADAO(){}
     public static PrecoPPADAO getInstance(){
@@ -20,7 +20,7 @@ public class PrecoPPADAO {
         return instancia;
     }
     
-    public boolean inserir(PrecoPPA precoppa) {
+    public boolean inserir(PrecoPPAVO precoppa) {
         String sql = "INSERT INTO preco_ppa (data_inicio, especie_id, data_final, valor) VALUES (?, ?, ?, ?)";
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -44,18 +44,14 @@ public class PrecoPPADAO {
         }
     }
 
-    public PrecoPPA buscarPorId(Timestamp data, int especie_id) {
+    public PrecoPPAVO buscarPorId(Timestamp data, int especie_id) {
         String chave = data+" "+especie_id;
         if (cache.containsKey(chave)) {
             return cache.get(chave);
         }
         
-        /*
-         * buscarPorId procurar pelo preço vigente de uma especie
-         * em uma data definida.
-         */
         String sql = "SELECT data_inicio, especie_id, data_final, valor FROM preco_ppa WHERE especie_id = ? AND data_inicio <= ? AND data_final >= ? ORDER BY data_inicio DESC";
-        PrecoPPA precoppa = null;
+        PrecoPPAVO precoppa = null;
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -66,9 +62,9 @@ public class PrecoPPADAO {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                Especie especie = DAO_especie.buscarPorId(rs.getInt("especie_id"));
+                EspecieVO especie = DAO_especie.buscarPorId(rs.getInt("especie_id"));
                 
-                precoppa = new PrecoPPA(
+                precoppa = new PrecoPPAVO(
                         rs.getTimestamp("data_inicio"),
                         especie,
                         rs.getTimestamp("data_final"),
@@ -83,7 +79,7 @@ public class PrecoPPADAO {
         return precoppa;
     }
 
-    public boolean atualizar(PrecoPPA precoppa) {
+    public boolean atualizar(PrecoPPAVO precoppa) {
         String sql = "UPDATE preco_ppa SET data_final = ?, valor = ? WHERE especie_id = ? AND data_inicio = ? ORDER BY data_inicio DESC LIMIT 1";
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -119,38 +115,5 @@ public class PrecoPPADAO {
             System.err.println("Erro ao excluir preço ppa: " + e.getMessage());
             return false;
         }
-    }
-
-    public List<PrecoPPA> listarTodos() {
-        List<PrecoPPA> precosppa = new ArrayList<>();
-        String sql = "SELECT data_inicio, especie_id, data_final, valor FROM precoppa";
-
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                Timestamp data_inicio = rs.getTimestamp("data_inicio");
-                int especie_id = rs.getInt("especie_id");
-                String chave = data_inicio+" "+especie_id;
-                
-                if (!cache.containsKey(chave)) {
-                    Especie especie = DAO_especie.buscarPorId(especie_id);
-                
-                    PrecoPPA precoppa = new PrecoPPA(
-                        data_inicio,
-                        especie,
-                        rs.getTimestamp("data_fim"),
-                        rs.getFloat("valor"));
-                    cache.put(chave, precoppa);
-                }
-                precosppa.add(cache.get(chave));
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Erro ao listar Precos PPA: " + e.getMessage());
-        }
-
-        return precosppa;
     }
 }

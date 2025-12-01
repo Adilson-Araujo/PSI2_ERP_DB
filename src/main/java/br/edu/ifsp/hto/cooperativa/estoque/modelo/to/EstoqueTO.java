@@ -1,13 +1,13 @@
 package br.edu.ifsp.hto.cooperativa.estoque.modelo.to;
 
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Produto;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.ProdutoVO;
 
 public class EstoqueTO {
     private int associado_id;
-    private Produto produto;
+    private ProdutoVO produto;
     private float quantidade;
 
-    public EstoqueTO(int associado_id, Produto produto, float quantidade) {
+    public EstoqueTO(int associado_id, ProdutoVO produto, float quantidade) {
         this.associado_id = associado_id;
         this.produto = produto;
         this.quantidade = quantidade;
@@ -17,7 +17,7 @@ public class EstoqueTO {
         return associado_id;
     }
 
-    public Produto getProduto() {
+    public ProdutoVO getProduto() {
         return produto;
     }
     
@@ -29,7 +29,7 @@ public class EstoqueTO {
         this.associado_id = associado_id;
     }
 
-    public void setProduto(Produto produto) {
+    public void setProduto(ProdutoVO produto) {
         this.produto = produto;
     }
 

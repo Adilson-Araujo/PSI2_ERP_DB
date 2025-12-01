@@ -2,9 +2,9 @@ package br.edu.ifsp.hto.cooperativa.estoque.modelo.dao;
 
 import br.edu.ifsp.hto.cooperativa.ConnectionFactory;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.to.EstoqueTO;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Produto;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Armazem;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.EstoqueAtual;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.ProdutoVO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.ArmazemVO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.EstoqueAtualVO;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +15,7 @@ public class EstoqueAtualDAO {
     private static EstoqueAtualDAO instancia = null;
     private static final ProdutoDAO DAO_produto = ProdutoDAO.getInstance();
     private static final ArmazemDAO DAO_armazem = ArmazemDAO.getInstance();
-    private static final Map<String, EstoqueAtual> cache = new HashMap<>();
+    private static final Map<String, EstoqueAtualVO> cache = new HashMap<>();
     
     private EstoqueAtualDAO(){}
     public static EstoqueAtualDAO getInstance(){
@@ -23,7 +23,7 @@ public class EstoqueAtualDAO {
         return instancia;
     }
     
-    public boolean inserir(EstoqueAtual estoqueAtual) {
+    private boolean inserir(EstoqueAtualVO estoqueAtual) {
         String sql = "INSERT INTO estoque_atual (associado_id, produto_id, armazem_id, quantidade) VALUES (?, ?, ?, ?)";
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -49,14 +49,14 @@ public class EstoqueAtualDAO {
         }
     }
 
-    public EstoqueAtual buscarPorId(int associado_id, int produto_id, int armazem_id) {
+    public EstoqueAtualVO buscarPorId(int associado_id, int produto_id, int armazem_id) {
         String chave = associado_id+" "+produto_id+" "+armazem_id;
         if (cache.containsKey(chave)) {
             return cache.get(chave);
         }
         
         String sql = "SELECT associado_id, produto_id, armazem_id, quantidade FROM estoque_atual WHERE associado_id = ? AND produto_id = ? AND armazem_id = ?";
-        EstoqueAtual estoqueAtual = null;
+        EstoqueAtualVO estoqueAtual = null;
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -67,10 +67,10 @@ public class EstoqueAtualDAO {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                Produto produto = DAO_produto.buscarPorId(rs.getInt("produto_id"));
-                Armazem armazem = DAO_armazem.buscarPorId(rs.getInt("armazem_id"));
+                ProdutoVO produto = DAO_produto.buscarPorId(rs.getInt("produto_id"));
+                ArmazemVO armazem = DAO_armazem.buscarPorId(rs.getInt("armazem_id"));
                 
-                estoqueAtual = new EstoqueAtual(
+                estoqueAtual = new EstoqueAtualVO(
                         rs.getInt("associado_id"),
                         produto,
                         armazem,
@@ -85,7 +85,7 @@ public class EstoqueAtualDAO {
         return estoqueAtual;
     }
     
-    public boolean atualizar(EstoqueAtual estoqueAtual) {
+    private boolean atualizar(EstoqueAtualVO estoqueAtual) {
         String sql = "UPDATE estoque_atual SET quantidade = ? WHERE associado_id = ? AND produto_id = ? AND armazem_id = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -105,8 +105,8 @@ public class EstoqueAtualDAO {
         }
     }
 
-    public boolean excluir(int associado_id, int produto_id, int armazem_id) {
-        String sql = "DELETE FROM estoque_atual WHERE associado_id = ? AND produto_id = ? AND armazem_id = ?";
+    private boolean excluir(int associado_id, int produto_id, int armazem_id) {
+        String sql = "UPDATE estoque_atual SET quantidade = 0 WHERE associado_id = ? AND produto_id = ? AND armazem_id = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -121,41 +121,6 @@ public class EstoqueAtualDAO {
             System.err.println("Erro ao excluir estoque atual: " + e.getMessage());
             return false;
         }
-    }
-
-    public List<EstoqueAtual> listarTodos() {
-        List<EstoqueAtual> estoquesAtuais = new ArrayList<>();
-        String sql = "SELECT associado_id, produto_id, armazem_id, quantidade FROM estoque_atual";
-
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                int associado_id = rs.getInt("associado_id");
-                int produto_id = rs.getInt("produto_id");
-                int armazem_id = rs.getInt("armazem_id");
-                String chave = associado_id+" "+produto_id+" "+armazem_id;
-                
-                if (!cache.containsKey(chave)) {
-                    Produto produto = DAO_produto.buscarPorId(produto_id);
-                    Armazem armazem = DAO_armazem.buscarPorId(armazem_id);
-
-                    EstoqueAtual estoqueAtual = new EstoqueAtual(
-                        associado_id,
-                        produto,
-                        armazem,
-                        rs.getFloat("quantidade"));
-                    cache.put(chave, estoqueAtual);
-                }
-                estoquesAtuais.add(cache.get(chave));
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Erro ao listar estoques atuais: " + e.getMessage());
-        }
-
-        return estoquesAtuais;
     }
     
     // Outros para alem do crud básico
@@ -172,7 +137,7 @@ public class EstoqueAtualDAO {
 
             while (rs.next()) {
                 int produto_id = rs.getInt("produto_id");
-                Produto produto = DAO_produto.buscarPorId(produto_id);
+                ProdutoVO produto = DAO_produto.buscarPorId(produto_id);
 
                 EstoqueTO estoqueAtual = new EstoqueTO(
                     associado_id,
@@ -200,7 +165,7 @@ public class EstoqueAtualDAO {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                Produto produto = DAO_produto.buscarPorId(produto_id);
+                ProdutoVO produto = DAO_produto.buscarPorId(produto_id);
                 
                 estoqueAtual = new EstoqueTO(
                         associado_id,
@@ -215,15 +180,13 @@ public class EstoqueAtualDAO {
         return estoqueAtual;
     }
     
-    // Outros para alem do CRUD básico.
-    
-    public void movimentaSaldo(int associado_id, Produto produto, Armazem armazem, float quantidade){
-        EstoqueAtual estoqueAtual = buscarPorId(associado_id, produto.getId(), armazem.getId());
+    public void movimentaSaldo(int associado_id, ProdutoVO produto, ArmazemVO armazem, float quantidade){
+        EstoqueAtualVO estoqueAtual = buscarPorId(associado_id, produto.getId(), armazem.getId());
         if(estoqueAtual != null){
             estoqueAtual.setQuantidade(estoqueAtual.getQuantidade() + quantidade);
             atualizar(estoqueAtual);
         } else {
-            estoqueAtual = new EstoqueAtual(associado_id, produto, armazem, quantidade);
+            estoqueAtual = new EstoqueAtualVO(associado_id, produto, armazem, quantidade);
             inserir(estoqueAtual);
         }
     }

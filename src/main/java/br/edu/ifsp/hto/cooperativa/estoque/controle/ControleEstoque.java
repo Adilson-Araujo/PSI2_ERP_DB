@@ -12,15 +12,15 @@ import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.TipoDAO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.to.EstoqueTO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.to.ProdutoPrecificadoTO;
 
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Armazem;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Categoria;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Especie;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.EstoqueAtual;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Movimentacao;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Origem;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.PrecoPPA;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Produto;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Tipo;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.ArmazemVO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.CategoriaVO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.EspecieVO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.EstoqueAtualVO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.MovimentacaoVO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.OrigemVO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.PrecoPPAVO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.ProdutoVO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.TipoVO;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -91,7 +91,7 @@ public class ControleEstoque {
      * @param  produto_id referente ao produto escolhido.
      * @return lista de {@code Movimentacao}
      */
-    public List<Movimentacao> listarMovimentacoes(int associado_id, int produto_id) {
+    public List<MovimentacaoVO> listarMovimentacoes(int associado_id, int produto_id) {
         return movimentacaoDAO.listarPorProduto(associado_id, produto_id);
     }
     
@@ -100,7 +100,7 @@ public class ControleEstoque {
      *
      * @return lista de {@code Armazem}
      */
-    public List<Armazem> listarArmazens() {
+    public List<ArmazemVO> listarArmazens() {
         return armazemDAO.listarTodos();
     }
     
@@ -109,7 +109,7 @@ public class ControleEstoque {
      *
      * @return lista de {@code Produto}
      */
-    public List<Produto> listarProdutos() {
+    public List<ProdutoVO> listarProdutos() {
         return produtoDAO.listarTodos();
     }
     /**
@@ -119,7 +119,7 @@ public class ControleEstoque {
      * @return produto correspondente
      * @throws Exception se o ID for inválido ou não existir
      */
-    public Produto buscarProdutoPorId(int id) throws Exception {
+    public ProdutoVO buscarProdutoPorId(int id) throws Exception {
         if (id <= 0) throw new Exception("ID inválido.");
         return produtoDAO.buscarPorId(id);
     }
@@ -129,7 +129,7 @@ public class ControleEstoque {
      *
      * @return lista de espécies
      */
-    public List<Especie> listarEspecies() {
+    public List<EspecieVO> listarEspecies() {
         return especieDAO.listarTodas();
     }
     /**
@@ -139,7 +139,7 @@ public class ControleEstoque {
      * @return espécie correspondente
      * @throws Exception se o ID for inválido ou não existir
      */
-    public Especie buscarEspeciePorId(int id) throws Exception {
+    public EspecieVO buscarEspeciePorId(int id) throws Exception {
         if (id <= 0) throw new Exception("ID inválido.");
         return especieDAO.buscarPorId(id);
     }
@@ -168,7 +168,7 @@ public class ControleEstoque {
      * @return           List contendo ProdutoPreficadoTO s.
      */
     public ProdutoPrecificadoTO buscarPrecos(int especie_id, Timestamp data){
-        return produtoDAO.buscarPrecificadoPorId(especie_id, data);
+        return produtoDAO.buscarPrecificadoPorEspecieId(especie_id, data);
     }
 
     /**
@@ -219,13 +219,13 @@ public class ControleEstoque {
      * @return nova movimentação não persistida
      * @throws RuntimeException se algum dos IDs for inválido ou não encontrado
      */
-    private Movimentacao novaMovimentacao(int tipo_id, int origem_id, int produto_id, int armazem_id, int associado_id, float quantidade){
-        Tipo tipo = tipoDAO.buscarPorId(tipo_id);
-        Origem origem = origemDAO.buscarPorId(origem_id);
-        Produto produto = produtoDAO.buscarPorId(produto_id);
-        Armazem armazem = armazemDAO.buscarPorId(armazem_id);
+    private MovimentacaoVO novaMovimentacao(int tipo_id, int origem_id, int produto_id, int armazem_id, int associado_id, float quantidade){
+        TipoVO tipo = tipoDAO.buscarPorId(tipo_id);
+        OrigemVO origem = origemDAO.buscarPorId(origem_id);
+        ProdutoVO produto = produtoDAO.buscarPorId(produto_id);
+        ArmazemVO armazem = armazemDAO.buscarPorId(armazem_id);
         Timestamp horacriacao = new Timestamp(System.currentTimeMillis());
-        Movimentacao nova_movimentacao = new Movimentacao(-1, tipo, origem, produto, armazem, associado_id, quantidade, horacriacao);
+        MovimentacaoVO nova_movimentacao = new MovimentacaoVO(-1, tipo, origem, produto, armazem, associado_id, quantidade, horacriacao);
         return nova_movimentacao;
     }
     
@@ -238,7 +238,7 @@ public class ControleEstoque {
      * @param area_produzida área produzida
      * @return movimentação de produção não persistida
      */
-    public Movimentacao novaProducao(int especie_id, int associado_id, float area_produzida){
+    public MovimentacaoVO novaProducao(int especie_id, int associado_id, float area_produzida){
         int produto_id = produtoDAO.buscarPorEspecieId(especie_id).getId();
         float quantidade = calcularQuantidade(especie_id, area_produzida);
         return novaMovimentacao(1, 1, produto_id, 1, associado_id, quantidade);
@@ -252,7 +252,7 @@ public class ControleEstoque {
      * @param quantidade    quantidade vendida
      * @return movimentação de venda não persistida
      */
-    public Movimentacao novaVenda(int produto_id, int associado_id, float quantidade){
+    public MovimentacaoVO novaVenda(int produto_id, int associado_id, float quantidade){
         return novaMovimentacao(2, 2, produto_id, 2, associado_id, quantidade);
     }
 
@@ -263,7 +263,7 @@ public class ControleEstoque {
      * @param movimentacao movimentação não persistida a registrar
      * @throws Exception se a movimentação não pertencer ao módulo de Produção
      */
-    public void inserirProducao(Movimentacao movimentacao)throws Exception {
+    public void inserirProducao(MovimentacaoVO movimentacao)throws Exception {
         if (movimentacao.getOrigem().getId() != 1 || movimentacao.getTipo().getId() != 1){
             throw new Exception("A Origem ou Tipo da Movimentação não condizem com o Módulo de Produção.");
         }
@@ -277,7 +277,7 @@ public class ControleEstoque {
      * @param movimentacao movimentação não persistida a registrar
      * @throws Exception se a movimentação não pertencer ao módulo de Venda
      */
-    public void inserirVenda(Movimentacao movimentacao)throws Exception {
+    public void inserirVenda(MovimentacaoVO movimentacao)throws Exception {
         if (movimentacao.getOrigem().getId() != 2 || movimentacao.getTipo().getId() != 2){
             throw new Exception("A Origem ou Tipo da Movimentação não condizem com o Módulo de Venda.");
         }
@@ -290,7 +290,7 @@ public class ControleEstoque {
      * @param movimentacao movimentação a atualizar
      * @throws Exception se o ID for inválido ou se a movimentação não pertencer a produção
      */
-    public void atualizarProducao(Movimentacao movimentacao) throws Exception {
+    public void atualizarProducao(MovimentacaoVO movimentacao) throws Exception {
         if (movimentacao.getId() <= 0) throw new Exception("ID inválido para atualização.");
         if (movimentacao.getOrigem().getId() != 1 || movimentacao.getTipo().getId() != 1){
             throw new Exception("A Origem ou Tipo da Movimentação não condizem com o Módulo de Produção.");
@@ -304,7 +304,7 @@ public class ControleEstoque {
      * @param movimentacao movimentação a atualizar
      * @throws Exception se o ID for inválido ou se a movimentação não pertencer a vendas
      */
-    public void atualizarVenda(Movimentacao movimentacao) throws Exception {
+    public void atualizarVenda(MovimentacaoVO movimentacao) throws Exception {
         if (movimentacao.getId() <= 0) throw new Exception("ID inválido para atualização.");
         if (movimentacao.getOrigem().getId() != 2 || movimentacao.getTipo().getId() != 2){
             throw new Exception("A Origem ou Tipo da Movimentação não condizem com o Módulo de Venda.");
@@ -328,7 +328,7 @@ public class ControleEstoque {
      * @param movimentacao movimentação a remover
      * @throws Exception se o ID for inválido ou a movimentação não for de produção
      */
-    public void excluirProducao(Movimentacao movimentacao) throws Exception {
+    public void excluirProducao(MovimentacaoVO movimentacao) throws Exception {
         if (movimentacao.getId() <= 0) throw new Exception("Objeto não foi registrado ou tem id invalido.");
         if (movimentacao.getOrigem().getId() != 1 || movimentacao.getTipo().getId() != 1){
             throw new Exception("A Origem ou Tipo da Movimentação não condizem com o Módulo de Produção.");
@@ -342,7 +342,7 @@ public class ControleEstoque {
      * @param movimentacao movimentação a remover
      * @throws Exception se o ID for inválido ou a movimentação não for de venda
      */
-    public void excluirVenda(Movimentacao movimentacao) throws Exception {
+    public void excluirVenda(MovimentacaoVO movimentacao) throws Exception {
         if (movimentacao.getId() <= 0) throw new Exception("Objeto não foi registrado ou tem id invalido.");
         if (movimentacao.getOrigem().getId() != 2 || movimentacao.getTipo().getId() != 2){
             throw new Exception("A Origem ou Tipo da Movimentação não condizem com o Módulo de Venda.");

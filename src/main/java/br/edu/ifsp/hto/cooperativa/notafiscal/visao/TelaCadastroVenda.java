@@ -45,17 +45,11 @@ public class TelaCadastroVenda extends ViewBase {
             txtValorProdutos, txtVlrFrete, txtVlrSeguro, txtDesconto, txtVlrIPI, txtValorTotalNF;
 
 
-    public TelaCadastroVenda() {
-        super();
-        setTitle("Cadastro de Nota Fiscal Eletrônica (NF-e)");
-        setSize(1000, 720);
-
-        // REMOVIDO: setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        // REMOVIDO: setLocationRelativeTo(null);
-
-        setClosable(true); // Permite fechar a janelinha
-        setResizable(true); // Permite redimensionar
-
+    public TelaCadastroVenda(JDesktopPane desktop) {
+        super("Cadastro de Nota Fiscal Eletrônica (NF-e)", desktop);
+    }
+    @Override
+    protected JPanel getPainelConteudo() {
         JTabbedPane abas = new JTabbedPane();
         abas.addTab("Identificação", criarPainelIdentificacao());
         abas.addTab("Emitente", criarPainelEmitente());
@@ -63,7 +57,11 @@ public class TelaCadastroVenda extends ViewBase {
         abas.addTab("Produtos", criarPainelProdutos());
         abas.addTab("Totais", criarPainelTotais());
 
-        add(abas);
+        // Criamos um painel wrapper para retornar
+        JPanel painelRetorno = new JPanel(new BorderLayout());
+        painelRetorno.add(abas, BorderLayout.CENTER);
+
+        return painelRetorno;
     }
 
     // ===================== Painéis =====================

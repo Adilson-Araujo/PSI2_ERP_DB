@@ -63,17 +63,17 @@ public class TelaPrincipal extends JFrame {
         Button btnGerarNfVenda = new Button("Gerar NF de Venda");
 
         btnCadastrarAssociado.addActionListener(e -> {
-            TelaCadastroAssociado tela = new TelaCadastroAssociado();
+            TelaCadastroAssociado tela = new TelaCadastroAssociado(desktopPane);
             adicionarJanela(tela);
         });
 
         btnCadastroVenda.addActionListener(e -> {
-            TelaCadastroVenda tela = new TelaCadastroVenda();
+            TelaCadastroVenda tela = new TelaCadastroVenda(desktopPane);
             adicionarJanela(tela);
         });
 
         btnGerarNfVenda.addActionListener(e -> {
-            TelaGerarNotaFiscalVenda tela = new TelaGerarNotaFiscalVenda();
+            TelaGerarNotaFiscalVenda tela = new TelaGerarNotaFiscalVenda(desktopPane);
             adicionarJanela(tela);
         });
 

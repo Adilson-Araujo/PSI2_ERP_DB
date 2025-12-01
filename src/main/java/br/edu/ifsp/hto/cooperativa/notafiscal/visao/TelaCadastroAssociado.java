@@ -16,23 +16,21 @@ public class TelaCadastroAssociado extends ViewBase {
     // --- Associado Produtor
     private JTextField txtCnpj, txtDap, txtCaf, txtPronaf, txtPaa, txtPnae;
 
-    public TelaCadastroAssociado() {
-        super(); // Chama o construtor da ViewBase (JInternalFrame)
-        setTitle("Cadastro de Associado");
-        setSize(700, 500);
-
-        // REMOVIDO: setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        // REMOVIDO: setLocationRelativeTo(null);
-
-        // MUDANÇA: Configuramos que ela pode ser fechada
-        setClosable(true);
-
+    public TelaCadastroAssociado(JDesktopPane desktop) {
+        super("Cadastro de Associado", desktop); // Passa o título para o cabeçalho
+    }
+    @Override
+    protected JPanel getPainelConteudo() {
+        // O código que estava no construtor vem pra cá
         JTabbedPane abas = new JTabbedPane();
         abas.addTab("Informações Pessoais", criarPainelPessoal());
         abas.addTab("Endereço", criarPainelEndereco());
         abas.addTab("Associado Produtor", criarPainelProdutor());
 
-        add(abas);
+        // Retorna o painel principal em vez de dar 'add()'
+        JPanel painelRetorno = new JPanel(new BorderLayout());
+        painelRetorno.add(abas, BorderLayout.CENTER);
+        return painelRetorno;
     }
 
     // Painel de Informações Pessoais

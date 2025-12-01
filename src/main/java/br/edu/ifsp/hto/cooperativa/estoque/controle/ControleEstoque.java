@@ -1,24 +1,14 @@
 package br.edu.ifsp.hto.cooperativa.estoque.controle;
 
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.ArmazemDAO;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.EspecieDAO;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.EstoqueAtualDAO;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.MovimentacaoDAO;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.OrigemDAO;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.ProdutoDAO;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.TipoDAO;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.to.EstoqueTO;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.to.ProdutoPrecificadoTO;
-
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.ArmazemVO;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.EspecieVO;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.MovimentacaoVO;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.OrigemVO;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.ProdutoVO;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.TipoVO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.*;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.*;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.to.*;
+import br.edu.ifsp.hto.cooperativa.estoque.visao.*;
 
 import java.sql.Timestamp;
 import java.util.List;
+import javax.swing.JDesktopPane;
+import javax.swing.JInternalFrame;
 
 /**
  * Controlador central do módulo de estoque. Responsável por intermediar operações
@@ -70,6 +60,46 @@ public class ControleEstoque {
     }
     
     // BÁSICO DA CLASS
+    // //////////////////////////////////////////
+    // CHAMADAS DE TELA DA CAMADA DE APRESENTAÇÃO
+    
+    public static void telaEstoqueEstrada(JDesktopPane desktop)
+    {desktop.add(TelaDeEntrada.gerarFrameInterno());}
+    
+    public static void telaEstoqueSaida(JDesktopPane desktop)
+    {desktop.add(TelaDeSaida.gerarFrameInterno());}
+    
+    public static void telaEstoqueTranferencia(JDesktopPane desktop)
+    {desktop.add(TelaDeTransferencia.gerarFrameInterno());}
+    
+    public static void telaEstoqueIndicacao(JDesktopPane desktop)
+    {System.out.println("Opção 4.");}
+    
+    public static void telaEstoqueGerenciarArmazem(JDesktopPane desktop)
+    {System.out.println("Opção 5.");}
+    
+    public static void telaEstoqueGerenciarCategoria(JDesktopPane desktop)
+    {System.out.println("Opção 6.");}
+    
+    public static void telaEstoqueGerenciarEspecie(JDesktopPane desktop)
+    {System.out.println("Opção 7.");}
+    
+    public static void telaEstoqueGerenciarProduto(JDesktopPane desktop)
+    {System.out.println("Opção 8.");}
+    
+    public static void telaEstoqueRelatorio(JDesktopPane desktop)
+    {desktop.add(TelaRelatorio.gerarFrameInterno());}
+    
+    public static void telaEstoqueHistorico(JDesktopPane desktop)
+    {desktop.add(TelaHistorico.gerarFrameInterno());}
+    
+    public static void telaEstoqueInventario(JDesktopPane desktop)
+    {desktop.add(TelaInventario.gerarFrameInterno());}
+    
+    public static void telaEstoqueEstoque(JDesktopPane desktop)
+    {desktop.add(TelaEstoqueAtual.gerarFrameInterno());}
+    
+    // CHAMADAS DE TELA DA CAMADA DE APRESENTAÇÃO
     // //////////////////////////////////////////
     // READ GERAL
 

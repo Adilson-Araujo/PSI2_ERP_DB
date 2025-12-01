@@ -1,5 +1,6 @@
 package br.edu.ifsp.hto.cooperativa;
 
+import br.edu.ifsp.hto.cooperativa.estoque.controle.ControleEstoque;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -86,15 +87,33 @@ public class Cooperativa extends JFrame {
 
 
         //Grupo Estoque adicionar as opcoes do subMneu (JMenuItem) aqui
-        JMenuItem estoqueItemMenu1 = new JMenuItem("Janela1");
-        JMenuItem estoqueItemMenu2 = new JMenuItem("Janela2");
-        JMenuItem estoqueItemMenu3 = new JMenuItem("Janela3");
-        JMenuItem estoqueItemMenu4 = new JMenuItem("Janela4");
+        JMenuItem estoqueItemEstoqueEntrada = new JMenuItem("Entrada de Estoque");
+        JMenuItem estoqueItemEstoqueSaida = new JMenuItem("Saída de Estoque");
+        JMenuItem estoqueItemEstoqueTranferencia = new JMenuItem("Transferência de Estoque");
+        JMenuItem estoqueItemIndicacao = new JMenuItem("Indicação de Saída por Venda");
 
-        estoqueMenu.add(estoqueItemMenu1);
-        estoqueMenu.add(estoqueItemMenu2);
-        estoqueMenu.add(estoqueItemMenu3);
-        estoqueMenu.add(estoqueItemMenu4);
+        JMenuItem estoqueItemGerenciarArmazem = new JMenuItem("Gerenciar Armazéns");
+        JMenuItem estoqueItemGerenciarCategoria = new JMenuItem("Gerenciar Categorias");
+        JMenuItem estoqueItemGerenciarEspecie = new JMenuItem("Gerenciar Espécies");
+        JMenuItem estoqueItemGerenciarProduto = new JMenuItem("Gerenciar Produtos");
+        
+        JMenuItem estoqueItemRelatorio = new JMenuItem("Relatório");
+        JMenuItem estoqueItemHistorico = new JMenuItem("Histórico");
+        JMenuItem estoqueItemInventario = new JMenuItem("Inventário");
+        JMenuItem estoqueItemEstoque = new JMenuItem("Estoque");
+
+        estoqueMenu.add(estoqueItemEstoqueEntrada);
+        estoqueMenu.add(estoqueItemEstoqueSaida);
+        estoqueMenu.add(estoqueItemEstoqueTranferencia);
+        estoqueMenu.add(estoqueItemIndicacao);
+        estoqueMenu.add(estoqueItemGerenciarArmazem);
+        estoqueMenu.add(estoqueItemGerenciarCategoria);
+        estoqueMenu.add(estoqueItemGerenciarEspecie);
+        estoqueMenu.add(estoqueItemGerenciarProduto);
+        estoqueMenu.add(estoqueItemRelatorio);
+        estoqueMenu.add(estoqueItemHistorico);
+        estoqueMenu.add(estoqueItemInventario);
+        estoqueMenu.add(estoqueItemEstoque);
 
         //Grupo Financeiro adicionar as opcoes do subMneu (JMenuItem) aqui
         JMenuItem financeiroItemMenu1 = new JMenuItem("Janela1");
@@ -141,6 +160,20 @@ public class Cooperativa extends JFrame {
         planejamentoItemMenu1.addActionListener(ev -> new VisaoHome(desktop));
         planejamentoItemMenu2.addActionListener(ev -> new VisaoAreas(desktop));
 
+        // --- AÇÕES DO GRUPO ESTOQUE ---
+        estoqueItemEstoqueEntrada.addActionListener(ev -> ControleEstoque.telaEstoqueEstrada(desktop));
+        estoqueItemEstoqueSaida.addActionListener(ev -> ControleEstoque.telaEstoqueSaida(desktop));
+        estoqueItemEstoqueTranferencia.addActionListener(ev -> ControleEstoque.telaEstoqueTranferencia(desktop));
+        estoqueItemIndicacao.addActionListener(ev -> ControleEstoque.telaEstoqueIndicacao(desktop));
+        estoqueItemGerenciarArmazem.addActionListener(ev -> ControleEstoque.telaEstoqueGerenciarArmazem(desktop));
+        estoqueItemGerenciarCategoria.addActionListener(ev -> ControleEstoque.telaEstoqueGerenciarCategoria(desktop));
+        estoqueItemGerenciarEspecie.addActionListener(ev -> ControleEstoque.telaEstoqueGerenciarEspecie(desktop));
+        estoqueItemGerenciarProduto.addActionListener(ev -> ControleEstoque.telaEstoqueGerenciarProduto(desktop));
+        estoqueItemRelatorio.addActionListener(ev -> ControleEstoque.telaEstoqueRelatorio(desktop));
+        estoqueItemHistorico.addActionListener(ev -> ControleEstoque.telaEstoqueHistorico(desktop));
+        estoqueItemInventario.addActionListener(ev -> ControleEstoque.telaEstoqueInventario(desktop));
+        estoqueItemEstoque.addActionListener(ev -> ControleEstoque.telaEstoqueEstoque(desktop));
+        
         // --- AÇÕES DO GRUPO NOTA FISCAL ---
 
         notaFiscalItemCadAssociado.addActionListener(ev -> {

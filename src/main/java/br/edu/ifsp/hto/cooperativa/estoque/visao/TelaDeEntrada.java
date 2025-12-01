@@ -11,7 +11,6 @@ import javax.swing.table.DefaultTableModel;
 import java.util.List;
 
 public class TelaDeEntrada {
-
     public static JInternalFrame gerarFrameInterno() {
         ControleEstoque controle = ControleEstoque.getInstance();
 
@@ -168,8 +167,8 @@ public class TelaDeEntrada {
         janela.add(painelMenu, BorderLayout.WEST);
         janela.add(painelWrapper, BorderLayout.CENTER);
         janela.add(painelTabela, BorderLayout.SOUTH);
-        janela.setVisible(true);
         
+        janela.setVisible(true);
         return janela;
     }
 

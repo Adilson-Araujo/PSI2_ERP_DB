@@ -1,24 +1,19 @@
 package br.edu.ifsp.hto.cooperativa.estoque.controle;
 
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.ArmazemDAO;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.CategoriaDAO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.EspecieDAO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.EstoqueAtualDAO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.MovimentacaoDAO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.OrigemDAO;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.PrecoPPADAO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.ProdutoDAO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.TipoDAO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.to.EstoqueTO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.to.ProdutoPrecificadoTO;
 
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.ArmazemVO;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.CategoriaVO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.EspecieVO;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.EstoqueAtualVO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.MovimentacaoVO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.OrigemVO;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.PrecoPPAVO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.ProdutoVO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.TipoVO;
 
@@ -38,8 +33,6 @@ public class ControleEstoque {
     private static ControleEstoque instancia = null;
     /** DAO responsável por operações com armazéns. */
     private final ArmazemDAO armazemDAO;
-    /** DAO responsável por operações com categoria. */
-    private final CategoriaDAO categoriaDAO;
     /** DAO responsável por operações com especie. */
     private final EspecieDAO especieDAO;
     /** DAO responsável por operações com estoque atual. */
@@ -48,8 +41,6 @@ public class ControleEstoque {
     private final MovimentacaoDAO movimentacaoDAO;
     /** DAO responsável por operações com origem. */
     private final OrigemDAO origemDAO;
-    /** DAO responsável por operações com preco ppa. */
-    private final PrecoPPADAO precoPPADAO;
     /** DAO responsável por operações com produto. */
     private final ProdutoDAO produtoDAO;
     /** DAO responsável por operações com tipos. */
@@ -60,12 +51,10 @@ public class ControleEstoque {
      */
     private ControleEstoque(){
         this.armazemDAO       =  ArmazemDAO.getInstance();
-        this.categoriaDAO     =  CategoriaDAO.getInstance();
         this.especieDAO       =  EspecieDAO.getInstance();
         this.estoqueAtualDAO  =  EstoqueAtualDAO.getInstance();
         this.movimentacaoDAO  =  MovimentacaoDAO.getInstance();
         this.origemDAO        =  OrigemDAO.getInstance();
-        this.precoPPADAO      =  PrecoPPADAO.getInstance();
         this.produtoDAO       =  ProdutoDAO.getInstance();
         this.tipoDAO          =  TipoDAO.getInstance();
     }
@@ -352,346 +341,4 @@ public class ControleEstoque {
     
     // OPERAÇÕES DE PRODUÇÃO E VENDA
     // //////////////////////////////////////////
-    // VERIFICAR
-
-    /*
-    
-    private void validarArmazem(Armazem armazem) throws Exception {
-        if (armazem == null) throw new Exception("Armazém inválido.");
-        if (armazem.getNome() == null || armazem.getNome().trim().isEmpty()) {
-            throw new Exception("Nome do armazém é obrigatório.");
-        }
-        if (armazem.getEndereco() == null || armazem.getEndereco().trim().isEmpty()) {
-            throw new Exception("Endereço do armazém é obrigatório.");
-        }
-    }
-
-    public void inserirArmazem(Armazem armazem) throws Exception {
-        validarArmazem(armazem);
-        if (!armazemDAO.inserir(armazem)) throw new Exception("Erro ao inserir armazém.");
-    }
-
-    public void atualizarArmazem(Armazem armazem) throws Exception {
-        validarArmazem(armazem);
-        if (armazem.getId() <= 0) throw new Exception("ID inválido para atualização.");
-        if (!armazemDAO.atualizar(armazem)) throw new Exception("Erro ao atualizar armazém.");
-    }
-
-    public void excluirArmazem(int id) throws Exception {
-        if (id <= 0) throw new Exception("ID inválido.");
-        if (!armazemDAO.excluir(id)) throw new Exception("Erro ao excluir armazém.");
-    }
-
-    public List<Armazem> listarArmazens() {
-        return armazemDAO.listarTodos();
-    }
-
-    public Armazem buscarArmazemPorId(int id) throws Exception {
-        if (id <= 0) throw new Exception("ID inválido.");
-        return armazemDAO.buscarPorId(id);
-    }
-    
-    private void validarCategoria(Categoria categoria) throws Exception {
-        if (categoria == null) throw new Exception("Categoria inválida.");
-        if (categoria.getNome() == null || categoria.getNome().trim().isEmpty()) {
-            throw new Exception("Nome da categoria é obrigatório.");
-        }
-    }
-    
-    public void inserirCategoria(Categoria categoria) throws Exception {
-        validarCategoria(categoria);
-        if (!categoriaDAO.inserir(categoria)) throw new Exception("Erro ao inserir categoria.");
-    }
-
-    public void atualizarCategoria(Categoria categoria) throws Exception {
-        validarCategoria(categoria);
-        if (categoria.getId() <= 0) throw new Exception("ID inválido para atualização.");
-        if (!categoriaDAO.atualizar(categoria)) throw new Exception("Erro ao atualizar categoria.");
-    }
-
-    public void excluirCategoria(int id) throws Exception {
-        if (id <= 0) throw new Exception("ID inválido.");
-        if (!categoriaDAO.excluir(id)) throw new Exception("Erro ao excluir categoria.");
-    }
-
-    public List<Categoria> listarCategorias() {
-        return categoriaDAO.listarTodas();
-    }
-
-    public Categoria buscarCategoriaPorId(int id) throws Exception {
-        if (id <= 0) throw new Exception("ID inválido.");
-        return categoriaDAO.buscarPorId(id);
-    }
-    
-    private void validarEspecie(Especie especie) throws Exception {
-        if (especie == null) throw new Exception("Espécie inválida.");
-        if (especie.getNome() == null || especie.getNome().trim().isEmpty()) {
-            throw new Exception("Nome da espécie é obrigatório.");
-        }
-        if (especie.getCategoria() == null || especie.getCategoria().getId() <= 0) {
-            throw new Exception("Selecione uma categoria válida.");
-        }
-    }
-
-    public void inserirEspecie(Especie especie) throws Exception {
-        validarEspecie(especie);
-        if (!especieDAO.inserir(especie)) throw new Exception("Erro ao inserir espécie.");
-    }
-
-    public void atualizarEspecie(Especie especie) throws Exception {
-        validarEspecie(especie);
-        if (especie.getId() <= 0) throw new Exception("ID inválido para atualização.");
-        if (!especieDAO.atualizar(especie)) throw new Exception("Erro ao atualizar espécie.");
-    }
-
-    public void excluirEspecie(int id) throws Exception {
-        if (id <= 0) throw new Exception("ID inválido.");
-        if (!especieDAO.excluir(id)) throw new Exception("Erro ao excluir espécie.");
-    }
-
-    public List<Especie> listarEspecies() {
-        return especieDAO.listarTodas();
-    }
-
-    public Especie buscarEspeciePorId(int id) throws Exception {
-        if (id <= 0) throw new Exception("ID inválido.");
-        return especieDAO.buscarPorId(id);
-    }
-    
-    private void validarEstoqueAtual(EstoqueAtual estoqueAtual) throws Exception {
-       if (estoqueAtual == null || estoqueAtual.getAssociado() == null || estoqueAtual.getProduto() == null || estoqueAtual.getArmazem() == null) {
-            throw new Exception("Dados de estoque inválidos.");
-        }
-        if (estoqueAtual.getAssociado().getId() <= 0 || estoqueAtual.getProduto().getId() <= 0 || estoqueAtual.getArmazem().getId() <= 0) {
-             throw new Exception("IDs de Associado, Produto ou Armazém inválidos.");
-        }
-        if (estoqueAtual.getQuantidade() < 0) throw new Exception("Quantidade não pode ser negativa.");
-    }
-    
-    public void inserirEstoqueAtual(EstoqueAtual estoqueAtual) throws Exception {
-        validarEstoqueAtual(estoqueAtual);
-        if (!estoqueAtualDAO.inserir(estoqueAtual)) throw new Exception("Erro ao inserir estoque.");
-    }
-    
-    public void atualizarEstoqueAtual(EstoqueAtual estoqueAtual) throws Exception {
-        validarEstoqueAtual(estoqueAtual);
-        if (!estoqueAtualDAO.atualizar(estoqueAtual)) throw new Exception("Erro ao atualizar estoque.");
-    }
-    
-    public void excluirEstoqueAtual(int id_associado, int id_produto, int id_armazem) throws Exception {
-         if (id_associado <= 0 || id_produto <= 0 || id_armazem <= 0) throw new Exception("IDs inválidos.");
-         if (!estoqueAtualDAO.excluir(id_associado, id_produto, id_armazem)) {
-             throw new Exception("Erro ao excluir estoque.");
-         }
-    }
-    
-    public List<EstoqueAtual> listarEstoqueAtual() {
-        return estoqueAtualDAO.listarTodos();
-    }
-    
-    public EstoqueAtual buscarEstoqueAtual(int id_associado, int id_produto, int id_armazem) throws Exception {
-        if (id_associado <= 0 || id_produto <= 0 || id_armazem <= 0) throw new Exception("IDs inválidos.");
-        return estoqueAtualDAO.buscarPorId(id_associado, id_produto, id_armazem);
-    }
-    
-    private void validarMovimentacao(Movimentacao movimentacao) throws Exception {
-        if (movimentacao == null) throw new Exception("Movimentação inválida.");
-        if (movimentacao.getTipo() == null || movimentacao.getTipo().getId() <= 0) throw new Exception("Tipo inválido.");
-        if (movimentacao.getOrigem() == null || movimentacao.getOrigem().getId() <= 0) throw new Exception("Origem inválida.");
-        if (movimentacao.getProduto() == null || movimentacao.getProduto().getId() <= 0) throw new Exception("Produto inválido.");
-        if (movimentacao.getQuantidade() <= 0) throw new Exception("Quantidade deve ser maior que zero.");
-    }
-    
-    public void inserirMovimentacao(Movimentacao movimentacao) throws Exception {
-        validarMovimentacao(movimentacao);
-        if (!movimentacaoDAO.inserir(movimentacao)) throw new Exception("Erro ao inserir movimentação.");
-    }
-
-    public void atualizarMovimentacao(Movimentacao movimentacao) throws Exception {
-        validarMovimentacao(movimentacao);
-        if (movimentacao.getId() <= 0) throw new Exception("ID inválido para atualização.");
-        if (!movimentacaoDAO.atualizar(movimentacao)) throw new Exception("Erro ao atualizar movimentação.");
-    }
-
-    public void excluirMovimentacao(int id) throws Exception {
-        if (id <= 0) throw new Exception("ID inválido.");
-        if (!movimentacaoDAO.excluir(id)) throw new Exception("Erro ao excluir movimentação.");
-    }
-
-    public List<Movimentacao> listarMovimentacoes() {
-        return movimentacaoDAO.listarTodas();
-    }
-
-    public Movimentacao buscarMovimentacaoPorId(int id) throws Exception {
-        if (id <= 0) throw new Exception("ID inválido.");
-        return movimentacaoDAO.buscarPorId(id);
-    }
-    
-    private void validarOrigem(Origem origem) throws Exception {
-        if (origem == null) throw new Exception("Origem inválida.");
-        if (origem.getNome() == null || origem.getNome().trim().isEmpty()) {
-            throw new Exception("Nome da origem é obrigatório.");
-        }
-    }
-
-    public void inserirOrigem(Origem origem) throws Exception {
-        validarOrigem(origem);
-        if (!origemDAO.inserir(origem)) throw new Exception("Erro ao inserir origem.");
-    }
-
-    public void atualizarOrigem(Origem origem) throws Exception {
-        validarOrigem(origem);
-        if (origem.getId() <= 0) throw new Exception("ID inválido para atualização.");
-        if (!origemDAO.atualizar(origem)) throw new Exception("Erro ao atualizar origem.");
-    }
-
-    public void excluirOrigem(int id) throws Exception {
-        if (id <= 0) throw new Exception("ID inválido.");
-        if (!origemDAO.excluir(id)) throw new Exception("Erro ao excluir origem.");
-    }
-
-    public List<Origem> listarOrigens() {
-        return origemDAO.listarTodas();
-    }
-
-    public Origem buscarOrigemPorId(int id) throws Exception {
-        if (id <= 0) throw new Exception("ID inválido.");
-        return origemDAO.buscarPorId(id);
-    }
-    
-    private void validarPlanoEspecie(PlanoEspecie planoEspecie) throws Exception {
-        if (planoEspecie == null) throw new Exception("Plano inválido.");
-        if (planoEspecie.getNome_plano() == null || planoEspecie.getNome_plano().trim().isEmpty()) {
-            throw new Exception("Nome do plano é obrigatório.");
-        }
-        if (planoEspecie.getEspecie() == null || planoEspecie.getEspecie().getId() <= 0) {
-            throw new Exception("Espécie inválida.");
-        }
-    }
-
-    public void inserirPlanoEspecie(PlanoEspecie planoEspecie) throws Exception {
-        validarPlanoEspecie(planoEspecie);
-        if (!planoEspecieDAO.inserir(planoEspecie)) throw new Exception("Erro ao inserir plano.");
-    }
-
-    public void atualizarPlanoEspecie(PlanoEspecie planoEspecie) throws Exception {
-        validarPlanoEspecie(planoEspecie);
-        if (planoEspecie.getId() <= 0) throw new Exception("ID inválido para atualização.");
-        if (!planoEspecieDAO.atualizar(planoEspecie)) throw new Exception("Erro ao atualizar plano.");
-    }
-
-    public void excluirPlanoEspecie(int id) throws Exception {
-        if (id <= 0) throw new Exception("ID inválido.");
-        if (!planoEspecieDAO.excluir(id)) throw new Exception("Erro ao excluir plano.");
-    }
-
-    public List<PlanoEspecie> listarPlanosEspecie() {
-        return planoEspecieDAO.listarTodas();
-    }
-
-    public PlanoEspecie buscarPlanoEspeciePorId(int id) throws Exception {
-        if (id <= 0) throw new Exception("ID inválido.");
-        return planoEspecieDAO.buscarPorId(id);
-    }
-    
-    private void validarPrecoPPA(PrecoPPA precoPPA) throws Exception {
-        if (precoPPA == null || precoPPA.getEspecie() == null || precoPPA.getData_inicio() == null) {
-            throw new Exception("Dados de Preço PPA inválidos.");
-        }
-        if (precoPPA.getEspecie().getId() <= 0) throw new Exception("Espécie inválida.");
-        if (precoPPA.getValor() < 0) throw new Exception("Valor não pode ser negativo.");
-    }
-
-    public void inserirPrecoPPA(PrecoPPA precoPPA) throws Exception {
-        validarPrecoPPA(precoPPA);
-        if (!precoPPADAO.inserir(precoPPA)) throw new Exception("Erro ao inserir preço PPA.");
-    }
-
-    public void atualizarPrecoPPA(PrecoPPA precoPPA) throws Exception {
-        validarPrecoPPA(precoPPA);
-        if (!precoPPADAO.atualizar(precoPPA)) throw new Exception("Erro ao atualizar preço PPA.");
-    }
-
-    public void excluirPrecoPPA(int id_Especie, Timestamp data_Inicio) throws Exception {
-        if (id_Especie <= 0 || data_Inicio == null) throw new Exception("Dados inválidos para exclusão.");
-        if (!precoPPADAO.excluir(id_Especie, data_Inicio)) throw new Exception("Erro ao excluir preço PPA.");
-    }
-
-    public List<PrecoPPA> listarPrecosPPA() {
-        return precoPPADAO.listarTodos();
-    }
-
-    public PrecoPPA buscarPrecoPPA(Timestamp data, int id_Especie) throws Exception {
-        if (id_Especie <= 0 || data == null) throw new Exception("Dados inválidos para busca.");
-        return precoPPADAO.buscarPorId(data, id_Especie);
-    }
-    
-    private void validarProduto(Produto produto) throws Exception {
-        if (produto == null) throw new Exception("Produto inválido.");
-        if (produto.getNome() == null || produto.getNome().trim().isEmpty()) {
-            throw new Exception("Nome do produto é obrigatório.");
-        }
-        if (produto.getEspecie() == null || produto.getEspecie().getId() <= 0) {
-            throw new Exception("Selecione uma espécie válida.");
-        }
-    }
-
-    public void inserirProduto(Produto produto) throws Exception {
-        validarProduto(produto);
-        if (!produtoDAO.inserir(produto)) throw new Exception("Erro ao inserir produto.");
-    }
-
-    public void atualizarProduto(Produto produto) throws Exception {
-        validarProduto(produto);
-        if (produto.getId() <= 0) throw new Exception("ID inválido para atualização.");
-        if (!produtoDAO.atualizar(produto)) throw new Exception("Erro ao atualizar produto.");
-    }
-
-    public void excluirProduto(int id) throws Exception {
-        if (id <= 0) throw new Exception("ID inválido.");
-        if (!produtoDAO.excluir(id)) throw new Exception("Erro ao excluir produto.");
-    }
-
-    public List<Produto> listarProdutos() {
-        return produtoDAO.listarTodos();
-    }
-
-    public Produto buscarProdutoPorId(int id) throws Exception {
-        if (id <= 0) throw new Exception("ID inválido.");
-        return produtoDAO.buscarPorId(id);
-    }
-    
-    private void validarTipo(Tipo tipo) throws Exception {
-        if (tipo == null) throw new Exception("Tipo inválido.");
-        if (tipo.getNome() == null || tipo.getNome().trim().isEmpty()) {
-            throw new Exception("Nome do tipo é obrigatório.");
-        }
-    }
-
-    public void inserirTipo(Tipo tipo) throws Exception {
-        validarTipo(tipo);
-        if (!tipoDAO.inserir(tipo)) throw new Exception("Erro ao inserir tipo.");
-    }
-
-    public void atualizarTipo(Tipo tipo) throws Exception {
-        validarTipo(tipo);
-        if (tipo.getId() <= 0) throw new Exception("ID inválido para atualização.");
-        if (!tipoDAO.atualizar(tipo)) throw new Exception("Erro ao atualizar tipo.");
-    }
-
-    public void excluirTipo(int id) throws Exception {
-        if (id <= 0) throw new Exception("ID inválido.");
-        if (!tipoDAO.excluir(id)) throw new Exception("Erro ao excluir tipo.");
-    }
-
-    public List<Tipo> listarTipos() {
-        return tipoDAO.listarTodos();
-    }
-
-    public Tipo buscarTipoPorId(int id) throws Exception {
-        if (id <= 0) throw new Exception("ID inválido.");
-        return tipoDAO.buscarPorId(id);
-    }
-
-    */
 }

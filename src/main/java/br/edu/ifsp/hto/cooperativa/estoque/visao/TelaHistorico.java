@@ -20,11 +20,11 @@ public class TelaHistorico {
     static String tipo = "Todos";
     static ControleEstoque controle = ControleEstoque.getInstance();
 
-    public static void main(String[] args) {
+    public static JInternalFrame gerarFrameInterno() {
 
-        JFrame janela = new JFrame("Histórico");
+        JInternalFrame janela = new JInternalFrame("Histórico");
         janela.setSize(1200, 700);
-        janela.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        janela.setDefaultCloseOperation(JInternalFrame.EXIT_ON_CLOSE);
         janela.setLayout(new BorderLayout());
 
         /* MENU LATERAL */
@@ -144,6 +144,7 @@ public class TelaHistorico {
         janela.add(painelCentral, BorderLayout.CENTER);
 
         janela.setVisible(true);
+        return janela;
     }
 
     /* BOTÕES DO MENU */

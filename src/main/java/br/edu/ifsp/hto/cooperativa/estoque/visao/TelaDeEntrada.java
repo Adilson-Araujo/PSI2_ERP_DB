@@ -12,12 +12,12 @@ import java.util.List;
 
 public class TelaDeEntrada {
 
-    public static void main(String[] args) {
+    public static JInternalFrame gerarFrameInterno() {
         ControleEstoque controle = ControleEstoque.getInstance();
 
-        final JFrame janela = new JFrame("Entrada no Estoque");
+        final JInternalFrame janela = new JInternalFrame("Entrada no Estoque");
         janela.setSize(700, 500); 
-        janela.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        janela.setDefaultCloseOperation(JInternalFrame.EXIT_ON_CLOSE);
         janela.setLayout(new BorderLayout());
 
 
@@ -169,6 +169,8 @@ public class TelaDeEntrada {
         janela.add(painelWrapper, BorderLayout.CENTER);
         janela.add(painelTabela, BorderLayout.SOUTH);
         janela.setVisible(true);
+        
+        return janela;
     }
 
 

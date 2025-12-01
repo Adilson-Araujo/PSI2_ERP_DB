@@ -7,12 +7,12 @@ import java.awt.*;
 
 public class TelaRelatorio {
 
-    public static void main(String[] args) {
+    public static JInternalFrame gerarFrameInterno(){
 
         // Criação da janela principal
-        final JFrame janela = new JFrame("Relatório");
+        final JInternalFrame janela = new JInternalFrame("Relatório");
         janela.setSize(900, 600);
-        janela.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        janela.setDefaultCloseOperation(JInternalFrame.EXIT_ON_CLOSE);
         janela.setLayout(new BorderLayout());
 
         /* MENU LATERAL*/
@@ -128,6 +128,7 @@ public class TelaRelatorio {
         janela.add(painelCentral, BorderLayout.CENTER); // Conteúdo principal
 
         janela.setVisible(true); // Exibe a tela
+        return janela;
     }
 
     /*  FUNÇÃO PARA CRIAR OS BOTÕES DO MENU LATERAL */

@@ -4,29 +4,22 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
-public class TelaEstoqueAtual extends JFrame {
+public class TelaEstoqueAtual {
+    public static JInternalFrame gerarFrameInterno(){
+        JInternalFrame janela = new JInternalFrame();
+        
+        JPanel painelControle;
+        JPanel painelExibicao;
+        JTextField campoProduto;
+        JButton botaoExportar;
+        JTable tabelaEstoque;
+        JScrollPane scrollTabela;
+        
+        janela.setTitle("Visão – Estoque Atual");
+        janela.setSize(900, 600);
+        janela.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
+        janela.setLayout(new BorderLayout());
 
-    private JPanel painelControle;
-    private JPanel painelExibicao;
-
-    private JTextField campoProduto;
-    private JButton botaoExportar;
-
-    private JTable tabelaEstoque;
-    private JScrollPane scrollTabela;
-
-    public TelaEstoqueAtual() {
-        setTitle("Visão – Estoque Atual");
-        setSize(900, 600);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLayout(new BorderLayout());
-
-        inicializarComponentes();
-        montarLayout();
-    }
-
-    private void inicializarComponentes() {
         painelControle = new JPanel();
         painelControle.setLayout(new FlowLayout(FlowLayout.LEFT));
 
@@ -52,14 +45,11 @@ public class TelaEstoqueAtual extends JFrame {
 
         scrollTabela = new JScrollPane(tabelaEstoque);
         painelExibicao.add(scrollTabela);
-    }
-
-    private void montarLayout() {
-        add(painelControle, BorderLayout.NORTH);
-        add(painelExibicao, BorderLayout.CENTER);
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new TelaEstoqueAtual().setVisible(true));
+        
+        janela.add(painelControle, BorderLayout.NORTH);
+        janela.add(painelExibicao, BorderLayout.CENTER);
+        
+        janela.setVisible(true);
+        return janela;
     }
 }

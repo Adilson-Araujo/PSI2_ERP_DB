@@ -9,11 +9,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class TelaDeSaida {
-    public static void main(String[] args) {
+    public static JInternalFrame gerarFrameInterno() {
 
-        final JFrame janela = new JFrame("Remover Produto");
+        final JInternalFrame janela = new JInternalFrame("Remover Produto");
         janela.setSize(700, 500);
-        janela.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        janela.setDefaultCloseOperation(JInternalFrame.EXIT_ON_CLOSE);
         janela.setLayout(new BorderLayout());
 
      
@@ -182,6 +182,8 @@ public class TelaDeSaida {
         janela.add(painelWrapper, BorderLayout.CENTER);
         janela.add(painelTabela, BorderLayout.SOUTH);
         janela.setVisible(true);
+        
+        return janela;
     }
 
     private static JButton criarBotao(String texto) {

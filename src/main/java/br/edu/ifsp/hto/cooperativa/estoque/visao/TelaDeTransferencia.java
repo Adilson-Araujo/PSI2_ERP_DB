@@ -10,11 +10,11 @@ import java.awt.event.ActionListener;
 
 public class TelaDeTransferencia {
 
-    public static void main(String[] args) {
+    public static JInternalFrame gerarFrameInterno() {
         
-        final JFrame janela = new JFrame("Transferência de Produtos");
+        final JInternalFrame janela = new JInternalFrame("Transferência de Produtos");
         janela.setSize(700, 500);
-        janela.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        janela.setDefaultCloseOperation(JInternalFrame.EXIT_ON_CLOSE);
         janela.setLayout(new BorderLayout());
 
        
@@ -169,6 +169,8 @@ public class TelaDeTransferencia {
         janela.add(painelWrapper, BorderLayout.CENTER);
         janela.add(painelTabela, BorderLayout.SOUTH);
         janela.setVisible(true);
+        
+        return janela;
     }
 
     private static JButton criarBotao(String texto) {

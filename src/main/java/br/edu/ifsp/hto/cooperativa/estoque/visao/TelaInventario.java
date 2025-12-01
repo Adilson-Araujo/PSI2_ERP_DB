@@ -4,33 +4,27 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
-public class TelaInventario extends JFrame {
+public class TelaInventario {
+    public static JInternalFrame gerarFrameInterno(){
+        JInternalFrame janela = new JInternalFrame();
 
-    private JPanel painelControle;
-    private JPanel painelBotoes;
-    private JScrollPane scrollTabela;
+        JPanel painelControle;
+        JPanel painelBotoes;
+        JScrollPane scrollTabela;
 
-    private JTextField campoProduto;
-    private JTextField campoArmazem;
+        JTextField campoProduto;
+        JTextField campoArmazem;
 
-    private JButton botaoImportar;
-    private JButton botaoExportar;
-    private JButton botaoSalvar;
+        JButton botaoImportar;
+        JButton botaoExportar;
+        JButton botaoSalvar;
 
-    private JTable tabelaInventario;
+        JTable tabelaInventario;
 
-    public TelaInventario() {
-        setTitle("Visão – Inventário");
-        setSize(900, 600);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLayout(new BorderLayout());
-
-        inicializarComponentes();
-        montarLayout();
-    }
-
-    private void inicializarComponentes() {
+        janela.setTitle("Visão – Inventário");
+        janela.setSize(900, 600);
+        janela.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
+        janela.setLayout(new BorderLayout());
 
         painelControle = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
@@ -68,15 +62,12 @@ public class TelaInventario extends JFrame {
 
         painelBotoes.add(botaoExportar);
         painelBotoes.add(botaoSalvar);
-    }
-
-    private void montarLayout() {
-        add(painelControle, BorderLayout.NORTH);
-        add(scrollTabela, BorderLayout.CENTER);
-        add(painelBotoes, BorderLayout.SOUTH);
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new TelaInventario().setVisible(true));
+        
+        janela.add(painelControle, BorderLayout.NORTH);
+        janela.add(scrollTabela, BorderLayout.CENTER);
+        janela.add(painelBotoes, BorderLayout.SOUTH);
+        
+        janela.setVisible(true);
+        return janela;
     }
 }

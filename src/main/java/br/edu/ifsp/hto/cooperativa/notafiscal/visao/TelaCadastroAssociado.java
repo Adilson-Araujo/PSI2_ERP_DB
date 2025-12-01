@@ -17,11 +17,15 @@ public class TelaCadastroAssociado extends ViewBase {
     private JTextField txtCnpj, txtDap, txtCaf, txtPronaf, txtPaa, txtPnae;
 
     public TelaCadastroAssociado() {
-        super();
+        super(); // Chama o construtor da ViewBase (JInternalFrame)
         setTitle("Cadastro de Associado");
         setSize(700, 500);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
+
+        // REMOVIDO: setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        // REMOVIDO: setLocationRelativeTo(null);
+
+        // MUDANÇA: Configuramos que ela pode ser fechada
+        setClosable(true);
 
         JTabbedPane abas = new JTabbedPane();
         abas.addTab("Informações Pessoais", criarPainelPessoal());
@@ -50,7 +54,7 @@ public class TelaCadastroAssociado extends ViewBase {
         addField(p, gbc, 3, "RG:", txtRg);
         addField(p, gbc, 4, "Telefone:", txtTelefone);
         addField(p, gbc, 5, "E-mail:", txtEmail);
-           
+
         addTopGlue(p, gbc, 11);
         return p;
     }

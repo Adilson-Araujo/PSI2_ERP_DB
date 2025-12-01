@@ -43,20 +43,24 @@ public class TelaCadastroVenda extends ViewBase {
     // Totais
     private JTextField txtBaseICMS, txtVlrICMS, txtBaseICMSST, txtVlrICMSST,
             txtValorProdutos, txtVlrFrete, txtVlrSeguro, txtDesconto, txtVlrIPI, txtValorTotalNF;
-    
-    
+
+
     public TelaCadastroVenda() {
         super();
         setTitle("Cadastro de Nota Fiscal Eletrônica (NF-e)");
         setSize(1000, 720);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
+
+        // REMOVIDO: setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // REMOVIDO: setLocationRelativeTo(null);
+
+        setClosable(true); // Permite fechar a janelinha
+        setResizable(true); // Permite redimensionar
 
         JTabbedPane abas = new JTabbedPane();
         abas.addTab("Identificação", criarPainelIdentificacao());
         abas.addTab("Emitente", criarPainelEmitente());
         abas.addTab("Destinatário", criarPainelDestinatario());
-        abas.addTab("Produtos", criarPainelProdutos()); // restaurado
+        abas.addTab("Produtos", criarPainelProdutos());
         abas.addTab("Totais", criarPainelTotais());
 
         add(abas);
@@ -134,20 +138,18 @@ public class TelaCadastroVenda extends ViewBase {
             AssociadoTO associado = null;
             var sessaoControlador = new SessaoControlador();
             var usuarioLogado = sessaoControlador.obterUsuarioLogado();
-            if (usuarioLogado == null){
+            if (usuarioLogado == null) {
                 if (txtEmitCnpj.getText().isEmpty()) {
                     JOptionPane.showMessageDialog(this, "Digite o CNPJ do emitente", "Aviso", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
                 var associadoControlador = new AssociadoControlador();
                 associado = associadoControlador.obter(txtEmitCnpj.getText());
-                if (associado == null)
-                {
+                if (associado == null) {
                     JOptionPane.showMessageDialog(this, "Emitente com cnpj: " + txtEmitCnpj.getText() + " não está cadastrado", "Aviso", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
-            }
-            else {
+            } else {
                 associado = usuarioLogado.associadoTO;
             }
             txtEmitCnpj.setText(associado.associado.getCnpj());
@@ -159,9 +161,7 @@ public class TelaCadastroVenda extends ViewBase {
             txtEmitCidade.setText(associado.endereco.getCidade());
             txtEmitRua.setText(associado.endereco.getRua());
             txtEmitNumero.setText(associado.endereco.getNumero().toString());
-        }
-        catch(Exception ex)
-        {
+        } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -206,16 +206,14 @@ public class TelaCadastroVenda extends ViewBase {
     }
 
     private void btnImportarDestinatario_click() {
-        try{
-            if (txtDestCpfCnpj.getText().isEmpty())
-            {
+        try {
+            if (txtDestCpfCnpj.getText().isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Digite o CPF / CNPJ do destinatário", "Aviso", JOptionPane.WARNING_MESSAGE);
                 return;
             }
             var clienteControlador = new ClienteControlador();
             var cliente = clienteControlador.obter(txtDestCpfCnpj.getText());
-            if (cliente == null)
-            {
+            if (cliente == null) {
                 JOptionPane.showMessageDialog(this, "Destinatário / cliente com cpf ou cnpj: " + txtEmitCnpj.getText() + " não está cadastrado", "Aviso", JOptionPane.WARNING_MESSAGE);
                 return;
             }
@@ -226,9 +224,7 @@ public class TelaCadastroVenda extends ViewBase {
             txtDestNumero.setText(cliente.endereco.getNumero().toString());
             txtDestUf.setText(cliente.endereco.getEstado());
             txtDestRazao.setText(cliente.cliente.getRazaoSocial());
-        }
-        catch(Exception ex)
-        {
+        } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -244,22 +240,24 @@ public class TelaCadastroVenda extends ViewBase {
         gbc.gridx = 0;
         gbc.gridy = 6;
         form.add(btnImportar, gbc);
-        
+
         btnImportar.addActionListener(e -> {
-    TelaSelecionarProdutoImportar tela = new TelaSelecionarProdutoImportar(this);
-    tela.setVisible(true);
-    if (tela.produtoFoiSelecionado()) {
-        modeloItens.addRow(new Object[]{
-            "COD" + (modeloItens.getRowCount() + 1),
-            tela.getProdutoSelecionado(),
-            "", "", // NCM e CFOP podem ser preenchidos depois
-            tela.getQuantidade(),
-            String.format("%.2f", tela.getValorUnitario()),
-            String.format("%.2f", tela.getQuantidade() * tela.getValorUnitario())
+            // Pegamos a janela pai (TelaPrincipal) para passar para o diálogo
+            JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+            TelaSelecionarProdutoImportar tela = new TelaSelecionarProdutoImportar(parentFrame);
+            tela.setVisible(true);
+            if (tela.produtoFoiSelecionado()) {
+                modeloItens.addRow(new Object[]{
+                        "COD" + (modeloItens.getRowCount() + 1),
+                        tela.getProdutoSelecionado(),
+                        "", "", // NCM e CFOP podem ser preenchidos depois
+                        tela.getQuantidade(),
+                        String.format("%.2f", tela.getValorUnitario()),
+                        String.format("%.2f", tela.getQuantidade() * tela.getValorUnitario())
+                });
+                atualizarTotais();
+            }
         });
-        atualizarTotais();
-    }
-});
 
         modeloItens = new DefaultTableModel(new Object[]{"Código", "Descrição", "NCM", "CFOP", "Qtd", "Vlr Unit", "Subtotal"}, 0) {
             @Override
@@ -315,7 +313,8 @@ public class TelaCadastroVenda extends ViewBase {
         addField(p, gbc, 9, "Total NF:", txtValorTotalNF);
 
         br.edu.ifsp.hto.cooperativa.notafiscal.visao.ClassesBase.Button btnSalvar = new Button("Salvar Nota Fiscal");
-        gbc.gridx = 1; gbc.gridy = 10;
+        gbc.gridx = 1;
+        gbc.gridy = 10;
         p.add(btnSalvar, gbc);
 
         addTopGlue(p, gbc, 11);
@@ -374,7 +373,7 @@ public class TelaCadastroVenda extends ViewBase {
         double total = valorProdutos + frete + seguro + ipi + icms + icmsst - desconto;
         txtValorTotalNF.setText(format(total));
     }
-    
+
     private void limparCamposProduto() {
         txtProdCodigo.setText("");
         txtProdDescricao.setText("");
@@ -387,24 +386,31 @@ public class TelaCadastroVenda extends ViewBase {
 
     private void addRecalcOnChange(JTextField... fields) {
         DocumentListener dl = new DocumentListener() {
-            public void insertUpdate(DocumentEvent e) { atualizarTotais(); }
-            public void removeUpdate(DocumentEvent e) { atualizarTotais(); }
-            public void changedUpdate(DocumentEvent e) { atualizarTotais(); }
+            public void insertUpdate(DocumentEvent e) {
+                atualizarTotais();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                atualizarTotais();
+            }
+
+            public void changedUpdate(DocumentEvent e) {
+                atualizarTotais();
+            }
         };
         for (JTextField f : fields) {
             f.getDocument().addDocumentListener(dl);
         }
     }
 
-    private void salvarNfe(){
+    private void salvarNfe() {
         var associadoControlador = new AssociadoControlador();
         var clienteControlador = new ClienteControlador();
         var notaFiscalEletronicaTO = new NotaFiscalEletronicaTO();
         notaFiscalEletronicaTO.notaFiscalEletronica = new NotaFiscalEletronicaVO();
         notaFiscalEletronicaTO.notaFiscalItens = new ArrayList<>();
         notaFiscalEletronicaTO.associadoTO = associadoControlador.obter(txtEmitCnpj.getText());
-        if (notaFiscalEletronicaTO.associadoTO == null)
-        {
+        if (notaFiscalEletronicaTO.associadoTO == null) {
             var associadoTO = new AssociadoTO();
             associadoTO.associado = new AssociadoVO();
             associadoTO.associado.setCnpj(txtEmitCnpj.getText());

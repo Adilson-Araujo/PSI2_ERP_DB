@@ -84,7 +84,7 @@ public class TelaLogin extends JFrame {
             // long associadoId = Sessao.getAssociadoIdLogado();
             if (usuarioLogado != null)
             {
-                Cooperativa  cooperativa = new br.edu.ifsp.hto.cooperativa.Cooperativa();
+                Cooperativa cooperativa = new br.edu.ifsp.hto.cooperativa.Cooperativa();
 
                 // NÃO MEXER EH A INTEGRAÇÃO DA TELA DE PRODUÇÃO PARA A GENTE TESTAR NOSSAS TELAS NO BD
                 // new br.edu.ifsp.hto.cooperativa.producao.visao.TelaInicial(associadoId).setVisible(true);

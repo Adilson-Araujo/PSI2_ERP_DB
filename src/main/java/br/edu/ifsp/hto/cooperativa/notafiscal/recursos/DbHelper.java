@@ -14,15 +14,16 @@ public class DbHelper {
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, nomeTabela);
+            stmt.setString(1, nomeTabela + "_id_seq");
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                return rs.getLong(0);
+                return rs.getLong(1);
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e);
         }
 
         return 0;

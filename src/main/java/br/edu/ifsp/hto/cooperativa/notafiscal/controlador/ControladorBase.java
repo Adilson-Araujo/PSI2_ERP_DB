@@ -2,10 +2,10 @@ package br.edu.ifsp.hto.cooperativa.notafiscal.controlador;
 
 import br.edu.ifsp.hto.cooperativa.ConnectionFactory;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.negocios.NegociosFactory;
+import org.apache.commons.collections.functors.ConstantTransformer;
 
 public class ControladorBase {
     private NegociosFactory _negociosFactory;
-
     protected NegociosFactory negociosFactory()
     {
         if (_negociosFactory == null)

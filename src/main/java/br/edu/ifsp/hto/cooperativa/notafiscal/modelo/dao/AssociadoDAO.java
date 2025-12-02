@@ -69,8 +69,13 @@ public class AssociadoDAO {
                 email,
                 data_cadastrado,
                 ativo,
-                id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                id,
+                daf,
+                caf,
+                pronaf,
+                paa,
+                pnae
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """;
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -87,6 +92,11 @@ public class AssociadoDAO {
             stmt.setTimestamp(9, Timestamp.valueOf(vo.getDataCadastrado()));
             stmt.setBoolean(10, vo.getAtivo());
             stmt.setLong(11, vo.getId());
+            stmt.setString(12, vo.getDaf());
+            stmt.setString(13, vo.getCaf());
+            stmt.setString(14, vo.getPronaf());
+            stmt.setString(15, vo.getPaa());
+            stmt.setString(16, vo.getPnae());
             stmt.executeUpdate();
 
 
@@ -108,7 +118,12 @@ public class AssociadoDAO {
                 telefone           = ?,
                 email              = ?,
                 data_cadastrado    = ?,
-                ativo              = ?
+                ativo              = ?,
+                daf                = ?,
+                caf                = ?,
+                pronaf             = ?,
+                paa                = ?,
+                pnae               = ?
             WHERE id = ?
         """;
 
@@ -125,7 +140,12 @@ public class AssociadoDAO {
             stmt.setString(8, vo.getEmail());
             stmt.setTimestamp(9, Timestamp.valueOf(vo.getDataCadastrado()));
             stmt.setBoolean(10, vo.getAtivo());
-            stmt.setLong(11, vo.getId());
+            stmt.setString(11, vo.getDaf());
+            stmt.setString(12, vo.getCaf());
+            stmt.setString(13, vo.getPronaf());
+            stmt.setString(14, vo.getPaa());
+            stmt.setString(15, vo.getPnae());
+            stmt.setLong(16, vo.getId());
             stmt.executeUpdate();
 
         } catch (SQLException e) {
@@ -148,6 +168,11 @@ public class AssociadoDAO {
                 telefone,
                 email,
                 data_cadastrado,
+                daf,
+                caf,
+                pronaf,
+                paa,
+                pnae,
                 ativo
             FROM associado
             ORDER BY id
@@ -170,6 +195,11 @@ public class AssociadoDAO {
                 vo.setEmail(rs.getString("email"));
                 vo.setDataCadastrado(rs.getTimestamp("data_cadastrado").toLocalDateTime());
                 vo.setAtivo(rs.getBoolean("ativo"));
+                vo.setDaf(rs.getString("daf"));
+                vo.setCaf(rs.getString("caf"));
+                vo.setPronaf(rs.getString("pronaf"));
+                vo.setPaa(rs.getString("paa"));
+                vo.setPnae(rs.getString("pnae"));
                 lista.add(vo);
             }
 
@@ -211,6 +241,11 @@ public class AssociadoDAO {
                 telefone,
                 email,
                 data_cadastrado,
+                daf,
+                caf,
+                pronaf,
+                paa,
+                pnae,
                 ativo
             FROM associado
             WHERE cnpj = ?
@@ -235,6 +270,11 @@ public class AssociadoDAO {
                 vo.setEmail(rs.getString("email"));
                 vo.setDataCadastrado(rs.getTimestamp("data_cadastrado").toLocalDateTime());
                 vo.setAtivo(rs.getBoolean("ativo"));
+                vo.setDaf(rs.getString("daf"));
+                vo.setCaf(rs.getString("caf"));
+                vo.setPronaf(rs.getString("pronaf"));
+                vo.setPaa(rs.getString("paa"));
+                vo.setPnae(rs.getString("pnae"));
                 return vo;
             }
 

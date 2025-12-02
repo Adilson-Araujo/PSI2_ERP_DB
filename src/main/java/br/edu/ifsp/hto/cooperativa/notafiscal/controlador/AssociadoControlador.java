@@ -21,5 +21,4 @@ public class AssociadoControlador extends ControladorBase {
     public void cadastrar(AssociadoTO associado) {
         executarTransacao(() -> negociosFactory().getAssociado().cadastrar(associado));
     }
-    
 }

@@ -10,10 +10,16 @@ public class AssociadoVO {
     private String inscricaoEstadual;
     private String inscricaoMunicipal;
     private Long enderecoId;
+
     private String telefone;
     private String email;
     private LocalDateTime dataCadastrado;
     private Boolean ativo;
+    private String daf;
+    private String caf;
+    private String pronaf;
+    private String paa;
+    private String pnae;
 
     public AssociadoVO() {}
 
@@ -40,6 +46,45 @@ public class AssociadoVO {
     public void setDataCadastrado(LocalDateTime dataCadastrado) { this.dataCadastrado = dataCadastrado; }
     public Boolean getAtivo() { return ativo; }
     public void setAtivo(Boolean ativo) { this.ativo = ativo; }
+    public String getDaf() {
+        return daf;
+    }
+
+    public void setDaf(String daf) {
+        this.daf = daf;
+    }
+
+    public String getCaf() {
+        return caf;
+    }
+
+    public void setCaf(String caf) {
+        this.caf = caf;
+    }
+
+    public String getPronaf() {
+        return pronaf;
+    }
+
+    public void setPronaf(String pronaf) {
+        this.pronaf = pronaf;
+    }
+
+    public String getPaa() {
+        return paa;
+    }
+
+    public void setPaa(String paa) {
+        this.paa = paa;
+    }
+
+    public String getPnae() {
+        return pnae;
+    }
+
+    public void setPnae(String pnae) {
+        this.pnae = pnae;
+    }
 
     @Override
     public String toString() {

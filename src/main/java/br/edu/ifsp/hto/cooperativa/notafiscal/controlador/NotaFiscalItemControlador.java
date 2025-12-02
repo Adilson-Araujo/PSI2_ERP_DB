@@ -4,25 +4,14 @@
  */
 package br.edu.ifsp.hto.cooperativa.notafiscal.controlador;
 
-import br.edu.ifsp.hto.cooperativa.notafiscal.controlador.API.INotaFiscalItemControlador;
-import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.dto.NotaFiscalItemTO;
+import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.vo.NotaFiscalItemVO;
+
 import java.util.List;
 
-public class NotaFiscalItemControlador implements INotaFiscalItemControlador {
+public class NotaFiscalItemControlador extends ControladorBase{
 
-    @Override
-    public NotaFiscalItemTO obter(int id) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public List<NotaFiscalItemTO> buscar() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public List<NotaFiscalItemTO> buscar(int notaFiscalEletronicaId) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public List<NotaFiscalItemVO> buscar(long notaFiscalEletronicaId) {
+        return executarTransacao(() -> negociosFactory().getNotaFiscalItem().buscarPorNf(notaFiscalEletronicaId));
     }
     
 }

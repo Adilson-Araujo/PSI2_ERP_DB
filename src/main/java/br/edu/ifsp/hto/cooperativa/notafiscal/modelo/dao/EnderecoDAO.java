@@ -55,8 +55,9 @@ public class EnderecoDAO {
                 bairro,
                 rua,
                 numero,
-                cep
-            ) VALUES (?, ?, ?, ?, ?, ?)
+                cep,
+                id
+            ) VALUES (?, ?, ?, ?, ?, ?,?)
         """;
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -68,12 +69,8 @@ public class EnderecoDAO {
             stmt.setString(4, vo.getRua());
             stmt.setInt(5, vo.getNumero());
             stmt.setString(6, vo.getCep());
+            stmt.setLong(7, vo.getId());
             stmt.executeUpdate();
-
-            ResultSet rs = stmt.getGeneratedKeys();
-            if (rs.next()) {
-                vo.setId(rs.getLong(1));
-            }
 
         } catch (SQLException e) {
             e.printStackTrace();

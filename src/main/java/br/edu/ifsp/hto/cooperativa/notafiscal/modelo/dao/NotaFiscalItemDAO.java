@@ -5,6 +5,7 @@ import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.vo.NotaFiscalItemVO;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class NotaFiscalItemDAO {
 
@@ -124,6 +125,42 @@ public class NotaFiscalItemDAO {
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement p = conn.prepareStatement(sql);
              ResultSet rs = p.executeQuery()) {
+
+            while (rs.next()) {
+                NotaFiscalItemVO vo = new NotaFiscalItemVO();
+                vo.setId(rs.getLong("id"));
+                vo.setNotaFiscalEletronicaId(rs.getLong("nota_fiscal_eletronica_id"));
+                vo.setProdutoId(rs.getInt("produto_id"));
+                vo.setCfop(rs.getString("cfop"));
+                vo.setNcm(rs.getString("ncm"));
+                vo.setQuantidade(rs.getInt("quantidade"));
+                vo.setValorUnitario(rs.getBigDecimal("valor_unitario"));
+                vo.setValorTotal(rs.getBigDecimal("valor_total"));
+                lista.add(vo);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return lista;
+    }
+
+    public List<NotaFiscalItemVO> buscarPorNf(Long id) {
+        ArrayList<NotaFiscalItemVO> lista = new ArrayList<>();
+
+        String sql = """
+            SELECT id, nota_fiscal_eletronica_id, produto_id, cfop, ncm,
+                   quantidade, valor_unitario, valor_total
+            FROM nota_fiscal_item
+            WHERE nota_fiscal_eletronica_id = ?
+            """;
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement p = conn.prepareStatement(sql)) {
+
+            p.setLong(1, id);
+            ResultSet rs = p.executeQuery();
 
             while (rs.next()) {
                 NotaFiscalItemVO vo = new NotaFiscalItemVO();

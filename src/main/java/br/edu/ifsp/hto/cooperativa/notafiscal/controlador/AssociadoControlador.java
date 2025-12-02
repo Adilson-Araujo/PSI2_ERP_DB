@@ -4,33 +4,22 @@
  */
 package br.edu.ifsp.hto.cooperativa.notafiscal.controlador;
 
-import br.edu.ifsp.hto.cooperativa.notafiscal.controlador.API.IAssociadoControlador;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.dto.AssociadoTO;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.negocios.NegociosFactory;
 
 import java.util.List;
 
-public class AssociadoControlador implements IAssociadoControlador {
+public class AssociadoControlador extends ControladorBase {
 
-    @Override
-    public List<AssociadoTO> buscar() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
     public AssociadoTO obter(long id) {
-        var negociosFactory = NegociosFactory.getInstance();
-        return negociosFactory.getAssociado().buscarId(id);
+        return executarTransacao(() -> negociosFactory().getAssociado().buscarId(id));
     }
 
-    @Override
     public AssociadoTO obter(String cnpj) {
-        var negociosFactory = NegociosFactory.getInstance();
-        return negociosFactory.getAssociado().buscarCnpj(cnpj);    }
+        return executarTransacao(() -> negociosFactory().getAssociado().buscarCnpj(cnpj));    }
 
-    @Override
     public void cadastrar(AssociadoTO associado) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        executarTransacao(() -> negociosFactory().getAssociado().cadastrar(associado));
     }
     
 }

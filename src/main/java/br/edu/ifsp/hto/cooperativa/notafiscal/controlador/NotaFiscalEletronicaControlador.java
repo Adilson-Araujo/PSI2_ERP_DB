@@ -4,52 +4,33 @@
  */
 package br.edu.ifsp.hto.cooperativa.notafiscal.controlador;
 
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.Produto;
-import br.edu.ifsp.hto.cooperativa.notafiscal.controlador.API.INotaFiscalEletronicaControlador;
-import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.dto.ClienteTO;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.dto.NotaFiscalEletronicaTO;
-import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.negocios.BaseNegocios;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.negocios.NegociosFactory;
-import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.negocios.NotaFiscalEletronica;
-import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.negocios.NotaFiscalItem;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.vo.AssociadoVO;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.vo.NotaFiscalEletronicaVO;
-import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.vo.NotaFiscalItemVO;
 import br.edu.ifsp.hto.cooperativa.vendas.modelo.vo.ItemPedidoVO;
 import br.edu.ifsp.hto.cooperativa.vendas.modelo.vo.VendaVO;
-import com.lowagie.text.pdf.AcroFields;
-import com.sun.codemodel.JForEach;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NotaFiscalEletronicaControlador implements INotaFiscalEletronicaControlador {
+public class NotaFiscalEletronicaControlador extends ControladorBase{
 
-    @Override
-    public NotaFiscalEletronicaTO obter(int id) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public NotaFiscalEletronicaTO obter(long id) {
+       return executarTransacao(() -> negociosFactory().getNotaFiscalEletronica().obter(id));
     }
 
-    @Override
     public NotaFiscalEletronicaTO obter(String chaveAcesso) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return executarTransacao(() -> negociosFactory().getNotaFiscalEletronica().obter(chaveAcesso));
     }
 
-    @Override
     public List<NotaFiscalEletronicaTO> buscar(AssociadoVO associado) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public List<NotaFiscalEletronicaTO> buscar() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return executarTransacao(() -> negociosFactory().getNotaFiscalEletronica().buscar(associado));
     }
     
-    @Override
     public NotaFiscalEletronicaTO emitirNotaFiscalEletronica(VendaVO venda, long clienteId, List<ItemPedidoVO> produtosVendidos, BigDecimal valorFrete, String dadosAdicionais){
-        var instance = NegociosFactory.getInstance();
         var nfeTO = new NotaFiscalEletronicaTO();
         var nfeVO = new NotaFiscalEletronicaVO();
         nfeTO.notaFiscalEletronica = nfeVO;
@@ -70,7 +51,7 @@ public class NotaFiscalEletronicaControlador implements INotaFiscalEletronicaCon
         nfeVO.setChaveAcesso(String.format("%044d", 0));
         nfeVO.setNumeroNotaFiscal("0");
         nfeVO.setNumeroSerie("001");
-        instance.getNotaFiscalEletronica().gerarDanfeNfe(nfeTO, produtosVendidos);
+        executarTransacao(() -> negociosFactory().getNotaFiscalEletronica().gerarDanfeNfe(nfeTO, produtosVendidos));
         return nfeTO;
     }
 

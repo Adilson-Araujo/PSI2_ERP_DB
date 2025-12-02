@@ -4,7 +4,10 @@
  */
 package br.edu.ifsp.hto.cooperativa.notafiscal.modelo.negocios;
 
+import br.edu.ifsp.hto.cooperativa.ConnectionFactory;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.dto.ClienteTO;
+import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.vo.ClienteVO;
+import br.edu.ifsp.hto.cooperativa.notafiscal.recursos.DbHelper;
 
 public class Cliente extends BaseNegocios {
     public ClienteTO buscarCpfCnpj(String cpfCnpj){
@@ -17,7 +20,7 @@ public class Cliente extends BaseNegocios {
 
         resultado.cliente = cliente;
         if (cliente.getEnderecoId() != 0)
-            resultado.endereco = DAOFactory.getEnderecoDAO().buscarId(cliente.getEnderecoId());
+            resultado.endereco = Factory.getEndereco().obter(cliente.getEnderecoId());
 
         return resultado;
     }
@@ -32,8 +35,26 @@ public class Cliente extends BaseNegocios {
 
         resultado.cliente = cliente;
         if (cliente.getEnderecoId() != 0)
-            resultado.endereco = DAOFactory.getEnderecoDAO().buscarId(cliente.getEnderecoId());
+            resultado.endereco = Factory.getEndereco().obter(cliente.getEnderecoId());
 
         return resultado;
+    }
+
+    public void adicionar(ClienteVO cliente){
+        if (cliente == null)
+            return;
+        cliente.setId(DbHelper.gerarPk("cliente"));
+        DAOFactory.getClienteDAO().adicionar(cliente);
+    }
+
+    public void cadastrar(ClienteTO cliente) {
+        if (cliente == null || cliente.cliente == null)
+            return;
+        if (cliente.endereco != null)
+        {
+            Factory.getEndereco().adicionar(cliente.endereco);
+            cliente.cliente.setEnderecoId(cliente.endereco.getId());
+        }
+        adicionar(cliente.cliente);
     }
 }

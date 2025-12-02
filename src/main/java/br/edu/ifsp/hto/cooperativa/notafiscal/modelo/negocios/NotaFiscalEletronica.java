@@ -8,6 +8,7 @@ import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.dto.*;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.nfeSchema.ChaveAcesso;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.nfeSchema.nfe.*;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.vo.*;
+import br.edu.ifsp.hto.cooperativa.notafiscal.recursos.DbHelper;
 import br.edu.ifsp.hto.cooperativa.vendas.modelo.vo.ItemPedidoVO;
 import br.edu.ifsp.hto.cooperativa.vendas.modelo.vo.VendaVO;
 import jakarta.xml.bind.*;
@@ -91,7 +92,7 @@ public class NotaFiscalEletronica extends BaseNegocios {
     public void incluirNotaFiscalEletronica(NotaFiscalEletronicaVO nfe){
         if (nfe == null)
             return;
-
+        nfe.setId(DbHelper.gerarPk("nota_fiscal_eletronica"));
         DAOFactory.getNotaFiscalEletronicaDAO().adicionar(nfe);
     }
 
@@ -147,7 +148,8 @@ public class NotaFiscalEletronica extends BaseNegocios {
             var sw = new StringWriter();
             marshaller.marshal(tnFe, sw);
             nfe.notaFiscalXml.setConteudo(sw.toString());
-
+            nfe.notaFiscalXml.setId(nfe.notaFiscalEletronica.getId());
+            Factory.getNotaFiscalXml().adicionar(nfe.notaFiscalXml);
         } catch (Exception e) {
             throw new RuntimeException("Erro ao gerar XML da NFe", e);
         }
@@ -262,5 +264,47 @@ public class NotaFiscalEletronica extends BaseNegocios {
 
         totalNode.setICMSTot(icms);
         inf.setTotal(totalNode);
+    }
+
+    public NotaFiscalEletronicaTO obter(long id) {
+        var nfeTO = new NotaFiscalEletronicaTO();
+        var nfe = DAOFactory.getNotaFiscalEletronicaDAO().buscarId(id);
+        if (nfe == null)
+            return null;
+        nfeTO.notaFiscalEletronica = nfe;
+        nfeTO.notaFiscalXml = Factory.getNotaFiscalXml().obter(id);
+        nfeTO.associadoTO = Factory.getAssociado().buscarId(nfe.getAssociadoId());
+        nfeTO.clienteTO = Factory.getCliente().buscarId(nfe.getClienteId());
+        nfeTO.notaFiscalItens = Factory.getNotaFiscalItem().buscarPorNf(nfe.getId());
+        return nfeTO;
+    }
+
+    public NotaFiscalEletronicaTO obter(String chaveAcesso) {
+        var nfeTO = new NotaFiscalEletronicaTO();
+        var nfe = DAOFactory.getNotaFiscalEletronicaDAO().buscarChaveAcesso(chaveAcesso);
+        if (nfe == null)
+            return null;
+        nfeTO.notaFiscalEletronica = nfe;
+        nfeTO.notaFiscalXml = Factory.getNotaFiscalXml().obter(nfe.getId());
+        nfeTO.associadoTO = Factory.getAssociado().buscarId(nfe.getAssociadoId());
+        nfeTO.clienteTO = Factory.getCliente().buscarId(nfe.getClienteId());
+        nfeTO.notaFiscalItens = Factory.getNotaFiscalItem().buscarPorNf(nfe.getId());
+        return nfeTO;
+    }
+
+    public List<NotaFiscalEletronicaTO> buscar(AssociadoVO associado) {
+        var nfes = DAOFactory.getNotaFiscalEletronicaDAO().buscarAssociado(associado.getId());
+        var result = new ArrayList<NotaFiscalEletronicaTO>();
+        for(var nfe : nfes)
+        {
+           var nfeTO = new NotaFiscalEletronicaTO();
+            nfeTO.notaFiscalEletronica = nfe;
+            nfeTO.notaFiscalXml = Factory.getNotaFiscalXml().obter(nfe.getId());
+            nfeTO.associadoTO = Factory.getAssociado().buscarId(nfe.getAssociadoId());
+            nfeTO.clienteTO = Factory.getCliente().buscarId(nfe.getClienteId());
+            nfeTO.notaFiscalItens = Factory.getNotaFiscalItem().buscarPorNf(nfe.getId());
+            result.add(nfeTO);
+        }
+        return result;
     }
 }

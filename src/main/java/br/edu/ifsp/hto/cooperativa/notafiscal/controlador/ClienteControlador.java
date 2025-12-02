@@ -4,28 +4,23 @@
  */
 package br.edu.ifsp.hto.cooperativa.notafiscal.controlador;
 
-import br.edu.ifsp.hto.cooperativa.notafiscal.controlador.API.IClienteControlador;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.dto.ClienteTO;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.negocios.NegociosFactory;
 
 import java.util.List;
 
-public class ClienteControlador implements IClienteControlador {
+public class ClienteControlador extends ControladorBase {
 
-    @Override
-    public List<ClienteTO> buscar() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public ClienteTO obter(long id) {
+        return executarTransacao(() -> negociosFactory().getCliente().buscarId(id));
     }
 
-    @Override
-    public ClienteTO obter(long id) {
-        var negociosFactory = NegociosFactory.getInstance();
-        return negociosFactory.getCliente().buscarId(id);    }
-
-    @Override
     public ClienteTO obter(String cpfCnpj) {
-        var negociosFactory = NegociosFactory.getInstance();
-        return negociosFactory.getCliente().buscarCpfCnpj(cpfCnpj);
+        return executarTransacao(() -> negociosFactory().getCliente().buscarCpfCnpj(cpfCnpj));
+    }
+
+    public void cadastrar(ClienteTO cliente){
+        executarTransacao(() -> negociosFactory().getCliente().cadastrar(cliente));
     }
     
 }

@@ -9,6 +9,7 @@ import java.util.List;
 
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.dto.AssociadoTO;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.vo.AssociadoVO;
+import br.edu.ifsp.hto.cooperativa.notafiscal.recursos.DbHelper;
 
 public class Associado extends BaseNegocios{
     
@@ -16,9 +17,21 @@ public class Associado extends BaseNegocios{
     {
         if (associado == null)
             return;
-        //if (associado.endereco != null)    
+
+        if (associado.endereco != null) {
+            Factory.getEndereco().adicionar(associado.endereco);
+            associado.associado.setEnderecoId(associado.endereco.getId());
+        }
+        adicionar(associado.associado);
     }
-    
+
+    public void adicionar(AssociadoVO associado){
+        if (associado == null)
+            return;
+        associado.setId(DbHelper.gerarPk("associado"));
+        DAOFactory.getAssociadoDAO().adicionar(associado);
+    }
+
     public AssociadoTO buscarId(long id){
         if (id == 0)
             return null;
@@ -29,7 +42,7 @@ public class Associado extends BaseNegocios{
 
         resultado.associado = associado;
         if (associado.getEnderecoId() != 0)
-            resultado.endereco = DAOFactory.getEnderecoDAO().buscarId(associado.getEnderecoId());
+            resultado.endereco = Factory.getEndereco().obter(associado.getEnderecoId());
 
         return resultado;
     }
@@ -41,10 +54,11 @@ public class Associado extends BaseNegocios{
         for (var associado : associados)
         {
             var associadoTO = new AssociadoTO();
-
-            var endereco = DAOFactory.getEnderecoDAO().buscarId(associado.getEnderecoId());
+            associadoTO.associado = associado;
+            var endereco = Factory.getEndereco().obter(associado.getEnderecoId());
             if (endereco != null)
                 associadoTO.endereco = endereco;
+            resultado.add(associadoTO);
         }
         return resultado;
     }
@@ -59,7 +73,7 @@ public class Associado extends BaseNegocios{
 
         resultado.associado = associado;
         if (associado.getEnderecoId() != 0)
-            resultado.endereco = DAOFactory.getEnderecoDAO().buscarId(associado.getEnderecoId());
+            resultado.endereco = Factory.getEndereco().obter(associado.getEnderecoId());
 
         return resultado;
     }

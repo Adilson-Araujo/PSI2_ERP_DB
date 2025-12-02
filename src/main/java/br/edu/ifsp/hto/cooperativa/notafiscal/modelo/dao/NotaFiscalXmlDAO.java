@@ -9,29 +9,22 @@ import java.util.List;
 
 public class NotaFiscalXmlDAO {
 
-    public NotaFiscalXmlVO inserir(NotaFiscalXmlVO xml) throws SQLException {
+    public void adicionar(NotaFiscalXmlVO xml){
         String sql = """
-            INSERT INTO nota_fiscal_xml (hash, conteudo)
-            VALUES (?, ?)
-            RETURNING id, hash, conteudo
-        """;
+                    INSERT INTO nota_fiscal_xml (hash, conteudo)
+                    VALUES (?, ?)
+                """;
 
         try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement p = conn.prepareStatement(sql)) {
 
-            ps.setString(1, xml.getHash());
-            ps.setString(2, xml.getConteudo());
+            p.setString(1, xml.getHash());
+            p.setString(2, xml.getConteudo());
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    xml.setId(rs.getLong("id"));
-                    xml.setHash(rs.getString("hash"));
-                    xml.setConteudo(rs.getString("conteudo"));
-                }
-            }
+            p.executeUpdate();
+        }catch(Exception ex){
+            throw new RuntimeException("Erro ao inserir Nota Fiscal Xml", ex);
         }
-
-        return xml;
     }
 
     public NotaFiscalXmlVO atualizar(NotaFiscalXmlVO xml) throws SQLException {
@@ -53,7 +46,7 @@ public class NotaFiscalXmlDAO {
         return buscarPorId(xml.getId());
     }
 
-    public NotaFiscalXmlVO buscarPorId(Long id) throws SQLException {
+    public NotaFiscalXmlVO buscarPorId(Long id) {
         String sql = """
             SELECT id, hash, conteudo
             FROM nota_fiscal_xml
@@ -75,7 +68,9 @@ public class NotaFiscalXmlDAO {
                 }
             }
         }
-
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 

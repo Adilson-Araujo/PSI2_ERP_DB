@@ -4,20 +4,13 @@
  */
 package br.edu.ifsp.hto.cooperativa.notafiscal.controlador;
 
-import br.edu.ifsp.hto.cooperativa.notafiscal.controlador.API.IEnderecoControlador;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.vo.EnderecoVO;
 import java.util.List;
 
-public class EnderecoControlador implements IEnderecoControlador {
+public class EnderecoControlador extends ControladorBase{
 
-    @Override
-    public List<EnderecoVO> buscarTodos() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public EnderecoVO obter(int id) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public EnderecoVO obter(long id) {
+        return executarTransacao(() -> negociosFactory().getEndereco().obter(id));
     }
     
 }

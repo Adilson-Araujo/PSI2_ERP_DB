@@ -68,8 +68,9 @@ public class AssociadoDAO {
                 telefone,
                 email,
                 data_cadastrado,
-                ativo
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ativo,
+                id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """;
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -85,12 +86,9 @@ public class AssociadoDAO {
             stmt.setString(8, vo.getEmail());
             stmt.setTimestamp(9, Timestamp.valueOf(vo.getDataCadastrado()));
             stmt.setBoolean(10, vo.getAtivo());
+            stmt.setLong(11, vo.getId());
             stmt.executeUpdate();
 
-            ResultSet rs = stmt.getGeneratedKeys();
-            if (rs.next()) {
-                vo.setId(rs.getLong(1));
-            }
 
         } catch (SQLException e) {
             e.printStackTrace();

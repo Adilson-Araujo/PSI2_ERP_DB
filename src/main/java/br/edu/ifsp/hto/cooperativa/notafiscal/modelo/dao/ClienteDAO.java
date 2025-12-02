@@ -62,8 +62,9 @@ public class ClienteDAO {
                 email,
                 data_cadastro,
                 ativo,
-                cpf_cnpj
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                cpf_cnpj,
+                id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """;
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -77,12 +78,8 @@ public class ClienteDAO {
             stmt.setTimestamp(6, Timestamp.valueOf(vo.getDataCadastro()));
             stmt.setBoolean(7, vo.getAtivo());
             stmt.setString(8, vo.getCpfCnpj());
+            stmt.setLong(9, vo.getId());
             stmt.executeUpdate();
-
-            ResultSet rs = stmt.getGeneratedKeys();
-            if (rs.next()) {
-                vo.setId(rs.getLong(1));
-            }
 
         } catch (SQLException e) {
             e.printStackTrace();

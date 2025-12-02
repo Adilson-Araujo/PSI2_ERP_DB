@@ -4,10 +4,19 @@
  */
 package br.edu.ifsp.hto.cooperativa.notafiscal.modelo.negocios;
 
-/**
- *
- * @author ht3036979
- */
-public class Endereco {
-    
+import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.vo.EnderecoVO;
+
+
+public class Endereco extends BaseNegocios{
+
+    public EnderecoVO obter(long id){
+        return DAOFactory.getEnderecoDAO().buscarId(id);
+
+    }
+
+    public void adicionar(EnderecoVO endereco) {
+        if (endereco == null)
+            return;
+        DAOFactory.getEnderecoDAO().adicionar(endereco);
+    }
 }

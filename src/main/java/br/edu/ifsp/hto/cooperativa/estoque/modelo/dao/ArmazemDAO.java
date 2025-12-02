@@ -17,23 +17,37 @@ public class ArmazemDAO {
         if (instancia == null) instancia = new ArmazemDAO();
         return instancia;
     }
+    
+    private int nextId(){
+        String sql = "SELECT MAX(id) FROM armazem";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt(1)+1;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 
     public boolean inserir(ArmazemVO armazem) {
-        String sql = "INSERT INTO armazem (nome, endereco_id) VALUES (?, ?)";
+        String sql = "INSERT INTO armazem (id, nome, endereco_id) VALUES (?, ?, ?)";
         try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql,
+                     Statement.RETURN_GENERATED_KEYS);) {
 
-            stmt.setString(1, armazem.getNome());
-            stmt.setInt(2, armazem.getEnderecoId());
+            int idGerado = nextId();
+            stmt.setInt(1, idGerado);
+            stmt.setString(2, armazem.getNome());
+            stmt.setInt(3, armazem.getEnderecoId());
             stmt.executeUpdate();
             
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    int idGerado = rs.getInt(1);
-                    armazem.setId(idGerado);
-                    cache.put(idGerado, armazem);
-                }
-            }
+            armazem.setId(idGerado);
+            cache.put(idGerado, armazem);
             
             return true;
 
@@ -92,7 +106,7 @@ public class ArmazemDAO {
     }
 
     public boolean excluir(int id) {
-        String sql = "UPDATE produto SET deletado = TRUE WHERE id = ?";
+        String sql = "UPDATE armazem SET deletado = true WHERE id = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -109,7 +123,7 @@ public class ArmazemDAO {
 
     public List<ArmazemVO> listarTodos() {
         List<ArmazemVO> armazens = new ArrayList<>();
-        String sql = "SELECT id, nome, endereco_id FROM armazem";
+        String sql = "SELECT id, nome, endereco_id FROM armazem WHERE deletado = false";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);

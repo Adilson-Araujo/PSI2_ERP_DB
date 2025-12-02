@@ -20,25 +20,38 @@ public class EspecieDAO {
         return instancia;
     }
     
+    private int nextId(){
+        String sql = "SELECT MAX(id) FROM especie";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt(1)+1;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    
     public boolean inserir(EspecieVO especie) {
-        String sql = "INSERT INTO especie (categoria_id, nome, descricao, tempo_colheita, rendimento_kg_m2) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO especie (id, categoria_id, nome, descricao, tempo_colheita, rendimento_kg_m2) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, especie.getCategoria().getId());
-            stmt.setString(2, especie.getNome());
-            stmt.setString(3, especie.getDescricao());
-            stmt.setInt(4, especie.getTempo_colheita());
-            stmt.setFloat(5, especie.getRendimento_kg_m2());
+            int idGerado = nextId();
+            stmt.setInt(1, idGerado);
+            stmt.setInt(2, especie.getCategoria().getId());
+            stmt.setString(3, especie.getNome());
+            stmt.setString(4, especie.getDescricao());
+            stmt.setInt(5, especie.getTempo_colheita());
+            stmt.setFloat(6, especie.getRendimento_kg_m2());
             stmt.executeUpdate();
             
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    int idGerado = rs.getInt(1);
-                    especie.setId(idGerado);
-                    cache.put(idGerado, especie);
-                }
-            }
+            especie.setId(idGerado);
+            cache.put(idGerado, especie);
             
             return true;
 
@@ -122,7 +135,7 @@ public class EspecieDAO {
 
     public List<EspecieVO> listarTodas() {
         List<EspecieVO> especies = new ArrayList<>();
-        String sql = "SELECT id, categoria_id, nome, descricao, tempo_colheita, rendimento_kg_m2 FROM especie";
+        String sql = "SELECT id, categoria_id, nome, descricao, tempo_colheita, rendimento_kg_m2 FROM especie WHERE deletado = false";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);

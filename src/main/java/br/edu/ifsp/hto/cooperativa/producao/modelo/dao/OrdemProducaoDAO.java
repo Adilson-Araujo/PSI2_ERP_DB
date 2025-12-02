@@ -97,6 +97,31 @@ public class OrdemProducaoDAO {
         return lista;
     }
 
+    // READ by Area (retorna ordens ativas de uma área específica)
+    public List<OrdemProducaoVO> listarPorAreaId(Long areaId) throws SQLException {
+        String sql = """
+            SELECT DISTINCT op.*, t.nome as talhao_nome FROM ordem_producao op
+            JOIN talhao t ON op.talhao_id = t.id
+            WHERE t.area_id = ? AND op.status != 'deletado'
+            ORDER BY op.id
+        """;
+        
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setLong(1, areaId);
+        ResultSet rs = ps.executeQuery();
+
+        List<OrdemProducaoVO> lista = new ArrayList<>();
+
+        while (rs.next()) {
+            lista.add(converter(rs));
+        }
+
+        rs.close();
+        ps.close();
+
+        return lista;
+    }
+
     // UPDATE
     public void atualizar(OrdemProducaoVO vo) throws SQLException {
         String sql = "UPDATE ordem_producao SET " +
@@ -124,11 +149,11 @@ public class OrdemProducaoDAO {
         ps.close();
     }
 
-    // DELETE
-    public void deletar(Long id) throws SQLException {
-        String sql = "DELETE FROM ordem_producao WHERE id = ?";
+    // DELETE (marca como deletado)
+    public void deletar(Long ordemId) throws SQLException {
+        String sql = "UPDATE ordem_producao SET status = 'deletado' WHERE id = ?";
         PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setLong(1, id);
+        ps.setLong(1, ordemId);
         ps.executeUpdate();
         ps.close();
     }
@@ -141,6 +166,14 @@ public class OrdemProducaoDAO {
         vo.setPlanoId((Integer) rs.getObject("plano_id"));
         vo.setEspecieId((Long) rs.getObject("especie_id"));
         vo.setTalhaoId((Long) rs.getObject("talhao_id"));
+        
+        // Tenta pegar o nome do talhão (pode não existir em todos os queries)
+        try {
+            vo.setNomeTalhao(rs.getString("talhao_nome"));
+        } catch (SQLException e) {
+            vo.setNomeTalhao(null);
+        }
+        
         vo.setNomePlano(rs.getString("nome_plano"));
         vo.setDescricao(rs.getString("descricao"));
         vo.setDataInicio(rs.getTimestamp("data_inicio"));

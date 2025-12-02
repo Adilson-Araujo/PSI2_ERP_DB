@@ -11,6 +11,7 @@ public class AreaVO {
     private double areaUtilizada; 
     private double ph; 
     private List<TalhaoVO> talhoes;
+    private List<OrdemProducaoVO> ordens; // 🔑 NOVO: ordens de produção ativas
 
     // 🔑 CONSTRUTOR PADRÃO ADICIONADO PARA O DAO
     // Esta adição é NECESSÁRIA porque a existência de outros construtores remove o construtor padrão implícito.
@@ -76,6 +77,9 @@ public class AreaVO {
 
     public List<TalhaoVO> getTalhoes() { return talhoes; }
     public void setTalhoes(List<TalhaoVO> talhoes) { this.talhoes = talhoes; }
+
+    public List<OrdemProducaoVO> getOrdens() { return ordens; }
+    public void setOrdens(List<OrdemProducaoVO> ordens) { this.ordens = ordens; }
 
     @Override
     public String toString() {

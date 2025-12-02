@@ -6,7 +6,22 @@ import java.awt.*;
 
 public class TelaCanteiro extends JFrame {
 
-    public TelaCanteiro() {
+    private String cultura;
+    private String nomeCanteiro;
+    private java.util.Date inicio;
+    private double areaM2;
+    private double qtdKg;
+    private Long canteiroId;
+    private Long areaId;
+
+    public TelaCanteiro(String cultura, String nomeCanteiro, java.util.Date inicio, double areaM2, double qtdKg, Long canteiroId, Long areaId) {
+        this.cultura = cultura;
+        this.nomeCanteiro = nomeCanteiro;
+        this.inicio = inicio;
+        this.areaM2 = areaM2;
+        this.qtdKg = qtdKg;
+        this.canteiroId = canteiroId;
+        this.areaId = areaId;
         setTitle("Canteiro");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(1200, 800);
@@ -46,6 +61,19 @@ public class TelaCanteiro extends JFrame {
             botao.setPreferredSize(new Dimension(180, 50));
             botao.setBorder(BorderFactory.createLineBorder(verdeEscuro, 2));
             botao.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            
+            // Ação do botão
+            botao.addActionListener(e -> {
+                if (texto.equals("Área de plantio")) {
+                    new br.edu.ifsp.hto.cooperativa.producao.visao.TelaGerenciarArea().setVisible(true);
+                    dispose();
+                } else if (texto.equals("Registrar problemas")) {
+                    // Adicionar lógica para Registrar problemas
+                } else if (texto.equals("Relatório de produção")) {
+                    // Adicionar lógica para Relatório de produção
+                }
+            });
+            
             menuLateral.add(botao);
             menuLateral.add(Box.createVerticalStrut(20));
         }
@@ -79,6 +107,61 @@ public class TelaCanteiro extends JFrame {
         btnPronto.setPreferredSize(tam);
         btnPronto.setMaximumSize(tam);
 
+        // Ação do botão Voltar
+        btnVoltar.addActionListener(e -> {
+            if (areaId != null) {
+                try {
+                    br.edu.ifsp.hto.cooperativa.producao.controle.GerenciarAreaController controller = 
+                        new br.edu.ifsp.hto.cooperativa.producao.controle.GerenciarAreaController();
+                    br.edu.ifsp.hto.cooperativa.producao.modelo.vo.AreaVO area = 
+                        controller.carregarAreaCompletaPorId(areaId);
+                    if (area != null) {
+                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaTalhao(area).setVisible(true);
+                        dispose();
+                    } else {
+                        dispose();
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    dispose();
+                }
+            } else {
+                dispose();
+            }
+        });
+
+        // Ação do botão Editar Canteiro
+        btnEditar.addActionListener(e -> {
+            if (canteiroId != null) {
+                try {
+                    br.edu.ifsp.hto.cooperativa.producao.modelo.dao.CanteiroDAO canteiroDAO = 
+                        new br.edu.ifsp.hto.cooperativa.producao.modelo.dao.CanteiroDAO();
+                    br.edu.ifsp.hto.cooperativa.producao.modelo.vo.CanteiroVO canteiro = 
+                        canteiroDAO.buscarPorId(canteiroId.intValue());
+                    
+                    if (canteiro != null) {
+                        TelaEditarCanteiro telaEditar = new TelaEditarCanteiro(canteiro, areaId);
+                        telaEditar.setVisible(true);
+                        // Não fecha a tela atual - a TelaEditarCanteiro vai fechar e reabrir quando salvar
+                    } else {
+                        JOptionPane.showMessageDialog(TelaCanteiro.this, 
+                            "Erro: Canteiro não encontrado!", 
+                            "Erro", 
+                            JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(TelaCanteiro.this, 
+                        "Erro ao abrir tela de edição: " + ex.getMessage(), 
+                        "Erro", 
+                        JOptionPane.ERROR_MESSAGE);
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+        // Ação do botão Canteiro Pronto
+        btnPronto.addActionListener(e -> finalizarCanteiro());
+
         leftButtons.add(btnVoltar);
         leftButtons.add(btnEditar);
         leftButtons.add(btnPronto);
@@ -93,7 +176,7 @@ public class TelaCanteiro extends JFrame {
         conteudo.add(leftButtons, gbc);
 
         // --- Título na mesma linha, mas ocupando espaço restante ---
-        JLabel lblTitulo = new JLabel("Canteiro 1", SwingConstants.CENTER);
+        JLabel lblTitulo = new JLabel(nomeCanteiro != null ? nomeCanteiro : "Canteiro", SwingConstants.CENTER);
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 40));
         lblTitulo.setForeground(verdeEscuro);
 
@@ -121,11 +204,12 @@ public class TelaCanteiro extends JFrame {
         containerResumo.setOpaque(false);
         containerResumo.add(painelResumo);
 
+        String dataFmt = inicio != null ? new java.text.SimpleDateFormat("dd/MM/yyyy").format(inicio) : "--/--/----";
         String[] textosResumo = {
-                "Cultura: Milho",
-                "Início: 18/03/2026",
-                "m²: 10",
-                "Qtd em Kg: 80",
+            "Cultura: " + (cultura != null ? cultura : ""),
+            "Início: " + dataFmt,
+            "m²: " + String.format("%.2f", areaM2),
+            "Qtd em Kg: " + String.format("%.2f", qtdKg),
         };
 
         for (String texto : textosResumo) {
@@ -168,11 +252,11 @@ public class TelaCanteiro extends JFrame {
         conteudo.add(Box.createVerticalGlue(), gbcFim);
 
         // =============================
-        //  TALHÃO 1 (EXPANDIDO)
+        //  ATIVIDADES DO CANTEIRO
         // =============================
         GridBagConstraints gbcTalhao = new GridBagConstraints();
         gbcTalhao.gridx = 0;
-        gbcTalhao.gridy = 3;         // PRIMEIRO TALHÃO NA LINHA 3
+        gbcTalhao.gridy = 3;
         gbcTalhao.gridwidth = 4;
         gbcTalhao.weightx = 1;
         gbcTalhao.weighty = 0;
@@ -180,7 +264,31 @@ public class TelaCanteiro extends JFrame {
         gbcTalhao.fill = GridBagConstraints.HORIZONTAL;
         gbcTalhao.anchor = GridBagConstraints.NORTHWEST;
 
-        conteudo.add(criarPainelTalhaoExpandido(), gbcTalhao);
+        // Carregar atividades do canteiro dinamicamente
+        if (canteiroId != null) {
+            try {
+                br.edu.ifsp.hto.cooperativa.planejamento.modelo.DAO.AtividadeDAO atividadeDAO = 
+                    new br.edu.ifsp.hto.cooperativa.planejamento.modelo.DAO.AtividadeDAO();
+                java.util.List<br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.AtividadeNoCanteiroVO> atividades = 
+                    atividadeDAO.buscarAtividadesDoCanteiro(canteiroId.intValue());
+                
+                // Sempre criar o painel, mesmo se a lista estiver vazia
+                if (atividades == null) {
+                    atividades = new java.util.ArrayList<>();
+                }
+                conteudo.add(criarPainelAtividades(atividades), gbcTalhao);
+                
+            } catch (Exception ex) {
+                JLabel lblErro = new JLabel("Erro ao carregar atividades: " + ex.getMessage(), SwingConstants.CENTER);
+                lblErro.setForeground(Color.RED);
+                conteudo.add(lblErro, gbcTalhao);
+                ex.printStackTrace();
+            }
+        } else {
+            JLabel lblSemId = new JLabel("ID do canteiro não informado.", SwingConstants.CENTER);
+            lblSemId.setForeground(Color.GRAY);
+            conteudo.add(lblSemId, gbcTalhao);
+        }
 
         // =============================
         //  TALHÕES FECHADOS
@@ -201,31 +309,6 @@ public class TelaCanteiro extends JFrame {
         scroll.setBorder(null);
 
         add(scroll, BorderLayout.CENTER);
-
-        // =============================
-        //  BOTÃO ADD PLANO (ÚLTIMO ELEMENTO)
-        // =============================
-        JPanel centerButtons = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
-        centerButtons.setOpaque(false);
-
-        JButton addPlanoButton = criarBotaoPadrao("+ Adicionar Plano", verdeClaro);
-
-        Dimension tamanho = new Dimension(200, 45);
-        addPlanoButton.setPreferredSize(tamanho);
-        addPlanoButton.setMaximumSize(tamanho);
-
-        centerButtons.add(addPlanoButton);
-
-        GridBagConstraints gbcAdd = new GridBagConstraints();
-        gbcAdd.gridx = 0;
-        gbcAdd.gridy = 4;           // <<--- ÚLTIMA LINHA
-        gbcAdd.gridwidth = 4;
-        gbcAdd.weighty = 0;
-        gbcAdd.anchor = GridBagConstraints.CENTER;
-        gbcAdd.insets = new Insets(20, 0, 20, 0);
-        gbcAdd.fill = GridBagConstraints.NONE;
-
-        conteudo.add(centerButtons, gbcAdd);
     }
 
     // =============================
@@ -251,9 +334,8 @@ public class TelaCanteiro extends JFrame {
     //     return p;
     // }
 
-    private JPanel criarPainelTalhaoExpandido() {
-
-        // Painel principal do talhão (contém header + conteúdo)
+    private JPanel criarPainelAtividades(java.util.List<br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.AtividadeNoCanteiroVO> atividades) {
+        // Painel principal (contém header + conteúdo)
         JPanel bloco = new JPanel();
         bloco.setLayout(new BoxLayout(bloco, BoxLayout.Y_AXIS));
         bloco.setBorder(BorderFactory.createLineBorder(Color.GRAY));
@@ -266,12 +348,15 @@ public class TelaCanteiro extends JFrame {
         cabecalho.setBackground(new Color(230, 230, 230));
         cabecalho.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        JLabel lbl = new JLabel("Plano de Milho");
+        JLabel lbl = new JLabel("Atividades do Canteiro");
         lbl.setFont(new Font("Arial", Font.BOLD, 16));
 
         // Botão Nova Atividade
         JButton novaAtv = new JButton("Nova Atividade");
         novaAtv.setPreferredSize(new Dimension(130, 24));
+        
+        // Ação do botão Nova Atividade
+        novaAtv.addActionListener(e -> abrirDialogoNovaAtividade());
 
         // Seta do drop-down
         JButton arrow = new JButton("\u25BC");   // ▼
@@ -292,7 +377,6 @@ public class TelaCanteiro extends JFrame {
 
         bloco.add(cabecalho);
 
-
         // ================================
         // CONTEÚDO EXPANDIDO (começa visível)
         // ================================
@@ -303,16 +387,30 @@ public class TelaCanteiro extends JFrame {
 
         conteudoExpandido.add(Box.createVerticalStrut(10));
 
-        // Cards dentro do fundo branco
+        // Cards dentro do fundo branco - DINÂMICO
         JPanel cards = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 10));
         cards.setBackground(Color.WHITE);
 
-        cards.add(criarCard("Adubar", "20/03/2026", "prioridade: alta"));
-        cards.add(criarCard("Regar", "20/03/2026", "prioridade: alta"));
-        cards.add(criarCard("Detetizar", "20/04/2026", "prioridade: baixa"));
+        if (atividades != null && !atividades.isEmpty()) {
+            for (br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.AtividadeNoCanteiroVO atividadeNoCanteiro : atividades) {
+                br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.AtividadeVO atividade = atividadeNoCanteiro.getAtividadeVO();
+                if (atividade != null) {
+                    String nomeAtividade = atividade.getNomeAtividade() != null ? atividade.getNomeAtividade() : "Atividade";
+                    String dataAtividade = atividadeNoCanteiro.getDataAtividade() != null ? 
+                        new java.text.SimpleDateFormat("dd/MM/yyyy").format(atividadeNoCanteiro.getDataAtividade()) : "--/--/----";
+                    String status = atividade.getStatus() != null ? "Status: " + atividade.getStatus() : "Status: Pendente";
+                    
+                    cards.add(criarCard(nomeAtividade, dataAtividade, status));
+                }
+            }
+        } else {
+            JLabel lblVazio = new JLabel("Nenhuma atividade cadastrada. Clique em 'Nova Atividade' para adicionar.");
+            lblVazio.setFont(new Font("Arial", Font.ITALIC, 14));
+            lblVazio.setForeground(new Color(100, 100, 100));
+            cards.add(lblVazio);
+        }
 
         conteudoExpandido.add(cards);
-
         bloco.add(conteudoExpandido);
 
         // ================================
@@ -327,6 +425,194 @@ public class TelaCanteiro extends JFrame {
         });
 
         return bloco;
+    }
+
+    private void finalizarCanteiro() {
+        // Confirmação
+        int confirmacao = JOptionPane.showConfirmDialog(
+            this,
+            "Tem certeza que deseja finalizar este canteiro?\n" +
+            "Esta ação irá registrar a produção no estoque e não poderá ser desfeita.",
+            "Confirmar Finalização",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.WARNING_MESSAGE
+        );
+        
+        if (confirmacao != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        if (canteiroId == null || areaId == null) {
+            JOptionPane.showMessageDialog(this, "Dados do canteiro incompletos.", "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try {
+            // Buscar canteiro para obter ordem_producao_id
+            br.edu.ifsp.hto.cooperativa.producao.modelo.dao.CanteiroDAO canteiroDAO = 
+                new br.edu.ifsp.hto.cooperativa.producao.modelo.dao.CanteiroDAO();
+            br.edu.ifsp.hto.cooperativa.producao.modelo.vo.CanteiroVO canteiro = 
+                canteiroDAO.buscarPorId(canteiroId.intValue());
+            
+            if (canteiro == null || canteiro.getOrdemProducaoId() == null) {
+                JOptionPane.showMessageDialog(this, "Canteiro não encontrado.", "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Buscar ordem de produção para obter especie_id
+            br.edu.ifsp.hto.cooperativa.producao.controle.GerenciarAreaController areaController = 
+                new br.edu.ifsp.hto.cooperativa.producao.controle.GerenciarAreaController();
+            br.edu.ifsp.hto.cooperativa.producao.modelo.vo.OrdemProducaoVO ordem = 
+                areaController.buscarOrdemPorId(canteiro.getOrdemProducaoId());
+            
+            if (ordem == null || ordem.getEspecieId() == null) {
+                JOptionPane.showMessageDialog(this, "Ordem de produção não encontrada.", "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Buscar área para obter associado_id
+            br.edu.ifsp.hto.cooperativa.producao.modelo.dao.AreaDAO areaDAO = 
+                new br.edu.ifsp.hto.cooperativa.producao.modelo.dao.AreaDAO();
+            br.edu.ifsp.hto.cooperativa.producao.modelo.vo.AreaVO area = 
+                areaDAO.buscarPorId(areaId);
+            
+            if (area == null) {
+                JOptionPane.showMessageDialog(this, "Área não encontrada.", "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Obter dados para a movimentação
+            int especieId = ordem.getEspecieId().intValue();
+            int associadoId = (int) area.getAssociadoId();
+            float areaProduzida = canteiro.getAreaCanteiroM2() != null ? 
+                canteiro.getAreaCanteiroM2().floatValue() : 0.0f;
+
+            if (areaProduzida <= 0) {
+                JOptionPane.showMessageDialog(this, "Área do canteiro inválida.", "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Criar movimentação de produção usando ControleEstoque
+            br.edu.ifsp.hto.cooperativa.estoque.controle.ControleEstoque controleEstoque = 
+                br.edu.ifsp.hto.cooperativa.estoque.controle.ControleEstoque.getInstance();
+            
+            br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.MovimentacaoVO movimentacao = 
+                controleEstoque.novaProducao(especieId, associadoId, areaProduzida);
+            
+            // Inserir a movimentação no banco
+            controleEstoque.inserirProducao(movimentacao);
+
+            // Atualizar status do canteiro para "finalizado" ou similar
+            canteiro.setStatus("finalizado");
+            canteiroDAO.atualizar(canteiro);
+
+            JOptionPane.showMessageDialog(
+                this, 
+                "Canteiro finalizado com sucesso!\n" +
+                "Produção registrada no estoque: " + String.format("%.2f", movimentacao.getQuantidade()) + " kg",
+                "Sucesso", 
+                JOptionPane.INFORMATION_MESSAGE
+            );
+
+            // Voltar para TelaTalhao
+            if (areaId != null) {
+                br.edu.ifsp.hto.cooperativa.producao.modelo.vo.AreaVO areaRecarregada = 
+                    areaController.carregarAreaCompletaPorId(areaId);
+                if (areaRecarregada != null) {
+                    new br.edu.ifsp.hto.cooperativa.producao.visao.TelaTalhao(areaRecarregada).setVisible(true);
+                    dispose();
+                }
+            }
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(
+                this, 
+                "Erro ao finalizar canteiro: " + ex.getMessage(), 
+                "Erro", 
+                JOptionPane.ERROR_MESSAGE
+            );
+            ex.printStackTrace();
+        }
+    }
+
+    private void abrirDialogoNovaAtividade() {
+        if (canteiroId == null) {
+            JOptionPane.showMessageDialog(this, "ID do canteiro não disponível.", "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try {
+            // Buscar todas as atividades disponíveis
+            br.edu.ifsp.hto.cooperativa.planejamento.modelo.DAO.AtividadeDAO atividadeDAO = 
+                new br.edu.ifsp.hto.cooperativa.planejamento.modelo.DAO.AtividadeDAO();
+            java.util.List<br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.AtividadeVO> atividadesDisponiveis = 
+                atividadeDAO.listarTodas();
+
+            if (atividadesDisponiveis == null || atividadesDisponiveis.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Não há atividades disponíveis no sistema.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            // Criar array para o dropdown
+            br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.AtividadeVO[] atividadesArray = 
+                atividadesDisponiveis.toArray(new br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.AtividadeVO[0]);
+
+            // Mostrar dropdown de seleção
+            br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.AtividadeVO atividadeSelecionada = 
+                (br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.AtividadeVO) JOptionPane.showInputDialog(
+                    this,
+                    "Selecione a atividade a adicionar:",
+                    "Nova Atividade",
+                    JOptionPane.PLAIN_MESSAGE,
+                    null,
+                    atividadesArray,
+                    atividadesArray.length > 0 ? atividadesArray[0] : null
+                );
+
+            if (atividadeSelecionada == null) return; // usuário cancelou
+
+            // Solicitar tempo gasto (em horas)
+            String tempoStr = JOptionPane.showInputDialog(this, "Tempo estimado (em horas):", "0.0");
+            if (tempoStr == null) return; // cancelou
+            
+            float tempoGastoHoras = 0.0f;
+            try {
+                tempoGastoHoras = Float.parseFloat(tempoStr);
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Tempo inválido. Use formato decimal (ex: 2.5)", "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Solicitar data da atividade
+            String dataStr = JOptionPane.showInputDialog(this, "Data da atividade (dd/MM/yyyy):", 
+                new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date()));
+            if (dataStr == null) return; // cancelou
+            
+            java.sql.Date dataAtividade;
+            try {
+                java.util.Date dataParsed = new java.text.SimpleDateFormat("dd/MM/yyyy").parse(dataStr);
+                dataAtividade = new java.sql.Date(dataParsed.getTime());
+            } catch (java.text.ParseException ex) {
+                JOptionPane.showMessageDialog(this, "Data inválida. Use o formato dd/MM/yyyy (ex: 02/12/2025)", "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Inserir na tabela atividade_canteiro
+            br.edu.ifsp.hto.cooperativa.planejamento.modelo.DAO.CanteiroDAO canteiroDAO = 
+                new br.edu.ifsp.hto.cooperativa.planejamento.modelo.DAO.CanteiroDAO();
+            canteiroDAO.adicionarAtividade(canteiroId.intValue(), atividadeSelecionada.getId(), tempoGastoHoras, dataAtividade);
+
+            JOptionPane.showMessageDialog(this, "Atividade adicionada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+
+            // Recarregar a tela
+            dispose();
+            TelaCanteiro novaTela = new TelaCanteiro(cultura, nomeCanteiro, inicio, areaM2, qtdKg, canteiroId, areaId);
+            novaTela.setVisible(true);
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Erro ao adicionar atividade: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
     }
 
     private JPanel criarCard(String titulo, String data, String prioridade) {
@@ -356,6 +642,13 @@ public class TelaCanteiro extends JFrame {
         ver.setFocusPainted(false);
         ver.setPreferredSize(new Dimension(150, 35));
         ver.setMaximumSize(new Dimension(150, 35));  // impede esticar
+        
+        // Ação do botão Ver: navegar para TelaAtividades
+        ver.addActionListener(e -> {
+            TelaAtividades telaAtividades = new TelaAtividades(cultura, nomeCanteiro, inicio, areaM2, qtdKg, canteiroId, areaId);
+            telaAtividades.setVisible(true);
+            TelaCanteiro.this.dispose();
+        });
 
         p.add(Box.createVerticalStrut(10));
         p.add(l1);
@@ -379,10 +672,5 @@ public class TelaCanteiro extends JFrame {
         return b;
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            TelaCanteiro t = new TelaCanteiro();
-            t.setVisible(true);
-        });
-    }
+    // Remover main de teste ou manter conforme necessidade
 }

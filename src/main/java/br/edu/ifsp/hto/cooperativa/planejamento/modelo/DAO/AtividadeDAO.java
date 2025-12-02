@@ -234,6 +234,29 @@ public class AtividadeDAO {
     }
 
     /**
+     * Marca uma atividade de um canteiro específico como concluída (ativo = false)
+     * 
+     * @param canteiroId identificador do canteiro
+     * @param atividadeId identificador da atividade
+     */
+    public void concluirAtividadeDoCanteiro(int canteiroId, int atividadeId) {
+        try {
+            Connection conn = ConnectionFactory.getConnection();
+            
+            String sql = "UPDATE atividade_canteiro SET ativo = false WHERE canteiro_id = ? AND atividade_id = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, canteiroId);
+            stmt.setInt(2, atividadeId);
+            stmt.executeUpdate();
+
+            stmt.close();
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Remove um material de uma atividade específica
      * 
      * @param materialId identificador do material

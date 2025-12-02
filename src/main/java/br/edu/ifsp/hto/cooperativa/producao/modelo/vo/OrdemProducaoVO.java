@@ -1,13 +1,16 @@
 package br.edu.ifsp.hto.cooperativa.producao.modelo.vo;
 
 import java.util.Date;
+import java.util.List;
 
 public class OrdemProducaoVO {
 
     private Long id;
     private Integer planoId;
     private Long especieId;
+    private String nomeEspecie; // 🔑 NOVO: nome da espécie
     private Long talhaoId;
+    private String nomeTalhao; // 🔑 NOVO: nome do talhão associado
     private String nomePlano;
     private String descricao;
     private Date dataInicio;
@@ -17,6 +20,7 @@ public class OrdemProducaoVO {
     private Date dataExecucao;
     private Double quantidadeKg;
     private String status;
+    private List<CanteiroVO> canteiros; // 🔑 NOVO: canteiros desta ordem
 
     // Getters e Setters
     public Long getId() {
@@ -40,11 +44,25 @@ public class OrdemProducaoVO {
         this.especieId = especieId;
     }
 
+    public String getNomeEspecie() {
+        return nomeEspecie;
+    }
+    public void setNomeEspecie(String nomeEspecie) {
+        this.nomeEspecie = nomeEspecie;
+    }
+
     public Long getTalhaoId() {
         return talhaoId;
     }
     public void setTalhaoId(Long talhaoId) {
         this.talhaoId = talhaoId;
+    }
+
+    public String getNomeTalhao() {
+        return nomeTalhao;
+    }
+    public void setNomeTalhao(String nomeTalhao) {
+        this.nomeTalhao = nomeTalhao;
     }
 
     public String getNomePlano() {
@@ -108,5 +126,12 @@ public class OrdemProducaoVO {
     }
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public List<CanteiroVO> getCanteiros() {
+        return canteiros;
+    }
+    public void setCanteiros(List<CanteiroVO> canteiros) {
+        this.canteiros = canteiros;
     }
 }

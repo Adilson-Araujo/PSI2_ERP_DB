@@ -5,11 +5,13 @@ import javax.swing.*;
 import br.edu.ifsp.hto.cooperativa.producao.modelo.vo.AreaVO;
 import br.edu.ifsp.hto.cooperativa.producao.modelo.vo.TalhaoVO; // 🔑 NOVO IMPORT
 import br.edu.ifsp.hto.cooperativa.producao.modelo.vo.CanteiroVO; // 🔑 NOVO IMPORT
+import br.edu.ifsp.hto.cooperativa.producao.modelo.vo.OrdemProducaoVO; // 🔑 NOVO IMPORT
 
 import java.awt.*;
 import java.util.List; // Import necessário para lidar com List<TalhaoVO>
 import java.awt.event.ActionListener; // Import necessário para o listener
 import br.edu.ifsp.hto.cooperativa.producao.controle.GerenciarAreaController; // Controller
+import java.math.BigDecimal;
 
 public class TelaTalhao extends JFrame {
 
@@ -25,7 +27,16 @@ public class TelaTalhao extends JFrame {
 
     // O construtor é o mesmo, mas o conteúdo é movido para initComponents()
     public TelaTalhao(AreaVO area) {
+        // Recarrega a área completa (inclui talhões, ordens e recalcula área utilizada)
         this.area = area;
+        try {
+            AreaVO recarregada = controller.carregarAreaCompletaPorId(area.getId());
+            if (recarregada != null) this.area = recarregada;
+        } catch (Exception ex) {
+            // Se falhar, continua com a área fornecida (fallback)
+            System.err.println("Aviso: falha ao recarregar área completa: " + ex.getMessage());
+        }
+
         initComponents();
     }
     
@@ -123,25 +134,66 @@ public class TelaTalhao extends JFrame {
         JPanel leftButtonsBelow = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         leftButtonsBelow.setOpaque(false);
 
-        JButton btnRemover = criarBotaoPadrao("Remover Talhão", verdeClaro);
-        JButton btnAdicionar = criarBotaoPadrao("Novo Talhão", verdeClaro);
+        JButton btnRemover = criarBotaoPadrao("Remover Ordem", verdeClaro);
         JButton btnEditar = criarBotaoPadrao("Editar Talhão", verdeClaro);
         JButton btnPlano = criarBotaoPadrao("Usar Plano", verdeClaro);
 
         btnRemover.setPreferredSize(tam); btnRemover.setMaximumSize(tam);
         btnEditar.setPreferredSize(tam); btnEditar.setMaximumSize(tam);
-        btnAdicionar.setPreferredSize(tam); btnAdicionar.setMaximumSize(tam);
         btnPlano.setPreferredSize(tam); btnPlano.setMaximumSize(tam);
 
         leftButtonsBelow.add(btnRemover);
-        leftButtonsBelow.add(btnAdicionar);
-        // Ação do botão Adicionar: abrir TelaAdicionarTalhao
-        btnAdicionar.addActionListener(e -> {
-            new TelaAdicionarTalhao(area).setVisible(true);
-            dispose();
-        });
         leftButtonsBelow.add(btnEditar);
         leftButtonsBelow.add(btnPlano);
+
+        // Ação do botão Editar Talhão: abre dropdown com talhões e edita o selecionado
+        btnEditar.addActionListener(e -> {
+            // Mapear talhões disponíveis
+            java.util.Map<Long, TalhaoVO> mapTalhoes = new java.util.LinkedHashMap<>();
+            if (area.getTalhoes() != null) {
+                for (TalhaoVO t : area.getTalhoes()) {
+                    mapTalhoes.put(t.getId(), t);
+                }
+            }
+
+            if (mapTalhoes.isEmpty()) {
+                JOptionPane.showMessageDialog(TelaTalhao.this, 
+                    "Não há talhões disponíveis para editar.", 
+                    "Aviso", 
+                    JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            // Criar array de nomes para o dropdown
+            String[] nomesTalhoes = new String[mapTalhoes.size()];
+            java.util.Map<String, TalhaoVO> mapNomeTalhao = new java.util.LinkedHashMap<>();
+            int idx = 0;
+            for (TalhaoVO t : mapTalhoes.values()) {
+                String nome = t.getNome() + " (ID: " + t.getId() + ")";
+                nomesTalhoes[idx++] = nome;
+                mapNomeTalhao.put(nome, t);
+            }
+
+            // Exibir dropdown
+            String escolhido = (String) JOptionPane.showInputDialog(
+                TelaTalhao.this,
+                "Selecione o talhão para editar:",
+                "Editar Talhão",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                nomesTalhoes,
+                nomesTalhoes[0]
+            );
+
+            if (escolhido != null) {
+                TalhaoVO talhaoEscolhido = mapNomeTalhao.get(escolhido);
+                if (talhaoEscolhido != null) {
+                    TelaEditarTalhao telaEditar = new TelaEditarTalhao(talhaoEscolhido, area.getId());
+                    telaEditar.setVisible(true);
+                    // Não fecha a tela atual - a TelaEditarTalhao vai fechar e reabrir quando salvar
+                }
+            }
+        });
 
         // Ação do botão Usar Plano: mostra dropdown com planos
         btnPlano.addActionListener(e -> {
@@ -197,45 +249,44 @@ public class TelaTalhao extends JFrame {
             }
         });
 
-        // Ação do botão Remover: chama o controller para inativar e atualiza a view
+        // Ação do botão Remover: remove ordem de produção (marca como deletado)
         btnRemover.addActionListener(e -> {
-            if (area.getTalhoes() == null || area.getTalhoes().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Não há talhões para remover.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
+            // Coleta todas as ordens ativas da área
+            List<OrdemProducaoVO> ordensAtivas = controller.listarOrdensAtivas(area.getId());
+
+            if (ordensAtivas.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Não há ordens ativas para remover.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
 
-            // Mostra apenas talhões ativos (por segurança)
-            java.util.List<TalhaoVO> ativos = new java.util.ArrayList<>();
-            for (TalhaoVO t : area.getTalhoes()) {
-                if (t != null && (t.getStatus() == null || !t.getStatus().equalsIgnoreCase("Inativo"))) {
-                    ativos.add(t);
-                }
+            // Cria dropdown com as ordens (exibe informação da ordem: ID, plano e talhão)
+            String[] nomes = new String[ordensAtivas.size()];
+            java.util.Map<String, OrdemProducaoVO> mapOrdens = new java.util.LinkedHashMap<>();
+            
+            for (int i = 0; i < ordensAtivas.size(); i++) {
+                OrdemProducaoVO ordem = ordensAtivas.get(i);
+                String nomePlano = ordem.getNomePlano() != null ? ordem.getNomePlano() : "Plano";
+                String nomeTalhao = ordem.getNomeTalhao() != null ? ordem.getNomeTalhao() : "Talhão " + (ordem.getTalhaoId() != null ? ordem.getTalhaoId() : "?");
+                String label = "Ordem ID: " + ordem.getId() + " - " + nomePlano + " - " + nomeTalhao;
+                nomes[i] = label;
+                mapOrdens.put(label, ordem);
             }
 
-            if (ativos.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Não há talhões ativos para remover.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
-                return;
-            }
-
-            String[] nomes = new String[ativos.size()];
-            for (int i = 0; i < ativos.size(); i++) nomes[i] = ativos.get(i).getNome();
-
-            String escolhido = (String) JOptionPane.showInputDialog(this, "Selecione o talhão a remover:", "Remover Talhão",
+            String escolhido = (String) JOptionPane.showInputDialog(this, "Selecione a ordem a remover:", "Remover Ordem",
                     JOptionPane.PLAIN_MESSAGE, null, nomes, nomes[0]);
 
             if (escolhido == null) return; // cancelou
 
-            TalhaoVO talhaoEscolhido = null;
-            for (TalhaoVO t : ativos) if (escolhido.equals(t.getNome())) { talhaoEscolhido = t; break; }
+            OrdemProducaoVO ordemEscolhida = mapOrdens.get(escolhido);
+            if (ordemEscolhida == null) return;
 
-            if (talhaoEscolhido == null) return;
-
-            int conf = JOptionPane.showConfirmDialog(this, "Confirma marcar o talhão '" + talhaoEscolhido.getNome() + "' como Inativo?", "Confirmar", JOptionPane.YES_NO_OPTION);
+            String nomeExibicao = "Ordem ID " + ordemEscolhida.getId() + " - " + (ordemEscolhida.getNomePlano() != null ? ordemEscolhida.getNomePlano() : "Plano");
+            int conf = JOptionPane.showConfirmDialog(this, "Confirma remover a ordem '" + nomeExibicao + "'?\nIsto inativará o canteiro relacionado e, se não restarem outros canteiros no talhão, também inativará o talhão.", "Confirmar", JOptionPane.YES_NO_OPTION);
             if (conf != JOptionPane.YES_OPTION) return;
 
-            boolean ok = controller.removerTalhao(talhaoEscolhido.getId());
+            boolean ok = controller.removerOrdem(ordemEscolhida.getId());
             if (ok) {
-                // Recarrega a área completa (o DAO agora filtra por status='Ativo')
+                // Recarrega a área completa
                 AreaVO nova = controller.carregarAreaCompletaPorId(area.getId());
                 if (nova != null) {
                     this.area = nova;
@@ -243,8 +294,9 @@ public class TelaTalhao extends JFrame {
                     initComponents();
                     revalidate();
                     repaint();
+                    JOptionPane.showMessageDialog(this, "Ordem removida com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                 } else {
-                    JOptionPane.showMessageDialog(this, "Talhão inativado, porém falha ao recarregar área.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Ordem removida, porém falha ao recarregar área.", "Aviso", JOptionPane.WARNING_MESSAGE);
                 }
             }
         });
@@ -296,27 +348,73 @@ public class TelaTalhao extends JFrame {
         conteudo.add(containerResumo, gbc);
 
 
-        // --- Resto: "Talhões Ativos" ---
-        JLabel lblAFazer = new JLabel("Talhões Ativos:");
+        // --- Resto: "Ordens de Produção Ativas" ---
+        JLabel lblAFazer = new JLabel("Ordens de Produção Ativas:");
         lblAFazer.setFont(new Font("Arial", Font.BOLD, 22));
         lblAFazer.setForeground(verdeEscuro);
         gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 4; gbc.weighty = 0; gbc.anchor = GridBagConstraints.WEST;
         conteudo.add(lblAFazer, gbc);
 
         // ===============================================
-        // 🔑 ITERAÇÃO DINÂMICA SOBRE TALHÕES E CANTEIROS
+        // NOVA LÓGICA: AGRUPAR CANTEIROS POR TALHAO
         // ===============================================
-        int linhaAtual = 4; 
+        int linhaAtual = 4;
 
-        if (area.getTalhoes() != null && !area.getTalhoes().isEmpty()) {
-            for (TalhaoVO talhao : area.getTalhoes()) {
-                
-                // Cria o painel do Talhão (que contém o cabeçalho e os canteiros)
-                JPanel painelTalhao = criarPainelTalhao(talhao); 
-                
+        // Mapear talhaoId -> TalhaoVO (usando lista de talhoes da area)
+        java.util.Map<Long, TalhaoVO> mapTalhoes = new java.util.LinkedHashMap<>();
+        if (area.getTalhoes() != null) {
+            for (TalhaoVO t : area.getTalhoes()) {
+                mapTalhoes.put(t.getId(), t);
+            }
+        }
+
+        // Mapear talhaoId -> lista de canteiros (de todas as ordens)
+        java.util.Map<Long, java.util.List<CanteiroVO>> mapCanteirosPorTalhao = new java.util.LinkedHashMap<>();
+        if (area.getOrdens() != null) {
+            for (OrdemProducaoVO ordem : area.getOrdens()) {
+                Long talhaoId = ordem.getTalhaoId();
+                if (talhaoId == null) continue;
+
+                // Se o talhão não existe no mapa de talhões (possivelmente não foi carregado),
+                // buscamos ele do banco de dados para obter todas as informações, incluindo a área.
+                if (!mapTalhoes.containsKey(talhaoId)) {
+                    TalhaoVO talhaoCompleto = controller.buscarTalhaoPorId(talhaoId);
+                    if (talhaoCompleto != null) {
+                        mapTalhoes.put(talhaoId, talhaoCompleto);
+                    } else {
+                        // Se não conseguir buscar, cria um sintético com nome da ordem
+                        TalhaoVO synth = new TalhaoVO();
+                        synth.setId(talhaoId);
+                        String nomeFromOrdem = ordem.getNomeTalhao();
+                        if (nomeFromOrdem == null || nomeFromOrdem.trim().isEmpty()) {
+                            nomeFromOrdem = "Talhão " + talhaoId;
+                        }
+                        synth.setNome(nomeFromOrdem);
+                        synth.setStatus(ordem.getStatus() != null ? ordem.getStatus() : "");
+                        // ⚠️ IMPORTANTE: Define área como 0.0 para evitar null
+                        synth.setAreaTalhao(java.math.BigDecimal.ZERO);
+                        mapTalhoes.put(talhaoId, synth);
+                    }
+                }
+
+                if (!mapCanteirosPorTalhao.containsKey(talhaoId)) {
+                    mapCanteirosPorTalhao.put(talhaoId, new java.util.ArrayList<>());
+                }
+                if (ordem.getCanteiros() != null) {
+                    mapCanteirosPorTalhao.get(talhaoId).addAll(ordem.getCanteiros());
+                }
+            }
+        }
+
+        if (!mapCanteirosPorTalhao.isEmpty()) {
+            for (Long talhaoId : mapCanteirosPorTalhao.keySet()) {
+                TalhaoVO talhao = mapTalhoes.get(talhaoId);
+                java.util.List<CanteiroVO> canteiros = mapCanteirosPorTalhao.get(talhaoId);
+                JPanel painelTalhao = criarPainelTalhaoAgrupado(talhao, canteiros);
+
                 GridBagConstraints gbcTalhao = new GridBagConstraints();
                 gbcTalhao.gridx = 0;
-                gbcTalhao.gridy = linhaAtual++; // Incrementa a linha
+                gbcTalhao.gridy = linhaAtual++;
                 gbcTalhao.gridwidth = 4;
                 gbcTalhao.weightx = 1;
                 gbcTalhao.weighty = 0;
@@ -327,20 +425,20 @@ public class TelaTalhao extends JFrame {
                 conteudo.add(painelTalhao, gbcTalhao);
             }
         } else {
-            // Exibir mensagem se não houver talhões
-            JLabel lblSemTalhoes = new JLabel("Não há talhões cadastrados para esta área.", SwingConstants.CENTER);
-            lblSemTalhoes.setFont(new Font("Arial", Font.ITALIC, 18));
-            lblSemTalhoes.setForeground(new Color(100, 100, 100));
-            
+            JLabel lblSemOrdens = new JLabel("Não há ordens de produção ativas nesta área.", SwingConstants.CENTER);
+            lblSemOrdens.setFont(new Font("Arial", Font.ITALIC, 18));
+            lblSemOrdens.setForeground(new Color(100, 100, 100));
+
             GridBagConstraints gbcVazio = new GridBagConstraints();
             gbcVazio.gridx = 0;
             gbcVazio.gridy = linhaAtual++;
             gbcVazio.gridwidth = 4;
             gbcVazio.insets = new Insets(40, 20, 40, 20);
             gbcVazio.anchor = GridBagConstraints.CENTER;
-            
-            conteudo.add(lblSemTalhoes, gbcVazio);
+
+            conteudo.add(lblSemOrdens, gbcVazio);
         }
+            // NOVO MÉTODO: Painel de talhão agrupando canteiros de todas as ordens
         
         // Para empurrar o rodapé para baixo (espaço)
         GridBagConstraints gbcEspaco = new GridBagConstraints();
@@ -361,6 +459,234 @@ public class TelaTalhao extends JFrame {
     // ====================================================================
     // 🔑 NOVO COMPONENTE: CRIAR PAINEL TALHÃO (Substitui criarPainelTalhaoExpandido)
     // ====================================================================
+
+    // ====================================================================
+    // 🔑 NOVO MÉTODO: CRIAR PAINEL ORDEM (para ordens de produção)
+    // ====================================================================
+
+    private JPanel criarPainelOrdem(OrdemProducaoVO ordem) {
+        
+        // Painel principal da ordem (contém header + conteúdo)
+        JPanel bloco = new JPanel();
+        bloco.setLayout(new BoxLayout(bloco, BoxLayout.Y_AXIS));
+        bloco.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+
+        // --- 1. CABEÇALHO (sempre visível) ---
+        JPanel cabecalho = new JPanel(new BorderLayout());
+        cabecalho.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
+        cabecalho.setBackground(new Color(230, 230, 230));
+        cabecalho.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Nome do Talhão e Status da Ordem
+        String nomoCabecalho = ordem.getNomeTalhao() != null ? ordem.getNomeTalhao() : "Ordem " + ordem.getId();
+        JLabel lbl = new JLabel(nomoCabecalho + " (ID: " + ordem.getId() + ") | Status: " + ordem.getStatus() + " | Área: " + String.format("%.2f", ordem.getAreaCultivo()) + " m²");
+        lbl.setFont(new Font("Arial", Font.BOLD, 16));
+
+        // Seta do drop-down
+        JButton arrow = new JButton("\u25BC"); 
+        arrow.setFocusPainted(false);
+        arrow.setBorderPainted(false);
+        arrow.setContentAreaFilled(false);
+        arrow.setOpaque(false);
+        arrow.setBorder(null);
+
+        // Painel lateral com seta alinhada à direita
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        rightPanel.setOpaque(false);
+        rightPanel.add(arrow);
+
+        cabecalho.add(lbl, BorderLayout.WEST);
+        cabecalho.add(rightPanel, BorderLayout.EAST);
+        bloco.add(cabecalho);
+
+        // --- 2. CONTEÚDO EXPANDIDO (Canteiros da Ordem) ---
+        JPanel conteudoExpandido = new JPanel();
+        conteudoExpandido.setLayout(new BoxLayout(conteudoExpandido, BoxLayout.Y_AXIS));
+        conteudoExpandido.setBackground(Color.WHITE);
+        conteudoExpandido.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
+
+        JPanel painelTitulo = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        painelTitulo.setBackground(Color.WHITE);
+
+        JLabel lblCanteiros = new JLabel("Canteiros da Ordem:");
+        lblCanteiros.setFont(new Font("Arial", Font.BOLD, 16));
+        painelTitulo.add(lblCanteiros);
+        conteudoExpandido.add(painelTitulo);
+
+        conteudoExpandido.add(Box.createVerticalStrut(10));
+
+        // Painel de cards
+        JPanel cards = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 10));
+        cards.setBackground(Color.WHITE);
+
+        // 🔑 ITERAÇÃO DINÂMICA SOBRE CANTEIROS
+        if (ordem.getCanteiros() != null && !ordem.getCanteiros().isEmpty()) {
+            for (CanteiroVO canteiro : ordem.getCanteiros()) {
+                String nomeCanteiro = "Canteiro " + (ordem.getNomeEspecie() != null ? ordem.getNomeEspecie() : ordem.getNomePlano());
+                String infoCanteiro = String.format("%.2f", canteiro.getKgGerados()) + " kg";
+                JPanel card = criarCard(nomeCanteiro, infoCanteiro, canteiro.getStatus());
+                // Abre TelaCanteiro com dados ao clicar no botão de detalhes
+                // Procuramos o botão "Ver Detalhes" no card e adicionamos ação
+                for (Component comp : card.getComponents()) {
+                    if (comp instanceof JButton) {
+                        JButton btn = (JButton) comp;
+                        if ("Ver Detalhes".equals(btn.getText()) || "Ver".equals(btn.getText())) {
+                            btn.addActionListener(ev -> {
+                                // Cultura/especie
+                                String cultura = ordem.getNomeEspecie() != null ? ordem.getNomeEspecie() : (ordem.getNomePlano() != null ? ordem.getNomePlano() : "");
+                                // Nome do canteiro (título)
+                                String titulo = nomeCanteiro;
+                                // Início (dataExecucao da ordem)
+                                java.util.Date inicio = ordem.getDataExecucao();
+                                // Área m² (área do canteiro)
+                                double areaM2 = canteiro.getAreaCanteiroM2() != null ? canteiro.getAreaCanteiroM2().doubleValue() : 0.0;
+                                // Qtd em Kg
+                                double qtdKg = canteiro.getKgGerados() != null ? canteiro.getKgGerados().doubleValue() : 0.0;
+                                Long canteiroId = canteiro.getId();
+                                Long areaId = area != null ? area.getId() : null;
+
+                                TelaCanteiro tela = new TelaCanteiro(cultura, titulo, inicio, areaM2, qtdKg, canteiroId, areaId);
+                                tela.setVisible(true);
+                                TelaTalhao.this.dispose();
+                            });
+                        }
+                    }
+                }
+                cards.add(card);
+            }
+        } else {
+            JLabel lblVazio = new JLabel("Nenhum canteiro cadastrado nesta ordem.");
+            cards.add(lblVazio);
+        }
+
+        conteudoExpandido.add(cards);
+        bloco.add(conteudoExpandido);
+
+        return bloco;
+    }
+
+    // ====================================================================
+    // 🔑 NOVO MÉTODO: CRIAR PAINEL TALHÃO AGRUPADO
+    // ====================================================================
+    private JPanel criarPainelTalhaoAgrupado(TalhaoVO talhao, java.util.List<CanteiroVO> canteiros) {
+        // Painel principal do talhão (contém header + conteúdo)
+        JPanel bloco = new JPanel();
+        bloco.setLayout(new BoxLayout(bloco, BoxLayout.Y_AXIS));
+        bloco.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+
+        // --- 1. CABEÇALHO (sempre visível) ---
+        JPanel cabecalho = new JPanel(new BorderLayout());
+        cabecalho.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
+        cabecalho.setBackground(new Color(230, 230, 230));
+        cabecalho.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        String nomeTalhao = talhao != null ? talhao.getNome() : "Talhão " + (talhao != null ? talhao.getId() : "?");
+        String statusTalhao = talhao != null ? talhao.getStatus() : "";
+        double areaTalhao = talhao != null && talhao.getAreaTalhao() != null ? talhao.getAreaTalhao().doubleValue() : 0.0;
+
+        // Calcula área restante (área total do talhão - soma das áreas dos canteiros)
+        double areaUtilizadaPorCanteiros = 0.0;
+        if (canteiros != null) {
+            for (CanteiroVO c : canteiros) {
+                if (c.getAreaCanteiroM2() != null) {
+                    areaUtilizadaPorCanteiros += c.getAreaCanteiroM2().doubleValue();
+                }
+            }
+        }
+        double areaRestante = areaTalhao - areaUtilizadaPorCanteiros;
+
+        JLabel lbl = new JLabel(nomeTalhao + " | Status: " + statusTalhao + " | Área: " + String.format("%.2f", areaTalhao) + " m² | Área Restante: " + String.format("%.2f", areaRestante) + " m²");
+        lbl.setFont(new Font("Arial", Font.BOLD, 16));
+
+        // Seta do drop-down
+        JButton arrow = new JButton("\u25BC"); 
+        arrow.setFocusPainted(false);
+        arrow.setBorderPainted(false);
+        arrow.setContentAreaFilled(false);
+        arrow.setOpaque(false);
+        arrow.setBorder(null);
+
+        // Painel lateral com seta alinhada à direita
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        rightPanel.setOpaque(false);
+        rightPanel.add(arrow);
+
+        cabecalho.add(lbl, BorderLayout.WEST);
+        cabecalho.add(rightPanel, BorderLayout.EAST);
+        bloco.add(cabecalho);
+
+        // --- 2. CONTEÚDO EXPANDIDO (Canteiros de todas as ordens deste talhão) ---
+        JPanel conteudoExpandido = new JPanel();
+        conteudoExpandido.setLayout(new BoxLayout(conteudoExpandido, BoxLayout.Y_AXIS));
+        conteudoExpandido.setBackground(Color.WHITE);
+        conteudoExpandido.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
+
+        JPanel painelTitulo = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        painelTitulo.setBackground(Color.WHITE);
+
+        JLabel lblCanteiros = new JLabel("Canteiros em " + nomeTalhao + ":");
+        lblCanteiros.setFont(new Font("Arial", Font.BOLD, 16));
+        painelTitulo.add(lblCanteiros);
+        conteudoExpandido.add(painelTitulo);
+
+        conteudoExpandido.add(Box.createVerticalStrut(10));
+
+        // Painel de cards
+        JPanel cards = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 10));
+        cards.setBackground(Color.WHITE);
+
+        if (canteiros != null && !canteiros.isEmpty()) {
+            for (CanteiroVO canteiro : canteiros) {
+                String nomeCanteiro = canteiro.getNome();
+                String infoCanteiro = String.format("%.2f", canteiro.getKgGerados()) + " kg";
+                JPanel card = criarCard(nomeCanteiro, infoCanteiro, canteiro.getStatus());
+                for (Component comp : card.getComponents()) {
+                    if (comp instanceof JButton) {
+                        JButton btn = (JButton) comp;
+                        if ("Ver Detalhes".equals(btn.getText()) || "Ver".equals(btn.getText())) {
+                            btn.addActionListener(ev -> {
+                                // Buscar ordem por ID para obter dados complementares
+                                OrdemProducaoVO ordem = controller.buscarOrdemPorId(canteiro.getOrdemProducaoId());
+                                String cultura = ordem != null && ordem.getNomeEspecie() != null ? ordem.getNomeEspecie() : (ordem != null && ordem.getNomePlano() != null ? ordem.getNomePlano() : "");
+                                String titulo = nomeCanteiro;
+                                double areaM2 = canteiro.getAreaCanteiroM2() != null ? canteiro.getAreaCanteiroM2().doubleValue() : 0.0;
+                                double qtdKg = canteiro.getKgGerados() != null ? canteiro.getKgGerados().doubleValue() : 0.0;
+                                java.util.Date inicio = ordem != null ? ordem.getDataExecucao() : null;
+                                Long canteiroId = canteiro.getId();
+                                Long areaId = area != null ? area.getId() : null;
+
+                                TelaCanteiro tela = new TelaCanteiro(cultura, titulo, inicio, areaM2, qtdKg, canteiroId, areaId);
+                                tela.setVisible(true);
+                                // Fecha a tela atual (Talhão) para não ficar duas abertas
+                                TelaTalhao.this.dispose();
+                            });
+                        }
+                    }
+                }
+                cards.add(card);
+            }
+        } else {
+            JLabel lblVazio = new JLabel("Nenhum canteiro cadastrado neste talhão.");
+            cards.add(lblVazio);
+        }
+
+        conteudoExpandido.add(cards);
+        bloco.add(conteudoExpandido);
+
+        // Começa fechado
+        conteudoExpandido.setVisible(false);
+        arrow.setText("\u25B6"); // ▶
+
+        arrow.addActionListener(e -> {
+            boolean visivel = conteudoExpandido.isVisible();
+            conteudoExpandido.setVisible(!visivel);
+            arrow.setText(visivel ? "\u25B6" : "\u25BC");
+            bloco.revalidate();
+            bloco.repaint();
+        });
+
+        return bloco;
+    }
 
     private JPanel criarPainelTalhao(TalhaoVO talhao) {
         

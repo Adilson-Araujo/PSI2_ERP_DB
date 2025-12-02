@@ -6,13 +6,35 @@ import javax.swing.table.DefaultTableModel;
 
 import java.net.URI;
 // import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.List;
 
+import br.edu.ifsp.hto.cooperativa.planejamento.modelo.DAO.AtividadeDAO;
+import br.edu.ifsp.hto.cooperativa.planejamento.modelo.DAO.MaterialDAO;
+import br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.AtividadeNoCanteiroVO;
+import br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.MaterialNaAtividadeVO;
 
 import java.awt.*;
 
 public class TelaAtividades extends JFrame {
 
-    public TelaAtividades() {
+    private String cultura;
+    private String nomeCanteiro;
+    private java.util.Date inicio;
+    private double areaM2;
+    private double qtdKg;
+    private Long canteiroId;
+    private Long areaId;
+    private Integer atividadeId;
+
+    public TelaAtividades(String cultura, String nomeCanteiro, java.util.Date inicio, double areaM2, double qtdKg, Long canteiroId, Long areaId) {
+        this.cultura = cultura;
+        this.nomeCanteiro = nomeCanteiro;
+        this.inicio = inicio;
+        this.areaM2 = areaM2;
+        this.qtdKg = qtdKg;
+        this.canteiroId = canteiroId;
+        this.areaId = areaId;
         setTitle("Tela Atividades");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(1200, 800);
@@ -79,12 +101,43 @@ public class TelaAtividades extends JFrame {
         btnVoltar.setFont(new Font("Arial", Font.BOLD, 18));
         btnVoltar.setFocusPainted(false);
         btnVoltar.setPreferredSize(new Dimension(120, 45));
+        btnVoltar.addActionListener(e -> {
+            TelaCanteiro telaCanteiro = new TelaCanteiro(cultura, nomeCanteiro, inicio, areaM2, qtdKg, canteiroId, areaId);
+            telaCanteiro.setVisible(true);
+            TelaAtividades.this.dispose();
+        });
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.WEST;
         conteudo.add(btnVoltar, gbc);
 
-        JLabel lblTitulo = new JLabel("Atividade: Preparar Solo", SwingConstants.CENTER);
+        // Buscar atividades do canteiro do banco de dados
+        AtividadeDAO atividadeDAO = new AtividadeDAO();
+        List<AtividadeNoCanteiroVO> atividades = atividadeDAO.buscarAtividadesDoCanteiro(canteiroId.intValue());
+        
+        // Valores padrão caso não haja atividades
+        String nomeAtividade = "Sem atividades";
+        String dataAtividadeStr = "N/A";
+        String tempoGastoStr = "0.0h";
+        
+        if (atividades != null && !atividades.isEmpty()) {
+            // Pega a primeira atividade (você pode adaptar para mostrar todas ou uma específica)
+            AtividadeNoCanteiroVO atividadeNoCanteiro = atividades.get(0);
+            nomeAtividade = atividadeNoCanteiro.getAtividadeVO().getNomeAtividade();
+            this.atividadeId = atividadeNoCanteiro.getAtividadeVO().getId();
+            
+            // Formata data_atividade
+            if (atividadeNoCanteiro.getDataAtividade() != null) {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                dataAtividadeStr = sdf.format(atividadeNoCanteiro.getDataAtividade());
+            }
+            
+            // Formata tempo_gasto_horas
+            float tempoGasto = atividadeNoCanteiro.getTempoGastoHoras();
+            tempoGastoStr = String.format("%.1fh", tempoGasto);
+        }
+
+        JLabel lblTitulo = new JLabel("Atividade: " + nomeAtividade, SwingConstants.CENTER);
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 36));
         lblTitulo.setForeground(verdeEscuro);
         gbc.gridx = 1;
@@ -93,12 +146,11 @@ public class TelaAtividades extends JFrame {
         gbc.anchor = GridBagConstraints.CENTER;
         conteudo.add(lblTitulo, gbc);
 
-        JPanel painelResumo = new JPanel(new GridLayout(1, 3, 40, 20));
+        JPanel painelResumo = new JPanel(new GridLayout(1, 2, 40, 20));
         painelResumo.setOpaque(false);
         String[] textos = {
-                "Custo Total: R$ 660,00",
-                "Data Prevista: 18/02/2026",
-                "Prioridade: Alta"
+                "Data da Atividade: " + dataAtividadeStr,
+                "Tempo gasto: " + tempoGastoStr
         };
 
         for (String texto : textos) {
@@ -129,15 +181,6 @@ public class TelaAtividades extends JFrame {
         JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 0));
         painelBotoes.setOpaque(false);
 
-        JButton btnEditar = new JButton("Editar");
-        btnEditar.setFont(new Font("Arial", Font.BOLD, 16));
-        btnEditar.setBackground(verdeClaro);
-        btnEditar.setForeground(Color.BLACK);
-        btnEditar.setFocusPainted(false);
-        btnEditar.setPreferredSize(new Dimension(120, 38));
-        btnEditar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        painelBotoes.add(btnEditar);
-
         JButton btnConcluir = new JButton("Marcar como concluído");
         btnConcluir.setFont(new Font("Arial", Font.BOLD, 16));
         btnConcluir.setBackground(verdeClaro);
@@ -145,6 +188,37 @@ public class TelaAtividades extends JFrame {
         btnConcluir.setFocusPainted(false);
         btnConcluir.setPreferredSize(new Dimension(220, 38));
         btnConcluir.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnConcluir.addActionListener(e -> {
+            if (atividadeId != null) {
+                int confirm = JOptionPane.showConfirmDialog(
+                    TelaAtividades.this,
+                    "Deseja marcar esta atividade como concluída?",
+                    "Confirmar Conclusão",
+                    JOptionPane.YES_NO_OPTION
+                );
+                
+                if (confirm == JOptionPane.YES_OPTION) {
+                    atividadeDAO.concluirAtividadeDoCanteiro(canteiroId.intValue(), atividadeId);
+                    JOptionPane.showMessageDialog(
+                        TelaAtividades.this,
+                        "Atividade marcada como concluída!",
+                        "Sucesso",
+                        JOptionPane.INFORMATION_MESSAGE
+                    );
+                    // Volta para tela canteiro
+                    TelaCanteiro telaCanteiro = new TelaCanteiro(cultura, nomeCanteiro, inicio, areaM2, qtdKg, canteiroId, areaId);
+                    telaCanteiro.setVisible(true);
+                    TelaAtividades.this.dispose();
+                }
+            } else {
+                JOptionPane.showMessageDialog(
+                    TelaAtividades.this,
+                    "Nenhuma atividade disponível para concluir.",
+                    "Aviso",
+                    JOptionPane.WARNING_MESSAGE
+                );
+            }
+        });
         painelBotoes.add(btnConcluir);
 
         painelTitulo.add(painelBotoes, BorderLayout.EAST);
@@ -167,25 +241,31 @@ public class TelaAtividades extends JFrame {
 
 
 
-        String[] colunas = {"ID", "Nome", "Tipo", "Uni. Medida","Custo Uni.", "Qtd. Materiais", "Custo Tot.", "  ", "  "};
-        Object[][] dados = {
-        {1, "Semente milho", "Semente", "kg", "25,00", 20, "500,00", iconEdit,  iconDelete},
-        {2, "Água", "Insumo", "m³", "2,00", 50, "100,00",  iconEdit,  iconDelete},
-        {3, "Diesel", "Combustível", "L", "6,00", 10, "60,00",  iconEdit,  iconDelete}
-        };
+        // Buscar materiais da atividade do banco de dados
+        String[] colunas = {"ID", "Nome", "Unidade Medida", "Quantidade", "Quantidade Utilizada"};
+        
+        MaterialDAO materialDAO = new MaterialDAO();
+        List<MaterialNaAtividadeVO> materiaisDaAtividade = new java.util.ArrayList<>();
+        
+        if (atividadeId != null) {
+            materiaisDaAtividade = materialDAO.buscarMateriaisDaAtividade(atividadeId);
+        }
+        
+        // Preencher dados da tabela com os materiais reais
+        Object[][] dados = new Object[materiaisDaAtividade.size()][5];
+        for (int i = 0; i < materiaisDaAtividade.size(); i++) {
+            MaterialNaAtividadeVO materialNaAtividade = materiaisDaAtividade.get(i);
+            dados[i][0] = materialNaAtividade.getMaterial().getId();
+            dados[i][1] = materialNaAtividade.getMaterial().getNome();
+            dados[i][2] = materialNaAtividade.getMaterial().getUnidadeMedida();
+            dados[i][3] = String.format("%.2f", materialNaAtividade.getMaterial().getQuantidade());
+            dados[i][4] = String.format("%.2f", materialNaAtividade.getQuantidadeUtilizada());
+        }
 
         DefaultTableModel modelo = new DefaultTableModel(dados, colunas) {
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
-
-            @Override
-            public Class<?> getColumnClass(int columnIndex) {
-            if (columnIndex == 7 || columnIndex == 8) {
-                return Icon.class; 
-            }
-            return Object.class;
-    }
         };
 
         JTable tabela = new JTable(modelo);
@@ -197,45 +277,27 @@ public class TelaAtividades extends JFrame {
 
         DefaultTableCellRenderer center = new DefaultTableCellRenderer();
         center.setHorizontalAlignment(SwingConstants.CENTER);
-        for (int i = 0; i < tabela.getColumnCount() - 2; i++) {
+        for (int i = 0; i < tabela.getColumnCount(); i++) {
             tabela.getColumnModel().getColumn(i).setCellRenderer(center);
         }
 
-
-        tabela.getColumnModel().getColumn(0).setPreferredWidth(40);  
-        tabela.getColumnModel().getColumn(1).setPreferredWidth(160); 
-        tabela.getColumnModel().getColumn(2).setPreferredWidth(120); 
-        tabela.getColumnModel().getColumn(3).setPreferredWidth(100);  
-        tabela.getColumnModel().getColumn(4).setPreferredWidth(100);  
-        tabela.getColumnModel().getColumn(5).setPreferredWidth(120);  
-        tabela.getColumnModel().getColumn(6).setPreferredWidth(100);  
-        tabela.getColumnModel().getColumn(7).setPreferredWidth(50);
-        tabela.getColumnModel().getColumn(8).setPreferredWidth(50);
+        tabela.getColumnModel().getColumn(0).setPreferredWidth(50);   // ID
+        tabela.getColumnModel().getColumn(1).setPreferredWidth(250);  // Nome
+        tabela.getColumnModel().getColumn(2).setPreferredWidth(150);  // Unidade Medida
+        tabela.getColumnModel().getColumn(3).setPreferredWidth(150);  // Quantidade
+        tabela.getColumnModel().getColumn(4).setPreferredWidth(200);  // Quantidade Utilizada
 
         JScrollPane scrollTabela = new JScrollPane(tabela);
         gbc.gridy = 3;
         gbc.weighty = 1;
         conteudo.add(scrollTabela, gbc);
 
-        JButton btnAtrelar = new JButton("+ Atrelar Material");
-        btnAtrelar.setFont(new Font("Arial", Font.BOLD, 16));
-        btnAtrelar.setForeground(Color.BLACK);
-
-        btnAtrelar.setContentAreaFilled(false);
-        btnAtrelar.setBorderPainted(false);
-        btnAtrelar.setFocusPainted(false);
-
-        btnAtrelar.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        gbc.gridy = 4;        
-        gbc.weighty = 0;
-        gbc.anchor = GridBagConstraints.WEST;
-        conteudo.add(btnAtrelar, gbc);
+        // Botão atrelar material removido - funcionalidade será implementada posteriormente
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            TelaAtividades tela = new TelaAtividades();
+            TelaAtividades tela = new TelaAtividades("Tomate", "Canteiro A", new java.util.Date(), 10.0, 50.0, 1L, 1L);
             tela.setVisible(true);
         });
     }

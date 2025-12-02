@@ -20,18 +20,36 @@ public class PrecoPPADAO {
         return instancia;
     }
     
+    private int nextId(){
+        String sql = "SELECT MAX(id) FROM Produto";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt(1)+1;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    
     public boolean inserir(PrecoPPAVO precoppa) {
-        String sql = "INSERT INTO preco_ppa (data_inicio, especie_id, data_final, valor) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO preco_ppa (id, data_inicio, especie_id, data_final, valor) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             Timestamp data_inicio = precoppa.getData_inicio();
             int especie_id = precoppa.getEspecie().getId();
             
-            stmt.setTimestamp(1, data_inicio);
-            stmt.setInt(2, especie_id);
-            stmt.setTimestamp(3, precoppa.getData_final());
-            stmt.setFloat(4, precoppa.getValor());
+            int idGerado = nextId();
+            stmt.setInt(1, idGerado);
+            stmt.setTimestamp(2, data_inicio);
+            stmt.setInt(3, especie_id);
+            stmt.setTimestamp(4, precoppa.getData_final());
+            stmt.setFloat(5, precoppa.getValor());
             stmt.executeUpdate();
             
             cache.put(data_inicio+" "+especie_id, precoppa);

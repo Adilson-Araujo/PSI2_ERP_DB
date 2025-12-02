@@ -23,23 +23,36 @@ public class ProdutoDAO {
         return instancia;
     }
     
+    private int nextId(){
+        String sql = "SELECT MAX(id) FROM Produto";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt(1)+1;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    
     public boolean inserir(ProdutoVO produto) {
-        String sql = "INSERT INTO produto (especie_id, nome, descricao) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO produto (id, especie_id, nome, descricao) VALUES (?, ?, ?, ?)";
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, produto.getEspecie().getId());
-            stmt.setString(2, produto.getNome());
-            stmt.setString(3, produto.getDescricao());
+            int idGerado = nextId();
+            stmt.setInt(1, idGerado);
+            stmt.setInt(2, produto.getEspecie().getId());
+            stmt.setString(3, produto.getNome());
+            stmt.setString(4, produto.getDescricao());
             stmt.executeUpdate();
             
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    int idGerado = rs.getInt(1);
-                    produto.setId(idGerado);
-                    cache.put(idGerado, produto);
-                }
-            }
+            produto.setId(idGerado);
+            cache.put(idGerado, produto);
             
             return true;
 
@@ -83,15 +96,15 @@ public class ProdutoDAO {
     }
 
     public boolean atualizar(ProdutoVO produto) {
-        String sql = "UPDATE produto SET id, especie_id, nome, descricao WHERE id = ?";
+        String sql = "UPDATE produto SET especie_id = ?, nome = ?, descricao = ? WHERE id = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, produto.getId());
-            stmt.setInt(2, produto.getEspecie().getId());
-            stmt.setString(3, produto.getNome());
-            stmt.setString(4, produto.getDescricao());
+            stmt.setInt(1, produto.getEspecie().getId());
+            stmt.setString(2, produto.getNome());
+            stmt.setString(3, produto.getDescricao());
+            stmt.setInt(4, produto.getId());
 
             int linhasAfetadas = stmt.executeUpdate();
             return linhasAfetadas > 0;
@@ -120,7 +133,7 @@ public class ProdutoDAO {
 
     public List<ProdutoVO> listarTodos() {
         List<ProdutoVO> produtos = new ArrayList<>();
-        String sql = "SELECT id, especie_id, nome, descricao FROM produto";
+        String sql = "SELECT id, especie_id, nome, descricao FROM produto WHERE deletado = false";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);

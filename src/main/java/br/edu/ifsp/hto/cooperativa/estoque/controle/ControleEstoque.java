@@ -1,9 +1,11 @@
 package br.edu.ifsp.hto.cooperativa.estoque.controle;
 
+import br.edu.ifsp.hto.cooperativa.estoque.visao.gerenciamento.*;
+import br.edu.ifsp.hto.cooperativa.estoque.visao.transacoes.*;
+import br.edu.ifsp.hto.cooperativa.estoque.visao.estatistica.*;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.*;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.*;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.to.*;
-import br.edu.ifsp.hto.cooperativa.estoque.visao.*;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -76,16 +78,16 @@ public class ControleEstoque {
     {System.out.println("Opção 4.");}
     
     public static void telaEstoqueGerenciarArmazem(JDesktopPane desktop)
-    {System.out.println("Opção 5.");}
+    {desktop.add(TelaArmazemCRUD.gerarFrameInterno());}
     
     public static void telaEstoqueGerenciarCategoria(JDesktopPane desktop)
-    {System.out.println("Opção 6.");}
+    {desktop.add(TelaCategoriaCRUD.gerarFrameInterno());}
     
     public static void telaEstoqueGerenciarEspecie(JDesktopPane desktop)
-    {System.out.println("Opção 7.");}
+    {desktop.add(TelaEspecieCRUD.gerarFrameInterno());}
     
     public static void telaEstoqueGerenciarProduto(JDesktopPane desktop)
-    {System.out.println("Opção 8.");}
+    {desktop.add(TelaProdutoCRUD.gerarFrameInterno());}
     
     public static void telaEstoqueRelatorio(JDesktopPane desktop)
     {desktop.add(TelaRelatorio.gerarFrameInterno());}
@@ -121,6 +123,16 @@ public class ControleEstoque {
      */
     public List<ArmazemVO> listarArmazens() {
         return armazemDAO.listarTodos();
+    }
+    
+    /**
+     * Pega um objeto armazem conforme seu id.
+     * 
+     * @param id id do armazem procurado.
+     * @return ArmazemVo procurado se encontrado.
+     */
+    public ArmazemVO buscarArmazemPorId(int id){
+        return armazemDAO.buscarPorId(id);
     }
     
     /**

@@ -17,22 +17,36 @@ public class CategoriaDAO {
         if (instancia == null) instancia = new CategoriaDAO();
         return instancia;
     }
+    
+    private int nextId(){
+        String sql = "SELECT MAX(id) FROM categoria";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt(1)+1;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 
     public boolean inserir(CategoriaVO categoria) {
-        String sql = "INSERT INTO categoria (nome) VALUES (?)";
+        String sql = "INSERT INTO categoria (id, nome) VALUES (?, ?)";
         try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql,
+                     Statement.RETURN_GENERATED_KEYS);) {
 
-            stmt.setString(1, categoria.getNome());
+            int idGerado = nextId();
+            stmt.setInt(1, idGerado);
+            stmt.setString(2, categoria.getNome());
             stmt.executeUpdate();
-            
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    int idGerado = rs.getInt(1);
-                    categoria.setId(idGerado);
-                    cache.put(idGerado, categoria);
-                }
-            }
+                        
+            categoria.setId(idGerado);
+            cache.put(idGerado, categoria);
             
             return true;
 
@@ -89,7 +103,7 @@ public class CategoriaDAO {
     }
 
     public boolean excluir(int id) {
-        String sql = "UPDATE categoria SET deletado = TRUE WHERE id = ?";
+        String sql = "UPDATE categoria SET deletado = true WHERE id = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -106,7 +120,7 @@ public class CategoriaDAO {
 
     public List<CategoriaVO> listarTodas() {
         List<CategoriaVO> categorias = new ArrayList<>();
-        String sql = "SELECT id, nome FROM categorias ORDER BY nome";
+        String sql = "SELECT id, nome FROM categoria WHERE deletado = false ORDER BY nome";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);

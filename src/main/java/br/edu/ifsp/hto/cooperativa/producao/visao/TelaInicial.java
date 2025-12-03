@@ -79,7 +79,13 @@ public class TelaInicial extends JFrame {
                 dispose();
             }
             if (texto.equals("Relatório de produção")) {
-                // depois criamos isso
+                // Criar e abrir tela de relatório de produção
+                br.edu.ifsp.hto.cooperativa.producao.modelo.RelatorioProducaoModel model = 
+                    new br.edu.ifsp.hto.cooperativa.producao.modelo.RelatorioProducaoModel();
+                br.edu.ifsp.hto.cooperativa.producao.controle.RelatorioProducaoController controller = 
+                    new br.edu.ifsp.hto.cooperativa.producao.controle.RelatorioProducaoController(model);
+                new br.edu.ifsp.hto.cooperativa.producao.visao.TelaRelatorioProducao(controller).setVisible(true);
+                dispose();
             }
         });
 

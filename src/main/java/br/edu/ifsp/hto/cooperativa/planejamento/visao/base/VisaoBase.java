@@ -23,7 +23,7 @@ public abstract class VisaoBase extends JInternalFrame implements NavegadorTelas
 
     private void configurarJanela() {
         setSize(1024, 768); // Tamanho HD padrão
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setClosable(true);
         setLayout(new BorderLayout());
         setVisible(true);
     }

@@ -64,7 +64,7 @@ public class TelaRegistrarProblemas extends JFrame {
 
         menuLateral.add(Box.createVerticalStrut(40));
 
-        String[] botoes = {"Área de plantio", "Registrar problemas", "Relatório de produção"};
+        String[] botoes = {"Tela inicial", "Área de plantio", "Registrar problemas", "Relatório de produção"};
         for (String texto : botoes) {
             JButton botao = new JButton(texto);
             botao.setFont(new Font("Arial", Font.BOLD, 15));
@@ -76,6 +76,32 @@ public class TelaRegistrarProblemas extends JFrame {
             botao.setPreferredSize(new Dimension(180, 50));
             botao.setBorder(BorderFactory.createLineBorder(verdeEscuro, 2));
             botao.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            
+            botao.addActionListener(e -> {
+                try {
+                    long associadoId = br.edu.ifsp.hto.cooperativa.sessao.modelo.negocios.Sessao.getAssociadoIdLogado();
+                    if (texto.equals("Tela inicial")) {
+                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaInicial(associadoId).setVisible(true);
+                        dispose();
+                    } else if (texto.equals("Área de plantio")) {
+                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaGerenciarArea().setVisible(true);
+                        dispose();
+                    } else if (texto.equals("Registrar problemas")) {
+                        // Já está na tela de registrar problemas, não faz nada
+                        // ou apenas foca na tela atual
+                    } else if (texto.equals("Relatório de produção")) {
+                        br.edu.ifsp.hto.cooperativa.producao.modelo.RelatorioProducaoModel model = 
+                            new br.edu.ifsp.hto.cooperativa.producao.modelo.RelatorioProducaoModel();
+                        br.edu.ifsp.hto.cooperativa.producao.controle.RelatorioProducaoController relController = 
+                            new br.edu.ifsp.hto.cooperativa.producao.controle.RelatorioProducaoController(model);
+                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaRelatorioProducao(relController).setVisible(true);
+                        dispose();
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Erro ao navegar: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                }
+            });
+            
             menuLateral.add(botao);
             menuLateral.add(Box.createVerticalStrut(15));
         }

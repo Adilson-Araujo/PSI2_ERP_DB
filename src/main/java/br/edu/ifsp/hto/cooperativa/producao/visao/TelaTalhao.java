@@ -78,23 +78,34 @@ public class TelaTalhao extends JFrame {
             botao.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             // 🔑 ADIÇÃO: Listener de Evento para o botão
             botao.addActionListener(e -> {
-                if (texto.equals("Tela inicial")) {
-                    // AÇÃO CORRETA para o botão "Tela inicial"
+                try {
                     long associadoId = br.edu.ifsp.hto.cooperativa.sessao.modelo.negocios.Sessao.getAssociadoIdLogado();
-                    new br.edu.ifsp.hto.cooperativa.producao.visao.TelaInicial(associadoId).setVisible(true);
-                    dispose(); // Fecha a tela atual (TelaGerenciarArea)
-
-                } else if (texto.equals("Área de plantio")) {
-                    new br.edu.ifsp.hto.cooperativa.producao.visao.TelaGerenciarArea().setVisible(true);
-                    dispose();
-
-                } else if (texto.equals("Registrar problemas")) {
-                    // Adicionar lógica para Registrar problemas
-                
-                } else if (texto.equals("Relatório de produção")) {
-                    // Adicionar lógica para Relatório de produção
+                    if (texto.equals("Tela inicial")) {
+                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaInicial(associadoId).setVisible(true);
+                        dispose();
+                    } else if (texto.equals("Área de plantio")) {
+                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaGerenciarArea().setVisible(true);
+                        dispose();
+                    } else if (texto.equals("Registrar problemas")) {
+                        br.edu.ifsp.hto.cooperativa.producao.modelo.RegistrarProblemasModel model = 
+                            new br.edu.ifsp.hto.cooperativa.producao.modelo.RegistrarProblemasModel();
+                        br.edu.ifsp.hto.cooperativa.producao.controle.RegistrarProblemasController controller = 
+                            new br.edu.ifsp.hto.cooperativa.producao.controle.RegistrarProblemasController(model);
+                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaRegistrarProblemas(controller).setVisible(true);
+                        dispose();
+                    } else if (texto.equals("Relatório de produção")) {
+                        br.edu.ifsp.hto.cooperativa.producao.modelo.RelatorioProducaoModel model = 
+                            new br.edu.ifsp.hto.cooperativa.producao.modelo.RelatorioProducaoModel();
+                        br.edu.ifsp.hto.cooperativa.producao.controle.RelatorioProducaoController controller = 
+                            new br.edu.ifsp.hto.cooperativa.producao.controle.RelatorioProducaoController(model);
+                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaRelatorioProducao(controller).setVisible(true);
+                        dispose();
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Erro ao navegar: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
                 }
             });
+            
             menuLateral.add(botao);
             menuLateral.add(Box.createVerticalStrut(20));
         }

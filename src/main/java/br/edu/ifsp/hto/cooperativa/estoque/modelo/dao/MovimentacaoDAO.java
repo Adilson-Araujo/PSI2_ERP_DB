@@ -223,4 +223,44 @@ public class MovimentacaoDAO {
 
         return movimentacoes;
     }
+    
+    public List<MovimentacaoVO> listarVendasIndicar(int associado_id) {
+        List<MovimentacaoVO> movimentacoes = new ArrayList<>();
+        String sql = "SELECT id, tipo_id, origem_id, produto_id, armazem_id, associado_id, quantidade, data_movimento FROM movimentacao WHERE associado_id = ? AND tipo_id = 2 AND origem_id = 2 AND armazem_id = 2 AND deletado = false";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, associado_id);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                
+                TipoVO tipo = DAO_tipo.buscarPorId(rs.getInt("tipo_id"));
+                OrigemVO origem = DAO_origem.buscarPorId(rs.getInt("origem_id"));
+                ProdutoVO produto = DAO_produto.buscarPorId(rs.getInt("produto_id"));
+                ArmazemVO armazem = DAO_armazem.buscarPorId(rs.getInt("armazem_id"));
+                
+                if (!cache.containsKey(id)) {
+                    MovimentacaoVO movimentacao = new MovimentacaoVO(
+                            id,
+                            tipo,
+                            origem,
+                            produto,
+                            armazem,
+                            rs.getInt("associado_id"),
+                            rs.getFloat("quantidade"),
+                            rs.getTimestamp("data_movimento"));
+                    cache.put(id, movimentacao);
+                }
+                movimentacoes.add(cache.get(id));
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao listar movimentações: " + e.getMessage());
+        }
+
+        return movimentacoes;
+    }
 }

@@ -75,7 +75,7 @@ public class ControleEstoque {
     {desktop.add(TelaDeTransferencia.gerarFrameInterno());}
     
     public static void telaEstoqueIndicacao(JDesktopPane desktop)
-    {System.out.println("Opção 4.");}
+    {desktop.add(TelaDeIndicacao.gerarFrameInterno());}
     
     public static void telaEstoqueGerenciarArmazem(JDesktopPane desktop)
     {desktop.add(TelaArmazemCRUD.gerarFrameInterno());}

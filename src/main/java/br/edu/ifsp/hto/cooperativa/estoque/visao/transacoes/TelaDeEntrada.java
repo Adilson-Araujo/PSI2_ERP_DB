@@ -1,10 +1,17 @@
 package br.edu.ifsp.hto.cooperativa.estoque.visao.transacoes;
 
 import br.edu.ifsp.hto.cooperativa.estoque.controle.ControleEstoque;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.MovimentacaoDAO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.OrigemDAO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.TipoDAO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.ArmazemVO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.MovimentacaoVO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.ProdutoVO;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Timestamp;
+import java.time.Instant;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
@@ -13,6 +20,9 @@ import java.util.List;
 public class TelaDeEntrada {
     public static JInternalFrame gerarFrameInterno() {
         ControleEstoque controle = ControleEstoque.getInstance();
+        MovimentacaoDAO movimentacaoDAO = MovimentacaoDAO.getInstance();
+        TipoDAO tipoDAO = TipoDAO.getInstance();
+        OrigemDAO origemDAO = OrigemDAO.getInstance();
 
         final JInternalFrame janela = new JInternalFrame("Entrada no Estoque");
         janela.setSize(700, 500); 
@@ -72,11 +82,13 @@ public class TelaDeEntrada {
         gbc.gridy = 2;
         painelCentral.add(lblProduto, gbc);
 
-        String[] produtos = {"Alface", "Laranja", "Mamão", "Milho"};
-        JComboBox<String> comboProdutos = new JComboBox<>(produtos);
+        List<ProdutoVO> produtos = controle.listarProdutos();
+        JComboBox<ProdutoVO> comboProduto = new JComboBox<>(
+            produtos.toArray(ProdutoVO[]::new)
+        );
+        
         gbc.gridx = 1;
-        painelCentral.add(comboProdutos, gbc);
-
+        painelCentral.add(comboProduto, gbc);
   
         JLabel lblQuantidade = new JLabel("Quantidade:");
         gbc.gridx = 0;
@@ -92,10 +104,15 @@ public class TelaDeEntrada {
         JButton btnSalvar = new JButton("Salvar");
         JButton btnExcluir = new JButton("Excluir");
         
-        btnSalvar.addActionListener(e -> {
-            ArmazemVO selecionado = (ArmazemVO) comboArmazem.getSelectedItem();
-            if (selecionado != null) {
-                System.out.println(selecionado.getId());
+        btnSalvar.addActionListener(ev -> {
+            ArmazemVO armazem = (ArmazemVO) comboArmazem.getSelectedItem();
+            ProdutoVO produto = (ProdutoVO) comboProduto.getSelectedItem();
+            float quantidade = (Double.valueOf(txtQuantidade.getText())).floatValue();
+            MovimentacaoVO movimentacao = new MovimentacaoVO(-1, tipoDAO.buscarPorId(1), origemDAO.buscarPorId(3), produto, armazem, 1, quantidade, Timestamp.from(Instant.now()));
+            try{
+                movimentacaoDAO.inserir(movimentacao);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
 

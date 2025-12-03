@@ -8,6 +8,7 @@ import br.edu.ifsp.hto.cooperativa.planejamento.visao.componentes.MenuLateral;
 import br.edu.ifsp.hto.cooperativa.planejamento.visao.estilo.Tema;
 import br.edu.ifsp.hto.cooperativa.planejamento.visao.telas.VisaoAreas;
 import br.edu.ifsp.hto.cooperativa.planejamento.visao.telas.VisaoHome;
+import br.edu.ifsp.hto.cooperativa.planejamento.visao.telas.VisaoMateriais;
 
 public abstract class VisaoBase extends JInternalFrame implements NavegadorTelas {
 
@@ -81,7 +82,13 @@ public abstract class VisaoBase extends JInternalFrame implements NavegadorTelas
     }
 
     // --- Outras navegações (Futuro) ---
-    @Override public void abrirMateriais() {}
+    @Override public void abrirMateriais() {
+        if (!(this instanceof VisaoAreas)) {
+            this.dispose();
+            new VisaoMateriais(parent).setVisible(true);
+        }
+    }
+
     @Override public void abrirTalhoes() {}
     @Override public void abrirPlanos() {}
     @Override public void abrirAtividades() {}

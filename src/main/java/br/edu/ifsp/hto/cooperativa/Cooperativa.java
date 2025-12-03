@@ -1,6 +1,13 @@
 package br.edu.ifsp.hto.cooperativa;
 
 import br.edu.ifsp.hto.cooperativa.estoque.controle.ControleEstoque;
+import br.edu.ifsp.hto.cooperativa.financeiro.visao.VisaoDespesa;
+import br.edu.ifsp.hto.cooperativa.financeiro.visao.VisaoEstoque;
+import br.edu.ifsp.hto.cooperativa.financeiro.visao.VisaoGeralGrafica;
+import br.edu.ifsp.hto.cooperativa.financeiro.visao.VisaoGeralTabela;
+import br.edu.ifsp.hto.cooperativa.financeiro.visao.VisaoPlanejamento;
+import br.edu.ifsp.hto.cooperativa.financeiro.visao.VisaoProducao;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -138,15 +145,19 @@ public class Cooperativa extends JFrame {
         estoqueMenu.add(estoqueItemEstoque);
 
         //Grupo Financeiro adicionar as opcoes do subMneu (JMenuItem) aqui
-        JMenuItem financeiroItemMenu1 = new JMenuItem("Janela1");
-        JMenuItem financeiroItemMenu2 = new JMenuItem("Janela2");
-        JMenuItem financeiroItemMenu3 = new JMenuItem("Janela3");
-        JMenuItem financeiroItemMenu4 = new JMenuItem("Janela4");
+        JMenuItem financeiroVisaoGeralGraph = new JMenuItem("Visão Geral em Gráfico");
+        JMenuItem financeiroVisaoGeralTab = new JMenuItem("Visão Geral em Tabela");
+        JMenuItem financeiroEstoque = new JMenuItem("Sobre Estoque");
+        JMenuItem financeiroPlan = new JMenuItem("Sobre Planejamentos");
+        JMenuItem financeiroProd = new JMenuItem("Sobre Produção");
+        JMenuItem financeiroDesp = new JMenuItem("Registro de Despesas");
 
-        financeiroMenu.add(financeiroItemMenu1);
-        financeiroMenu.add(financeiroItemMenu2);
-        financeiroMenu.add(financeiroItemMenu3);
-        financeiroMenu.add(financeiroItemMenu4);
+        financeiroMenu.add(financeiroVisaoGeralGraph);
+        financeiroMenu.add(financeiroVisaoGeralTab);
+        financeiroMenu.add(financeiroEstoque);
+        financeiroMenu.add(financeiroPlan);
+        financeiroMenu.add(financeiroProd);
+        financeiroMenu.add(financeiroDesp);
 
         //Grupo Nota Fiscal adicionar as opcoes do subMneu (JMenuItem) aqui
         JMenuItem notaFiscalItemCadAssociado = new JMenuItem("Cadastrar Associado");
@@ -266,6 +277,14 @@ public class Cooperativa extends JFrame {
             tela.setVisible(true);
             try { tela.setSelected(true); } catch (java.beans.PropertyVetoException e) {}
         });
+        
+                // -- Ações do grupo FINANCEIRO
+        financeiroVisaoGeralGraph.addActionListener(ev -> new VisaoGeralGrafica(desktop));
+        financeiroVisaoGeralTab.addActionListener(ev -> new VisaoGeralTabela(desktop));
+        financeiroEstoque.addActionListener(ev -> new VisaoEstoque(desktop));
+        financeiroPlan.addActionListener(ev -> new VisaoPlanejamento(desktop));
+        financeiroProd.addActionListener(ev -> new VisaoProducao(desktop));
+        financeiroDesp.addActionListener(ev -> new VisaoDespesa(desktop));
 
         // --- AÇÕES DO GRUPO NOTA FISCAL ---
 

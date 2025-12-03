@@ -28,21 +28,6 @@ public class DespesaVO {
         this.descricao_despesa = descricao_despesa;
     }
     
-    // Versão que não recebe id e usuario_id, para atualizar dados no banco, ou para outros motivos lógicos
-    public DespesaVO (
-        String categoria_gasto,
-        String destinatario,
-        double valor_gasto,
-        String data_transacao,
-        String descricao_despesa
-    ) {
-        this.categoria_gasto = categoria_gasto;
-        this.destinatario = destinatario;
-        this.valor_gasto = valor_gasto;
-        this.data_transacao = data_transacao;
-        this.descricao_despesa = descricao_despesa;
-    }
-    
     // Getters (Busca de atributos)
     public long buscaId () {return this.id;}
     public long buscaAssociado_id () {return this.associado_id;}
@@ -61,4 +46,3 @@ public class DespesaVO {
     public void atualizarData_transacao (String data_transacao) {this.data_transacao = data_transacao;}
     public void atualizarDescricao_despesa (String descricao_despesa) {this.descricao_despesa = descricao_despesa;}
 }
-

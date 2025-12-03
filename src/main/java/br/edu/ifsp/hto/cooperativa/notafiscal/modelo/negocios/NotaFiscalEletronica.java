@@ -30,6 +30,26 @@ public class NotaFiscalEletronica extends BaseNegocios {
     {
 
     }
+    public void adicionar(NotaFiscalEletronicaTO nfe)
+    {
+        if (nfe == null || nfe.notaFiscalEletronica == null)
+            return;
+        if (nfe.associadoTO.associado.getId() == null || nfe.associadoTO.associado.getId() == 0){
+            Factory.getAssociado().cadastrar(nfe.associadoTO);
+            nfe.notaFiscalEletronica.setAssociadoId(nfe.associadoTO.associado.getId());
+        }
+        if (nfe.clienteTO.cliente.getId() == null || nfe.clienteTO.cliente.getId() == 0){
+            Factory.getCliente().cadastrar(nfe.clienteTO);
+            nfe.notaFiscalEletronica.setClienteId(nfe.clienteTO.cliente.getId());
+        }
+        gerarChaveAcesso(nfe);
+        incluirNotaFiscalEletronica(nfe.notaFiscalEletronica);
+        for (var item : nfe.notaFiscalItens){
+            item.setNotaFiscalEletronicaId(nfe.notaFiscalEletronica.getId());
+            Factory.getNotaFiscalItem().adicionar(item);
+        }
+        gerarDanfeNfe(nfe);
+    }
     public void gerarDanfeNfe(NotaFiscalEletronicaTO nfe, List<ItemPedidoVO> produtos)
     {
         nfe.associadoTO = Factory.getAssociado().buscarId(nfe.notaFiscalEletronica.getAssociadoId());
@@ -56,6 +76,16 @@ public class NotaFiscalEletronica extends BaseNegocios {
         nfe.notaFiscalEletronica.setNumeroNotaFiscal(String.valueOf(nfe.notaFiscalEletronica.getId()));
         gerarChaveAcesso(nfe);
         alterarNotaFiscalEletronica(nfe.notaFiscalEletronica);
+        gerarXml(nfe);
+        imprimirDanfePdf(nfe);
+    }
+
+    public void gerarDanfeNfe(NotaFiscalEletronicaTO nfe){
+        if (nfe.notaFiscalEletronica.getChaveAcesso() == null || nfe.notaFiscalEletronica.getChaveAcesso().isEmpty()) {
+            gerarChaveAcesso(nfe);
+            alterarNotaFiscalEletronica(nfe.notaFiscalEletronica);
+        }
+
         gerarXml(nfe);
         imprimirDanfePdf(nfe);
     }
@@ -125,6 +155,9 @@ public class NotaFiscalEletronica extends BaseNegocios {
     }
     public void gerarXml(NotaFiscalEletronicaTO nfe) {
         try {
+            if (nfe.notaFiscalXml == null)
+                nfe.notaFiscalXml = new NotaFiscalXmlVO();
+
             var context = JAXBContext.newInstance(TNFe.class);
             var marshaller = context.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);

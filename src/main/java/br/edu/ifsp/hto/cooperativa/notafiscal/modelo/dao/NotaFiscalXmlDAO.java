@@ -11,15 +11,16 @@ public class NotaFiscalXmlDAO {
 
     public void adicionar(NotaFiscalXmlVO xml){
         String sql = """
-                    INSERT INTO nota_fiscal_xml (hash, conteudo)
-                    VALUES (?, ?)
+                    INSERT INTO nota_fiscal_xml (id, hash, conteudo)
+                    VALUES (?, ?, ?)
                 """;
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement p = conn.prepareStatement(sql)) {
 
-            p.setString(1, xml.getHash());
-            p.setString(2, xml.getConteudo());
+            p.setLong(1, xml.getId());
+            p.setString(2, xml.getHash());
+            p.setString(3, xml.getConteudo());
 
             p.executeUpdate();
         }catch(Exception ex){
@@ -69,7 +70,7 @@ public class NotaFiscalXmlDAO {
             }
         }
         catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
         }
         return null;
     }

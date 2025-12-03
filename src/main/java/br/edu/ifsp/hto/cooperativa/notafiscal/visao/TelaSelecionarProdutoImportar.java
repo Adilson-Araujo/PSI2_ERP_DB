@@ -1,11 +1,17 @@
 package br.edu.ifsp.hto.cooperativa.notafiscal.visao;
 
+import br.edu.ifsp.hto.cooperativa.estoque.controle.ControleEstoque;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.to.ProdutoPrecificadoTO;
 import br.edu.ifsp.hto.cooperativa.notafiscal.visao.ClassesBase.Button;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TelaSelecionarProdutoImportar extends JDialog {
 
@@ -13,10 +19,10 @@ public class TelaSelecionarProdutoImportar extends JDialog {
     private DefaultTableModel modeloProdutos;
     private JTextField txtQuantidade;
     private br.edu.ifsp.hto.cooperativa.notafiscal.visao.ClassesBase.Button btnImportar, btnCancelar;
+    private List<ProdutoPrecificadoTO> listaProdutosCarregados = new ArrayList<>();
 
-    // Produto selecionado (para o mock funcionar)
-    private String produtoSelecionado;
-    private double valorUnitario;
+    // Produto selecionado
+    private ProdutoPrecificadoTO produtoSelecionado;
     private int quantidade;
 
     public TelaSelecionarProdutoImportar(JFrame parent) {
@@ -30,13 +36,13 @@ public class TelaSelecionarProdutoImportar extends JDialog {
                 return false;
             }
         };
-
-        // Mock
-        modeloProdutos.addRow(new Object[]{"Alface", 0.99});
-        modeloProdutos.addRow(new Object[]{"Tomate", 2.29});
-        modeloProdutos.addRow(new Object[]{"Batata", 1.50});
-        modeloProdutos.addRow(new Object[]{"Maçã", 9});
-        modeloProdutos.addRow(new Object[]{"Manga", 7.00});
+        List<ProdutoPrecificadoTO> produtos = ControleEstoque.getInstance().listarPrecos(Timestamp.valueOf(LocalDateTime.now()));
+        for(var produto : produtos){
+            var nome = produto.getProduto().getNome();
+            var preco = produto.getPrecoPPA().getValor();
+            modeloProdutos.addRow(new Object[]{nome, preco});
+            listaProdutosCarregados.add(produto);
+        }
 
         tabelaProdutos = new JTable(modeloProdutos);
         tabelaProdutos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -69,8 +75,8 @@ public class TelaSelecionarProdutoImportar extends JDialog {
     private void importarProduto() {
         int row = tabelaProdutos.getSelectedRow();
         if (row >= 0) {
-            produtoSelecionado = String.valueOf(modeloProdutos.getValueAt(row, 0));
-            valorUnitario = Double.parseDouble(modeloProdutos.getValueAt(row, 1).toString());
+            produtoSelecionado = listaProdutosCarregados.get(row);
+
             try {
                 quantidade = Integer.parseInt(txtQuantidade.getText().trim());
             } catch (NumberFormatException ex) {
@@ -84,23 +90,11 @@ public class TelaSelecionarProdutoImportar extends JDialog {
     }
 
     // Getters para recuperar o produto selecionado
-    public String getProdutoSelecionado() { return produtoSelecionado; }
-    public double getValorUnitario() { return valorUnitario; }
+
     public int getQuantidade() { return quantidade; }
+    public ProdutoPrecificadoTO getProdutoSelecionado() {return produtoSelecionado;}
 
     public boolean produtoFoiSelecionado() {
         return produtoSelecionado != null;
-    }
-
-    public static void main(String[] args) {
-        TelaSelecionarProdutoImportar tela = new TelaSelecionarProdutoImportar(null);
-        tela.setVisible(true);
-        if (tela.produtoFoiSelecionado()) {
-            System.out.println("Produto: " + tela.getProdutoSelecionado());
-            System.out.println("Qtd: " + tela.getQuantidade());
-            System.out.println("Valor: " + tela.getValorUnitario());
-        } else {
-            System.out.println("Nenhum produto selecionado.");
-        }
     }
 }

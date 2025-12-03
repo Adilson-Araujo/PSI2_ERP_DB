@@ -70,7 +70,13 @@ public class TelaInicial extends JFrame {
                     dispose(); 
             }
             if (texto.equals("Registrar problemas")) {
-                // depois criamos isso
+                // Criar e abrir tela de registrar problemas
+                br.edu.ifsp.hto.cooperativa.producao.modelo.RegistrarProblemasModel model = 
+                    new br.edu.ifsp.hto.cooperativa.producao.modelo.RegistrarProblemasModel();
+                br.edu.ifsp.hto.cooperativa.producao.controle.RegistrarProblemasController controller = 
+                    new br.edu.ifsp.hto.cooperativa.producao.controle.RegistrarProblemasController(model);
+                new br.edu.ifsp.hto.cooperativa.producao.visao.TelaRegistrarProblemas(controller).setVisible(true);
+                dispose();
             }
             if (texto.equals("Relatório de produção")) {
                 // depois criamos isso

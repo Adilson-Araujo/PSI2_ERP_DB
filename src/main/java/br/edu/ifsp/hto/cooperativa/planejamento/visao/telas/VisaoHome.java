@@ -40,7 +40,7 @@ public class VisaoHome extends VisaoBase {
         painel.add(new CardDashboard("Planos Criados: " + pc.qtdPlanoAssociado(associadoId)));
         painel.add(new CardDashboard("Áreas Ativas: " + areas.size()));
         painel.add(new CardDashboard("Próximas Atividades: " + atividades.get(0).getNomeAtividade()));
-        painel.add(new CardDashboard("Alertas de Estoque"));
+        // painel.add(new CardDashboard("Alertas de Estoque"));
 
         return painel;
     }

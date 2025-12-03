@@ -27,21 +27,7 @@ public class MovimentacaoDAO {
         return instancia;
     }
     
-    private int nextId(){
-        String sql = "SELECT MAX(id) FROM Produto";
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            if (rs.next()) {
-                return rs.getInt(1)+1;
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
+    // Método removido - vamos usar a sequence do PostgreSQL diretamente
     
     private void validarMovimentacao(MovimentacaoVO movimentacao) throws Exception {
         if (movimentacao == null) throw new Exception("Movimentação inválida.");
@@ -57,35 +43,41 @@ public class MovimentacaoDAO {
         validarMovimentacao(movimentacao);
         if(movimentacao.getId() != -1) throw new Exception("Registro já inserido. Tente atualiza-lo");
         
-        String sql = "INSERT INTO movimentacao (id, tipo_id, origem_id, produto_id, armazem_id, associado_id, quantidade, data_movimento) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        // Usa a sequence do PostgreSQL automaticamente (não especifica o ID)
+        String sql = "INSERT INTO movimentacao (tipo_id, origem_id, produto_id, armazem_id, associado_id, quantidade, data_movimento) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id";
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            int idGerado = nextId();
-            stmt.setInt(1, idGerado);
-            stmt.setInt(2, movimentacao.getTipo().getId());
-            stmt.setInt(3, movimentacao.getOrigem().getId());
-            stmt.setInt(4, movimentacao.getProduto().getId());
-            stmt.setInt(5, movimentacao.getArmazem().getId());
-            stmt.setInt(6, movimentacao.getAssociadoId());
-            stmt.setFloat(7, movimentacao.getQuantidade());
-            stmt.setTimestamp(8, movimentacao.getData());
-            stmt.executeUpdate();
-
-            movimentacao.setId(idGerado); // atualiza o objeto com o novo ID
-            cache.put(idGerado, movimentacao);
+            stmt.setInt(1, movimentacao.getTipo().getId());
+            stmt.setInt(2, movimentacao.getOrigem().getId());
+            stmt.setInt(3, movimentacao.getProduto().getId());
+            stmt.setInt(4, movimentacao.getArmazem().getId());
+            stmt.setInt(5, movimentacao.getAssociadoId());
+            stmt.setFloat(6, movimentacao.getQuantidade());
+            stmt.setTimestamp(7, movimentacao.getData());
             
-            // Informa DAO_estoque_atual sobre a modificação.
-            DAO_estoque_atual.movimentaSaldo(
-                    movimentacao.getAssociadoId(), 
-                    movimentacao.getProduto(),
-                    movimentacao.getArmazem(),
-                    movimentacao.getQuantidade());
+            ResultSet rs = stmt.executeQuery();
             
-            return true;
+            if (rs.next()) {
+                int idGerado = rs.getInt(1);
+                movimentacao.setId(idGerado); // atualiza o objeto com o novo ID
+                cache.put(idGerado, movimentacao);
+                
+                // Informa DAO_estoque_atual sobre a modificação.
+                DAO_estoque_atual.movimentaSaldo(
+                        movimentacao.getAssociadoId(), 
+                        movimentacao.getProduto(),
+                        movimentacao.getArmazem(),
+                        movimentacao.getQuantidade());
+                
+                return true;
+            }
+            
+            return false;
 
         } catch (SQLException e) {
             System.err.println("Erro ao inserir movimentação: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }

@@ -102,9 +102,12 @@ public class OrdemProducaoDAO {
         String sql = """
             SELECT DISTINCT op.*, t.nome as talhao_nome FROM ordem_producao op
             JOIN talhao t ON op.talhao_id = t.id
-            WHERE t.area_id = ? AND op.status != 'deletado'
+            WHERE t.area_id = ? AND op.status = 'em_execucao'
             ORDER BY op.id
         """;
+        
+        System.out.println("[DEBUG] OrdemProducaoDAO.listarPorAreaId - areaId=" + areaId);
+        System.out.println("[DEBUG] SQL: " + sql);
         
         PreparedStatement ps = conn.prepareStatement(sql);
         ps.setLong(1, areaId);
@@ -113,8 +116,12 @@ public class OrdemProducaoDAO {
         List<OrdemProducaoVO> lista = new ArrayList<>();
 
         while (rs.next()) {
-            lista.add(converter(rs));
+            OrdemProducaoVO vo = converter(rs);
+            System.out.println("[DEBUG] Ordem encontrada: ID=" + vo.getId() + ", status=" + vo.getStatus() + ", talhao=" + vo.getTalhaoId());
+            lista.add(vo);
         }
+        
+        System.out.println("[DEBUG] Total de ordens encontradas: " + lista.size());
 
         rs.close();
         ps.close();

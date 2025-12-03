@@ -506,6 +506,24 @@ public class TelaCanteiro extends JFrame {
             canteiro.setStatus("finalizado");
             canteiroDAO.atualizar(canteiro);
 
+            // Atualizar status da ordem de produção para "concluido"
+            ordem.setStatus("concluido");
+            java.sql.Connection conn = null;
+            try {
+                conn = br.edu.ifsp.hto.cooperativa.ConnectionFactory.getConnection();
+                br.edu.ifsp.hto.cooperativa.producao.modelo.dao.OrdemProducaoDAO ordemDAO = 
+                    new br.edu.ifsp.hto.cooperativa.producao.modelo.dao.OrdemProducaoDAO(conn);
+                ordemDAO.atualizar(ordem);
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (java.sql.SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
             JOptionPane.showMessageDialog(
                 this, 
                 "Canteiro finalizado com sucesso!\n" +

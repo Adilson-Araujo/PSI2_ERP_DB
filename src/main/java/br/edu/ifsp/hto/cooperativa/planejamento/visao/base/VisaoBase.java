@@ -26,6 +26,12 @@ public abstract class VisaoBase extends JInternalFrame implements NavegadorTelas
         setSize(1024, 768); // Tamanho HD padrão
         setClosable(true);
         setLayout(new BorderLayout());
+
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int x = (screenSize.width - getWidth()) / 2;
+        int y = (screenSize.height - getHeight()) / 2;
+
+        setLocation(x, y);
         setVisible(true);
     }
 

@@ -55,6 +55,11 @@ public class NotaFiscalEletronicaControlador extends ControladorBase{
         return nfeTO;
     }
 
+    public void adicionar(NotaFiscalEletronicaTO nfe)
+    {
+        executarTransacao(() -> negociosFactory().getNotaFiscalEletronica().adicionar(nfe));
+    }
+
     public static void main (String args[]){
         var venda = new VendaVO();
         venda.setDataCompra(LocalDateTime.now());

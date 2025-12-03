@@ -24,7 +24,9 @@ public class ControladorBase {
             return result;
 
         } catch (Exception ex) {
-            try { conn.rollback(); } catch (Exception e) {}
+            try { ex.printStackTrace();
+                conn.rollback(); }
+            catch (Exception e) {}
             throw new RuntimeException(ex);
         } finally {
             try { conn.setAutoCommit(true); } catch (Exception e) {}
@@ -41,7 +43,9 @@ public class ControladorBase {
             conn.commit();
 
         } catch (Exception ex) {
-            try { conn.rollback(); } catch (Exception e) {}
+            try { ex.printStackTrace();
+                conn.rollback(); }
+            catch (Exception e) {}
             throw new RuntimeException(ex);
         } finally {
             try { conn.setAutoCommit(true); } catch (Exception e) {}

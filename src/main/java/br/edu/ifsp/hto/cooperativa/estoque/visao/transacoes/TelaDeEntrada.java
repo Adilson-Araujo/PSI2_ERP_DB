@@ -1,8 +1,10 @@
 package br.edu.ifsp.hto.cooperativa.estoque.visao.transacoes;
 
 import br.edu.ifsp.hto.cooperativa.estoque.controle.ControleEstoque;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.ArmazemDAO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.MovimentacaoDAO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.OrigemDAO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.ProdutoDAO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.TipoDAO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.ArmazemVO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.MovimentacaoVO;
@@ -10,6 +12,8 @@ import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.ProdutoVO;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.Timestamp;
 import java.time.Instant;
 import javax.swing.*;
@@ -18,15 +22,16 @@ import javax.swing.table.DefaultTableModel;
 import java.util.List;
 
 public class TelaDeEntrada {
+    static MovimentacaoVO movimentacaoSelecionada = null;
+    
     public static JInternalFrame gerarFrameInterno() {
         ControleEstoque controle = ControleEstoque.getInstance();
         MovimentacaoDAO movimentacaoDAO = MovimentacaoDAO.getInstance();
         TipoDAO tipoDAO = TipoDAO.getInstance();
         OrigemDAO origemDAO = OrigemDAO.getInstance();
 
-        final JInternalFrame janela = new JInternalFrame("Entrada no Estoque");
+        final JInternalFrame janela = new JInternalFrame("Entrada no Estoque", true, true, true, true);
         janela.setSize(700, 500); 
-        janela.setDefaultCloseOperation(JInternalFrame.EXIT_ON_CLOSE);
         janela.setLayout(new BorderLayout());
 
 
@@ -110,7 +115,11 @@ public class TelaDeEntrada {
             float quantidade = (Double.valueOf(txtQuantidade.getText())).floatValue();
             MovimentacaoVO movimentacao = new MovimentacaoVO(-1, tipoDAO.buscarPorId(1), origemDAO.buscarPorId(3), produto, armazem, 1, quantidade, Timestamp.from(Instant.now()));
             try{
-                movimentacaoDAO.inserir(movimentacao);
+                if(movimentacao.getId() == -1){
+                    movimentacaoDAO.inserir(movimentacao);
+                } else {
+                    movimentacaoDAO.atualizar(movimentacao);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -132,16 +141,41 @@ public class TelaDeEntrada {
         gbc.fill = GridBagConstraints.NONE;
         gbc.insets = new Insets(20, 0, 0, 0); 
         painelCentral.add(painelBotoes, gbc);
-
+        
         String[] colunas = {"ID", "Produto", "Armazém", "Quantidade", "Data"};
-        Object[][] dados = {
-            {"1", "ALfacec", "Armazém Principal", "50", "16/11/2025"},
-            {"2", "Milho", "Armazém Secundário", "30", "16/11/2025"}
-        };
+
+        List<MovimentacaoVO> lista = movimentacaoDAO.listarEntradas(1);
+        Object[][] dados = new Object[lista.size()][5];
+
+        for (int i = 0; i < lista.size(); i++) {
+            MovimentacaoVO a = lista.get(i);
+            dados[i][0] = a.getId();
+            dados[i][1] = a.getProduto();
+            dados[i][2] = a.getArmazem();
+            dados[i][3] = a.getQuantidade();
+            dados[i][4] = a.getData();
+        }
+        
+        
         DefaultTableModel model = new DefaultTableModel(dados, colunas) {
             public boolean isCellEditable(int row, int column) { return false; }
         };
         JTable tabela = new JTable(model);
+        
+        // Evento de clique
+        tabela.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int linha = tabela.getSelectedRow();
+                if (linha >= 0) {
+                    int id = (int) tabela.getValueAt(linha, 0);
+                    movimentacaoSelecionada = movimentacaoDAO.buscarPorId(id);
+                    comboArmazem.setSelectedItem(movimentacaoSelecionada.getArmazem());
+                    comboProduto.setSelectedItem(movimentacaoSelecionada.getProduto());
+                    txtQuantidade.setText("" + movimentacaoSelecionada.getQuantidade());
+                }
+            }
+        });
 
         final JScrollPane painelTabela = new JScrollPane(tabela);
         painelTabela.setPreferredSize(new Dimension(600, 150));

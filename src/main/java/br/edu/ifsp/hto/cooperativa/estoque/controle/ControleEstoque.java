@@ -66,13 +66,13 @@ public class ControleEstoque {
     // CHAMADAS DE TELA DA CAMADA DE APRESENTAÇÃO
     
     public static void telaEstoqueEstrada(JDesktopPane desktop)
-    {desktop.add(TelaDeEntrada.gerarFrameInterno());}
+    {desktop.add(TelaDeEntrada2.gerarFrameInterno());}
     
     public static void telaEstoqueSaida(JDesktopPane desktop)
-    {desktop.add(TelaDeSaida.gerarFrameInterno());}
+    {desktop.add(TelaDeSaida2.gerarFrameInterno());}
     
     public static void telaEstoqueTranferencia(JDesktopPane desktop)
-    {desktop.add(TelaDeTransferencia.gerarFrameInterno());}
+    {desktop.add(TelaDeTransferencia2.gerarFrameInterno());}
     
     public static void telaEstoqueIndicacao(JDesktopPane desktop)
     {desktop.add(TelaDeIndicacao.gerarFrameInterno());}

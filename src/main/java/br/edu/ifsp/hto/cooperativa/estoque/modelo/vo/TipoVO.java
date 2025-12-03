@@ -24,4 +24,9 @@ public class TipoVO{
     public void setNome(String nome){
         this.nome = nome;
     }
+    
+    @Override
+    public String toString(){
+        return this.id + " " + this.nome;
+    }
 }

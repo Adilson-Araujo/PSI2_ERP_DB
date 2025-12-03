@@ -180,8 +180,39 @@ public class EstoqueAtualDAO {
         return estoqueAtual;
     }
     
+    public List<EstoqueAtualVO> buscarArmazem(int associado_id, int armazem_id) {
+        String sql = "SELECT associado_id, produto_id, armazem_id, quantidade FROM estoque_atual WHERE associado_id = ? AND armazem_id = ?";
+        List<EstoqueAtualVO> estoquesAtuais = new ArrayList<>();
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, associado_id);
+            stmt.setInt(2, armazem_id);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                ProdutoVO produto = DAO_produto.buscarPorId(rs.getInt("produto_id"));
+                ArmazemVO armazem = DAO_armazem.buscarPorId(rs.getInt("armazem_id"));
+                
+                EstoqueAtualVO estoqueAtual = new EstoqueAtualVO(
+                        rs.getInt("associado_id"),
+                        produto,
+                        armazem,
+                        rs.getFloat("quantidade"));
+                estoquesAtuais.add(estoqueAtual);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao buscar estoque atual por ID: " + e.getMessage());
+        }
+
+        return estoquesAtuais;
+    }
+    
     public void movimentaSaldo(int associado_id, ProdutoVO produto, ArmazemVO armazem, float quantidade){
         EstoqueAtualVO estoqueAtual = buscarPorId(associado_id, produto.getId(), armazem.getId());
+        
         if(estoqueAtual != null){
             estoqueAtual.setQuantidade(estoqueAtual.getQuantidade() + quantidade);
             atualizar(estoqueAtual);

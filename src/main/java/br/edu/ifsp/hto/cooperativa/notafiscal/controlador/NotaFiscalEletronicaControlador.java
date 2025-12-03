@@ -55,11 +55,6 @@ public class NotaFiscalEletronicaControlador extends ControladorBase{
         return nfeTO;
     }
 
-    public void adicionar(NotaFiscalEletronicaTO nfe)
-    {
-        executarTransacao(() -> negociosFactory().getNotaFiscalEletronica().adicionar(nfe));
-    }
-
     public static void main (String args[]){
         var venda = new VendaVO();
         venda.setDataCompra(LocalDateTime.now());
@@ -68,7 +63,7 @@ public class NotaFiscalEletronicaControlador extends ControladorBase{
         var clienteId = 1;
         var produtos = new ArrayList<ItemPedidoVO>();
         var produto = new ItemPedidoVO();
-        produto.setProdutoId(1);
+        produto.setProdutoId(1L);
         produto.setValorUnitario(BigDecimal.valueOf(15));
         produto.setValorTotal(BigDecimal.valueOf(30));
         produto.setQuantidadeTotal(BigDecimal.valueOf(2));
@@ -78,34 +73,3 @@ public class NotaFiscalEletronicaControlador extends ControladorBase{
         new NotaFiscalEletronicaControlador().emitirNotaFiscalEletronica(venda,clienteId, produtos, valorFrete, dadosAdicionais);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

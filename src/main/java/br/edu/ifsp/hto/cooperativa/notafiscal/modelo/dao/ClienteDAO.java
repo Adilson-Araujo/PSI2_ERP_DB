@@ -46,7 +46,7 @@ public class ClienteDAO {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
 
         return null;
@@ -82,7 +82,7 @@ public class ClienteDAO {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -116,7 +116,7 @@ public class ClienteDAO {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -157,7 +157,7 @@ public class ClienteDAO {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
 
         return lista;
@@ -177,7 +177,7 @@ public class ClienteDAO {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -218,7 +218,7 @@ public class ClienteDAO {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
 
         return null;

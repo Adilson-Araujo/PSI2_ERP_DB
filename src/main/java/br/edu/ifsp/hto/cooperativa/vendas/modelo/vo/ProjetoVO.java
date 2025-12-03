@@ -4,14 +4,22 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class ProjetoVO {
-    private long id;
+
+    private Long id = null; // garante que nunca começa como 0
     private String nomeProjeto;
     private LocalDateTime dataCriacao;
     private LocalDateTime dataFinal;
     private BigDecimal orcamento;
 
-    public long getId() { return id; }
-    public void setId(long id) { this.id = id; }
+    public ProjetoVO() {}
+
+    public Long getId() { 
+        return id == null || id == 0 ? null : id; 
+    }
+
+    public void setId(Long id) { 
+        this.id = (id != null && id == 0) ? null : id; 
+    }
 
     public String getNomeProjeto() { return nomeProjeto; }
     public void setNomeProjeto(String nomeProjeto) { this.nomeProjeto = nomeProjeto; }

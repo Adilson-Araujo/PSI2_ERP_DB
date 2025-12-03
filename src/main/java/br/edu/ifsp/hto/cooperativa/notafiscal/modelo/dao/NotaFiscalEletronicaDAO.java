@@ -137,7 +137,7 @@ public class NotaFiscalEletronicaDAO {
             p.setString(15, vo.getNumeroSerie());
             p.setString(16, vo.getDadosAdicionais());
             p.setBigDecimal(17, vo.getValorFrete());
-            p.setLong(18, vo.getId());
+            p.setLong(17, vo.getId());
             p.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao inserir Nota Fiscal", e);
@@ -207,7 +207,7 @@ public class NotaFiscalEletronicaDAO {
             p.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -276,7 +276,7 @@ public class NotaFiscalEletronicaDAO {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
 
         return lista;
@@ -363,7 +363,7 @@ public class NotaFiscalEletronicaDAO {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
 
         return null;
@@ -429,7 +429,7 @@ public class NotaFiscalEletronicaDAO {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
 
         return lista;

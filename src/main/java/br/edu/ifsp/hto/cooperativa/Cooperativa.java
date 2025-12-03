@@ -19,6 +19,13 @@ import br.edu.ifsp.hto.cooperativa.notafiscal.visao.TelaCadastroAssociado;
 import br.edu.ifsp.hto.cooperativa.notafiscal.visao.TelaCadastroVenda;
 import br.edu.ifsp.hto.cooperativa.notafiscal.visao.TelaGerarNotaFiscalVenda;
 
+// --- SEUS IMPORTS (VENDAS) ---
+import br.edu.ifsp.hto.cooperativa.vendas.visao.CriarPedidoView;
+import br.edu.ifsp.hto.cooperativa.vendas.visao.ConsultaPedidosView;
+import br.edu.ifsp.hto.cooperativa.vendas.visao.CriarProjetoView;
+import br.edu.ifsp.hto.cooperativa.vendas.visao.ConsultaProjetosView;
+import br.edu.ifsp.hto.cooperativa.sessao.modelo.negocios.Sessao;
+
 public class Cooperativa extends JFrame {
 
     private JDesktopPane desktop; //Janela PAI para uso InternalFrame
@@ -74,16 +81,29 @@ public class Cooperativa extends JFrame {
         producaoMenu.add(producaoItemMenu3);
         producaoMenu.add(producaoItemMenu4);
 
-        //Grupo Vendas adicionar as opcoes do subMneu (JMenuItem) aqui
-        JMenuItem vendaItemMenu1 = new JMenuItem("Janela1");
-        JMenuItem vendaItemMenu2 = new JMenuItem("Janela2");
-        JMenuItem vendaItemMenu3 = new JMenuItem("Janela3");
-        JMenuItem vendaItemMenu4 = new JMenuItem("Janela4");
+        // --- GRUPO VENDAS ---
+        JMenuItem vendaItemCriarPedido = new JMenuItem("Criar Pedido");
+        JMenuItem vendaItemConsultarPedidos = new JMenuItem("Consultar Pedidos");
+        
+        // Itens de Projeto (Separados pois podem ser desabilitados)
+        JMenuItem vendaItemCriarProjeto = new JMenuItem("Criar Projeto");
+        JMenuItem vendaItemConsultarProjetos = new JMenuItem("Consultar Projetos");
 
-        vendaMenu.add(vendaItemMenu1);
-        vendaMenu.add(vendaItemMenu2);
-        vendaMenu.add(vendaItemMenu3);
-        vendaMenu.add(vendaItemMenu4);
+        // Lógica de Permissão: Se for Produtor (tipo 2), bloqueia gestão de projetos
+        try {
+            if (Sessao.getUsuarioLogado().usuarioVO.getTipoUsuario() == 2) { 
+                vendaItemCriarProjeto.setEnabled(false);
+                vendaItemConsultarProjetos.setEnabled(false);
+            }
+        } catch (Exception e) {
+            System.err.println("Aviso: Não foi possível verificar permissões de sessão.");
+        }
+
+        vendaMenu.add(vendaItemCriarPedido);
+        vendaMenu.add(vendaItemConsultarPedidos);
+        vendaMenu.addSeparator();
+        vendaMenu.add(vendaItemCriarProjeto);
+        vendaMenu.add(vendaItemConsultarProjetos);
 
 
         //Grupo Estoque adicionar as opcoes do subMneu (JMenuItem) aqui
@@ -174,6 +194,35 @@ public class Cooperativa extends JFrame {
         estoqueItemInventario.addActionListener(ev -> ControleEstoque.telaEstoqueInventario(desktop));
         estoqueItemEstoque.addActionListener(ev -> ControleEstoque.telaEstoqueEstoque(desktop));
         
+        // --- AÇÕES DO GRUPO VENDAS ---
+        vendaItemCriarPedido.addActionListener(ev -> {
+            CriarPedidoView tela = new CriarPedidoView();
+            desktop.add(tela); // <--- O PULO DO GATO: Adiciona DENTRO da área de trabalho
+            tela.setVisible(true);
+            try { tela.setSelected(true); } catch (java.beans.PropertyVetoException e) {}
+        });
+
+        vendaItemConsultarPedidos.addActionListener(ev -> {
+            ConsultaPedidosView tela = new ConsultaPedidosView();
+            desktop.add(tela); // Adiciona ao desktop
+            tela.setVisible(true);
+            try { tela.setSelected(true); } catch (java.beans.PropertyVetoException e) {}
+        });
+
+        vendaItemCriarProjeto.addActionListener(ev -> {
+            CriarProjetoView tela = new CriarProjetoView();
+            desktop.add(tela); // Adiciona ao desktop
+            tela.setVisible(true);
+            try { tela.setSelected(true); } catch (java.beans.PropertyVetoException e) {}
+        });
+
+        vendaItemConsultarProjetos.addActionListener(ev -> {
+            ConsultaProjetosView tela = new ConsultaProjetosView();
+            desktop.add(tela); // Adiciona ao desktop
+            tela.setVisible(true);
+            try { tela.setSelected(true); } catch (java.beans.PropertyVetoException e) {}
+        });
+
         // --- AÇÕES DO GRUPO NOTA FISCAL ---
 
         notaFiscalItemCadAssociado.addActionListener(ev -> {

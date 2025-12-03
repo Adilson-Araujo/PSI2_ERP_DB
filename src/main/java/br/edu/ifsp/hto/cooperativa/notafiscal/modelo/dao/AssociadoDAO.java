@@ -50,7 +50,7 @@ public class AssociadoDAO {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
 
         return null;
@@ -101,7 +101,7 @@ public class AssociadoDAO {
 
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -149,7 +149,7 @@ public class AssociadoDAO {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -204,7 +204,7 @@ public class AssociadoDAO {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
 
         return lista;
@@ -224,7 +224,7 @@ public class AssociadoDAO {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -279,7 +279,7 @@ public class AssociadoDAO {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
 
         return null;

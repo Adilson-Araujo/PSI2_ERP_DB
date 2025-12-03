@@ -30,7 +30,7 @@ public class NotaFiscalItemDAO {
                 NotaFiscalItemVO vo = new NotaFiscalItemVO();
                 vo.setId(rs.getLong("id"));
                 vo.setNotaFiscalEletronicaId(rs.getLong("nota_fiscal_eletronica_id"));
-                vo.setProdutoId(rs.getInt("produto_id"));
+                vo.setProdutoId(rs.getLong("produto_id"));
                 vo.setCfop(rs.getString("cfop"));
                 vo.setNcm(rs.getString("ncm"));
                 vo.setQuantidade(rs.getInt("quantidade"));
@@ -40,7 +40,7 @@ public class NotaFiscalItemDAO {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
         return null;
     }
@@ -60,7 +60,7 @@ public class NotaFiscalItemDAO {
              PreparedStatement p = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             p.setLong(1, vo.getNotaFiscalEletronicaId());
-            p.setInt(2, vo.getProdutoId());
+            p.setLong(2, vo.getProdutoId());
             p.setString(3, vo.getCfop());
             p.setString(4, vo.getNcm());
             p.setInt(5, vo.getQuantidade());
@@ -75,7 +75,7 @@ public class NotaFiscalItemDAO {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -94,7 +94,7 @@ public class NotaFiscalItemDAO {
              PreparedStatement p = conn.prepareStatement(sql)) {
 
             p.setLong(1, vo.getNotaFiscalEletronicaId());
-            p.setInt(2, vo.getProdutoId());
+            p.setLong(2, vo.getProdutoId());
             p.setString(3, vo.getCfop());
             p.setString(4, vo.getNcm());
             p.setInt(5, vo.getQuantidade());
@@ -105,7 +105,7 @@ public class NotaFiscalItemDAO {
             p.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -130,7 +130,7 @@ public class NotaFiscalItemDAO {
                 NotaFiscalItemVO vo = new NotaFiscalItemVO();
                 vo.setId(rs.getLong("id"));
                 vo.setNotaFiscalEletronicaId(rs.getLong("nota_fiscal_eletronica_id"));
-                vo.setProdutoId(rs.getInt("produto_id"));
+                vo.setProdutoId(rs.getLong("produto_id"));
                 vo.setCfop(rs.getString("cfop"));
                 vo.setNcm(rs.getString("ncm"));
                 vo.setQuantidade(rs.getInt("quantidade"));
@@ -140,7 +140,7 @@ public class NotaFiscalItemDAO {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
 
         return lista;
@@ -166,7 +166,7 @@ public class NotaFiscalItemDAO {
                 NotaFiscalItemVO vo = new NotaFiscalItemVO();
                 vo.setId(rs.getLong("id"));
                 vo.setNotaFiscalEletronicaId(rs.getLong("nota_fiscal_eletronica_id"));
-                vo.setProdutoId(rs.getInt("produto_id"));
+                vo.setProdutoId(rs.getLong("produto_id"));
                 vo.setCfop(rs.getString("cfop"));
                 vo.setNcm(rs.getString("ncm"));
                 vo.setQuantidade(rs.getInt("quantidade"));
@@ -176,7 +176,7 @@ public class NotaFiscalItemDAO {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
 
         return lista;

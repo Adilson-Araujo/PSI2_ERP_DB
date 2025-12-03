@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 public class NotaFiscalItemVO {
     private Long id;
-    private Integer produtoId;
+    private Long produtoId;
     private Long notaFiscalEletronicaId;
     private String cfop;
     private String ncm;
@@ -17,8 +17,8 @@ public class NotaFiscalItemVO {
     // getters e setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public Integer getProdutoId() { return produtoId; }
-    public void setProdutoId(Integer produtoId) { this.produtoId = produtoId; }
+    public Long getProdutoId() { return produtoId; }
+    public void setProdutoId(Long produtoId) { this.produtoId = produtoId; }
     public Long getNotaFiscalEletronicaId() { return notaFiscalEletronicaId; }
     public void setNotaFiscalEletronicaId(Long notaFiscalEletronicaId) { this.notaFiscalEletronicaId = notaFiscalEletronicaId; }
     public String getCfop() { return cfop; }

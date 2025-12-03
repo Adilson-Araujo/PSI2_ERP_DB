@@ -42,7 +42,7 @@ public class EnderecoDAO {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
         return null;
     }
@@ -73,7 +73,7 @@ public class EnderecoDAO {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -102,7 +102,7 @@ public class EnderecoDAO {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -139,7 +139,7 @@ public class EnderecoDAO {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
 
         return lista;

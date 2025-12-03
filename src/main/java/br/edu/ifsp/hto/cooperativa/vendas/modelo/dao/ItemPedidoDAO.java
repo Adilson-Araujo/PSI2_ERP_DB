@@ -1,95 +1,91 @@
 package br.edu.ifsp.hto.cooperativa.vendas.modelo.dao;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.sql.Statement;
-
+import br.edu.ifsp.hto.cooperativa.ConnectionFactory;
 import br.edu.ifsp.hto.cooperativa.vendas.modelo.vo.ItemPedidoVO;
 
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
 public class ItemPedidoDAO {
-    private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(
-            "jdbc:mysql://localhost:3306/cooperativaBD?serverTimezone=UTC&useSSL=false",
-            "root", "");
+
+    // ============================================================
+    // GERAR ID MANUAL (porque sua tabela não tem SERIAL)
+    // ============================================================
+    private Long gerarNovoId(Connection conn) throws SQLException {
+        String sql = "SELECT COALESCE(MAX(id),0) + 1 AS novo_id FROM item_pedido";
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) return rs.getLong("novo_id");
+        }
+        return 1L;
     }
 
-    public String adicionar(ItemPedidoVO i) {
-        String sql = "INSERT INTO item_pedido (pedido_id, produto_id, quantidade_total, valor_unitario, valor_total) VALUES (?, ?, ?, ?, ?)";
-        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setLong(1, i.getPedidoId());
-            stmt.setLong(2, i.getProdutoId());
-            stmt.setBigDecimal(3, i.getQuantidadeTotal());
-            stmt.setBigDecimal(4, i.getValorUnitario());
-            stmt.setBigDecimal(5, i.getValorTotal());
-            int affected = stmt.executeUpdate();
-            try (ResultSet keys = stmt.getGeneratedKeys()) { if (keys.next()) i.setId(keys.getLong(1)); }
-            return affected > 0 ? "Item cadastrado." : "Nenhuma linha inserida.";
-        } catch (SQLException e) { e.printStackTrace(); return "Erro: " + e.getMessage(); }
+    // ============================================================
+    // SALVAR ITEM (caso precise salvar avulso — opcional)
+    // ============================================================
+    public Long salvar(ItemPedidoVO item) {
+
+        String sql = "INSERT INTO item_pedido (id, pedido_id, produto_id, quantidade_total, valor_unitario, valor_total) " +
+                     "VALUES (?, ?, ?, ?, ?, ?)";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            Long novoId = gerarNovoId(conn);
+
+            stmt.setLong(1, novoId);
+            stmt.setLong(2, item.getPedidoId());
+            stmt.setLong(3, item.getProdutoId());
+            stmt.setBigDecimal(4, item.getQuantidadeTotal());
+            stmt.setBigDecimal(5, item.getValorUnitario());
+            stmt.setBigDecimal(6, item.getValorTotal());
+
+            stmt.executeUpdate();
+            return novoId;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
-    public ItemPedidoVO buscarId(long id) {
-        ItemPedidoVO i = null;
-        String sql = "SELECT * FROM item_pedido WHERE id = ?";
-        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, id);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    i = new ItemPedidoVO();
-                    i.setId(rs.getLong("id"));
-                    i.setPedidoId(rs.getLong("pedido_id"));
-                    i.setProdutoId(rs.getLong("produto_id"));
-                    i.setQuantidadeTotal(rs.getBigDecimal("quantidade_total"));
-                    i.setValorUnitario(rs.getBigDecimal("valor_unitario"));
-                    i.setValorTotal(rs.getBigDecimal("valor_total"));
-                }
-            }
-        } catch (SQLException e) { e.printStackTrace(); }
-        return i;
-    }
+    // ============================================================
+    // LISTAR TODOS OS ITENS DE UM PEDIDO
+    // ============================================================
+    public List<ItemPedidoVO> listarPorPedido(Long pedidoId) {
 
-    public List<ItemPedidoVO> obterTodos() {
         List<ItemPedidoVO> lista = new ArrayList<>();
-        String sql = "SELECT * FROM item_pedido";
-        try (Connection conn = getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+
+        String sql = "SELECT * FROM item_pedido WHERE pedido_id = ? ORDER BY id";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setLong(1, pedidoId);
+
+            ResultSet rs = stmt.executeQuery();
+
             while (rs.next()) {
-                ItemPedidoVO i = new ItemPedidoVO();
-                i.setId(rs.getLong("id"));
-                i.setPedidoId(rs.getLong("pedido_id"));
-                i.setProdutoId(rs.getLong("produto_id"));
-                i.setQuantidadeTotal(rs.getBigDecimal("quantidade_total"));
-                i.setValorUnitario(rs.getBigDecimal("valor_unitario"));
-                i.setValorTotal(rs.getBigDecimal("valor_total"));
-                lista.add(i);
+
+                ItemPedidoVO item = new ItemPedidoVO();
+
+                item.setId(rs.getLong("id"));
+                item.setPedidoId(pedidoId);
+                item.setProdutoId(rs.getLong("produto_id"));
+                item.setQuantidadeTotal(rs.getBigDecimal("quantidade_total"));
+                item.setValorUnitario(rs.getBigDecimal("valor_unitario"));
+                item.setValorTotal(rs.getBigDecimal("valor_total"));
+
+                lista.add(item);
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         return lista;
-    }
-
-    public String atualizar(ItemPedidoVO i) {
-        String sql = "UPDATE item_pedido SET pedido_id=?, produto_id=?, quantidade_total=?, valor_unitario=?, valor_total=? WHERE id=?";
-        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, i.getPedidoId());
-            stmt.setLong(2, i.getProdutoId());
-            stmt.setBigDecimal(3, i.getQuantidadeTotal());
-            stmt.setBigDecimal(4, i.getValorUnitario());
-            stmt.setBigDecimal(5, i.getValorTotal());
-            stmt.setLong(6, i.getId());
-            int affected = stmt.executeUpdate();
-            return affected > 0 ? "Item atualizado." : "Nenhuma linha atualizada.";
-        } catch (SQLException e) { e.printStackTrace(); return "Erro: " + e.getMessage(); }
-    }
-
-    public String remover(long id) {
-        String sql = "DELETE FROM item_pedido WHERE id=?";
-        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, id);
-            int affected = stmt.executeUpdate();
-            return affected > 0 ? "Item removido." : "Nenhuma linha removida.";
-        } catch (SQLException e) { e.printStackTrace(); return "Erro: " + e.getMessage(); }
     }
 }

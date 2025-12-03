@@ -1,42 +1,27 @@
 package br.edu.ifsp.hto.cooperativa.vendas.modelo.vo;
 
-import java.math.BigDecimal;
+import java.math.BigDecimal; // CORRIGIDO: Importa BigDecimal
 
 public class AssociadoItemPedidoVO {
-    private long id;
-    private long associadoId;
-    private long itemPedidoId;
+    private Long id;
+    private Long associadoId;
+    private Long itemPedidoId;
     private BigDecimal quantidadeAtribuida;
+    private Boolean entregue; // Campo adicionado nas etapas anteriores
 
-    public long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(long id) {
-        this.id = id;
-    }
+    public Long getAssociadoId() { return associadoId; }
+    public void setAssociadoId(Long associadoId) { this.associadoId = associadoId; }
 
-    public long getAssociadoId() {
-        return associadoId;
-    }
+    public Long getItemPedidoId() { return itemPedidoId; }
+    public void setItemPedidoId(Long itemPedidoId) { this.itemPedidoId = itemPedidoId; }
 
-    public void setAssociadoId(long associadoId) {
-        this.associadoId = associadoId;
-    }
+    public BigDecimal getQuantidadeAtribuida() { return quantidadeAtribuida; }
+    public void setQuantidadeAtribuida(BigDecimal quantidadeAtribuida) { this.quantidadeAtribuida = quantidadeAtribuida; }
 
-    public long getItemPedidoId() {
-        return itemPedidoId;
-    }
-
-    public void setItemPedidoId(long itemPedidoId) {
-        this.itemPedidoId = itemPedidoId;
-    }
-
-    public BigDecimal getQuantidadeAtribuida() {
-        return quantidadeAtribuida;
-    }
-
-    public void setQuantidadeAtribuida(BigDecimal quantidadeAtribuida) {
-        this.quantidadeAtribuida = quantidadeAtribuida;
-    }
+    // Getters e Setters
+    public Boolean getEntregue() { return entregue; }
+    public void setEntregue(Boolean entregue) { this.entregue = entregue; }
 }

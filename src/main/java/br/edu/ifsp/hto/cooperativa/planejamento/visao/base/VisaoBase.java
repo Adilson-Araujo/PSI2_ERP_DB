@@ -89,7 +89,7 @@ public abstract class VisaoBase extends JInternalFrame implements NavegadorTelas
 
     // --- Outras navegações (Futuro) ---
     @Override public void abrirMateriais() {
-        if (!(this instanceof VisaoAreas)) {
+        if (!(this instanceof VisaoMateriais)) {
             this.dispose();
             new VisaoMateriais(parent).setVisible(true);
         }

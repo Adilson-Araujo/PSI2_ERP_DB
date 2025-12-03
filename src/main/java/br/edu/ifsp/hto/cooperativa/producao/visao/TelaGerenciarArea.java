@@ -90,7 +90,7 @@ public class TelaGerenciarArea extends JFrame {
             botao.addActionListener(e -> {
                 if (texto.equals("Tela inicial")) {
                     // AÇÃO CORRETA para o botão "Tela inicial"
-                    new br.edu.ifsp.hto.cooperativa.producao.visao.TelaInicial().setVisible(true);
+                    new br.edu.ifsp.hto.cooperativa.producao.visao.TelaInicial(this.associadoId).setVisible(true);
                     dispose(); // Fecha a tela atual (TelaGerenciarArea)
 
                 } else if (texto.equals("Área de plantio")) {
@@ -135,8 +135,8 @@ public class TelaGerenciarArea extends JFrame {
             // Fecha a tela atual
             dispose(); 
 
-            // CORRIGIDO PARA USAR O CONSTRUTOR PADRÃO
-            new br.edu.ifsp.hto.cooperativa.producao.visao.TelaInicial().setVisible(true);
+            // CORRIGIDO PARA USAR O CONSTRUTOR COM associadoId
+            new br.edu.ifsp.hto.cooperativa.producao.visao.TelaInicial(this.associadoId).setVisible(true);
         });
 
         JLabel lblTitulo = new JLabel("Gerenciar Área");

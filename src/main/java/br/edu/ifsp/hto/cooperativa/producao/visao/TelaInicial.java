@@ -3,25 +3,18 @@ package br.edu.ifsp.hto.cooperativa.producao.visao;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
-import br.edu.ifsp.hto.cooperativa.sessao.modelo.negocios.Sessao;
+// import br.edu.ifsp.hto.cooperativa.sessao.modelo.vo.UsuarioVO;
 
 import java.awt.*;
+import br.edu.ifsp.hto.cooperativa.sessao.controlador.SessaoControlador;
+import br.edu.ifsp.hto.cooperativa.sessao.modelo.dto.UsuarioTO;
 
 public class TelaInicial extends JFrame {
 
-    // 🔑 NOVO CAMPO para guardar o ID
-    private long associadoId; 
+    private long associadoId;
 
-    // 🔑 NOVO CONSTRUTOR para receber o ID
-    public TelaInicial() {
-        // Busca o ID do associado logado na Sessão estática
-        try {
-            this.associadoId = Sessao.getAssociadoIdLogado();
-        } catch (Exception e) {
-            // Se falhar, lide com o erro (ex: volte para a tela de login)
-            JOptionPane.showMessageDialog(null, "Sessão expirada. Faça login novamente.", "Erro de Sessão", JOptionPane.ERROR_MESSAGE);
-            // return; // Se for uma aplicação Single-View, pode ser necessário sair ou voltar
-        }
+    public TelaInicial(Long associadoId) {
+        this.associadoId = associadoId;
         initializeComponents();
     }
 
@@ -72,17 +65,13 @@ public class TelaInicial extends JFrame {
 
         // ======= AÇÃO DOS BOTÕES =======
         botao.addActionListener(e -> {
-
             if (texto.equals("Área de plantio")) {
-                // CORRIGIDO PARA USAR O CONSTRUTOR PADRÃO
-                new br.edu.ifsp.hto.cooperativa.producao.visao.TelaGerenciarArea().setVisible(true);
-                dispose(); 
+            new br.edu.ifsp.hto.cooperativa.producao.visao.TelaGerenciarArea().setVisible(true);
+                    dispose(); 
             }
-
             if (texto.equals("Registrar problemas")) {
                 // depois criamos isso
             }
-
             if (texto.equals("Relatório de produção")) {
                 // depois criamos isso
             }
@@ -90,9 +79,7 @@ public class TelaInicial extends JFrame {
 
         menuLateral.add(botao);
         menuLateral.add(Box.createVerticalStrut(20));
-        
     }
-
 
         add(menuLateral, BorderLayout.WEST);
 
@@ -108,15 +95,26 @@ public class TelaInicial extends JFrame {
         gbc.weightx = 1;
         gbc.weighty = 0;
 
-        JButton btnVoltar = new JButton("Voltar");
-        btnVoltar.setBackground(verdeClaro);
-        btnVoltar.setFont(new Font("Arial", Font.BOLD, 18));
-        btnVoltar.setFocusPainted(false);
-        btnVoltar.setPreferredSize(new Dimension(120, 45));
+        String nomeUsuario = "Usuário"; // Valor padrão caso dê erro
+        try {
+            SessaoControlador sessaoControlador = new SessaoControlador();
+            UsuarioTO usuarioLogado = sessaoControlador.obterUsuarioLogado();
+            if (usuarioLogado != null && usuarioLogado.usuarioVO != null) {
+                nomeUsuario = usuarioLogado.usuarioVO.getNomeUsuario();
+            }
+        } catch (Exception e) {
+            System.err.println("Erro ao recuperar usuário da sessão: " + e.getMessage());
+        }
+
+        JLabel lblSaudacao = new JLabel("Olá, " + nomeUsuario + "!");
+        lblSaudacao.setFont(new Font("Arial", Font.BOLD, 28));
+        lblSaudacao.setForeground(verdeClaro); 
+        
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.WEST;
-        conteudo.add(btnVoltar, gbc);
+        conteudo.add(lblSaudacao, gbc);
+        // -----------------------------------------------------------
 
         JLabel lblTitulo = new JLabel("Tela inicial", SwingConstants.CENTER);
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 36));
@@ -127,13 +125,20 @@ public class TelaInicial extends JFrame {
         gbc.anchor = GridBagConstraints.CENTER;
         conteudo.add(lblTitulo, gbc);
 
+        br.edu.ifsp.hto.cooperativa.producao.controle.DashboardController dashController = 
+                new br.edu.ifsp.hto.cooperativa.producao.controle.DashboardController();
+        
+        br.edu.ifsp.hto.cooperativa.producao.modelo.vo.DashboardVO dadosDash = 
+                dashController.obterDadosIniciais((int) this.associadoId);
+
         JPanel painelResumo = new JPanel(new GridLayout(2, 2, 40, 20));
         painelResumo.setOpaque(false);
+
         String[] textos = {
-                "Talhões Criados: 5",
-                "Atividades Ativas: 5",
-                "Canteiros Ativos: 5",
-                "Canteiros Ativos: 5"
+                "Ordens em Execução: " + dadosDash.getQtdTalhoes(),
+                "Ordens Concluídas: " + dadosDash.getQtdAtividades(),
+                "Canteiros Ativos: " + dadosDash.getQtdCanteiros(),
+                "Problemas Ativos: " + dadosDash.getQtdProblemas()
         };
 
         for (String texto : textos) {
@@ -153,7 +158,7 @@ public class TelaInicial extends JFrame {
         gbc.weighty = 0.3;
         conteudo.add(painelResumo, gbc);
 
-        JLabel lblAFazer = new JLabel("A fazer:");
+        JLabel lblAFazer = new JLabel("Ordens Concluídas (Enviadas ao Estoque):");
         lblAFazer.setFont(new Font("Arial", Font.BOLD, 22));
         lblAFazer.setForeground(verdeEscuro);
         gbc.gridy = 2;
@@ -161,22 +166,29 @@ public class TelaInicial extends JFrame {
         gbc.anchor = GridBagConstraints.WEST;
         conteudo.add(lblAFazer, gbc);
 
-        String[] colunas = {"Atividade", "Custo Total", "Data Final", "Prioridade"};
-        Object[][] dados = {
-                {"Plantar milho", "600,00", "18/02/26", "ALTA"},
-                {"", "", "", ""},
-                {"", "", "", ""},
-                {"", "", "", ""},
-                {"", "", "", ""}
-        };
-
-        DefaultTableModel modelo = new DefaultTableModel(dados, colunas) {
+        String[] colunas = {"Espécie", "Descrição", "Data Execução", "Quantidade (kg)"};
+        
+        DefaultTableModel modelo = new DefaultTableModel(colunas, 0) {
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
         };
 
+        if (dadosDash.getAtividadesPendentes().isEmpty()) {
+            modelo.addRow(new Object[]{"Nenhuma ordem concluída", "-", "-", "-"});
+        } else {
+            for (br.edu.ifsp.hto.cooperativa.producao.modelo.vo.DashboardVO.AtividadeResumoVO atv : dadosDash.getAtividadesPendentes()) {
+                modelo.addRow(new Object[]{
+                    atv.getNome(),
+                    atv.getPrioridade(), // Descrição
+                    atv.getDataFinal(),
+                    String.format("%.2f", atv.getCustoTotal()) // Quantidade em kg
+                });
+            }
+        }
+
         JTable tabela = new JTable(modelo);
+        
         tabela.setFont(new Font("Arial", Font.PLAIN, 16));
         tabela.setRowHeight(30);
         tabela.getTableHeader().setBackground(verdeClaro);
@@ -188,11 +200,4 @@ public class TelaInicial extends JFrame {
         gbc.weighty = 1;
         conteudo.add(scrollTabela, gbc);
     }
-    //ABRIR SOMENTE APÓS LOGIN
-    // public static void main(String[] args) {
-    //     SwingUtilities.invokeLater(() -> {
-    //         TelaInicial tela = new TelaInicial(0);
-    //         tela.setVisible(true);
-    //     });
-    // }
 }

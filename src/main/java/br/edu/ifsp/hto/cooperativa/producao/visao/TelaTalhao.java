@@ -80,7 +80,8 @@ public class TelaTalhao extends JFrame {
             botao.addActionListener(e -> {
                 if (texto.equals("Tela inicial")) {
                     // AÇÃO CORRETA para o botão "Tela inicial"
-                    new br.edu.ifsp.hto.cooperativa.producao.visao.TelaInicial().setVisible(true);
+                    long associadoId = br.edu.ifsp.hto.cooperativa.sessao.modelo.negocios.Sessao.getAssociadoIdLogado();
+                    new br.edu.ifsp.hto.cooperativa.producao.visao.TelaInicial(associadoId).setVisible(true);
                     dispose(); // Fecha a tela atual (TelaGerenciarArea)
 
                 } else if (texto.equals("Área de plantio")) {

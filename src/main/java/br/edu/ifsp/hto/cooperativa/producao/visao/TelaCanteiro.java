@@ -502,8 +502,9 @@ public class TelaCanteiro extends JFrame {
             // Inserir a movimentação no banco
             controleEstoque.inserirProducao(movimentacao);
 
-            // Atualizar status do canteiro para "finalizado" ou similar
+            // Atualizar status do canteiro para "finalizado" e marcar como inativo
             canteiro.setStatus("finalizado");
+            canteiro.setAtivo(false); // IMPORTANTE: inativa o canteiro para liberar a área
             canteiroDAO.atualizar(canteiro);
 
             // Atualizar status da ordem de produção para "concluido"

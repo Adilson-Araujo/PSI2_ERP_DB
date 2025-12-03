@@ -274,13 +274,13 @@ public class GerenciarAreaController {
                 
                 // Calcula a área já utilizada por canteiros ativos deste talhão
                 java.util.List<CanteiroVO> canteirosExistentes = canteiroDAO.buscarPorTalhaoId(talhaoId);
-                System.out.println("[DEBUG VALIDAÇÃO] Canteiros existentes no talhão: " + canteirosExistentes.size());
+                System.out.println("[DEBUG VALIDAÇÃO] Canteiros ATIVOS no talhão: " + canteirosExistentes.size());
                 
                 double areaUtilizada = 0.0;
                 for (CanteiroVO c : canteirosExistentes) {
                     if (c.getAreaCanteiroM2() != null) {
                         double areaCanteiro = c.getAreaCanteiroM2().doubleValue();
-                        System.out.println("[DEBUG VALIDAÇÃO]   - Canteiro ID " + c.getId() + ": " + areaCanteiro + " m²");
+                        System.out.println("[DEBUG VALIDAÇÃO]   - Canteiro ID " + c.getId() + " (ativo=" + c.getAtivo() + ", status=" + c.getStatus() + "): " + areaCanteiro + " m²");
                         areaUtilizada += areaCanteiro;
                     }
                 }

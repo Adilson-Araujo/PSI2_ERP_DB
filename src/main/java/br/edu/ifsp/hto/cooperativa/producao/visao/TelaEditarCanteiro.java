@@ -40,7 +40,6 @@ public class TelaEditarCanteiro extends JFrame {
     // Campos do Canteiro
     private JTextField txtNome;
     private JTextField txtArea;
-    private JTextField txtKgGerados;
     private JComboBox<String> comboStatus;
 
     public TelaEditarCanteiro(CanteiroVO canteiro, Long areaId) {
@@ -123,14 +122,6 @@ public class TelaEditarCanteiro extends JFrame {
         txtArea.setText(String.valueOf(canteiro.getAreaCanteiroM2()));
         painelForm.add(txtArea, gbc);
 
-        // Campo Kg Gerados (Estimativa ou Real)
-        gbc.gridy++;
-        painelForm.add(criarLabel("Kg Gerados/Estimados:", verdeEscuro), gbc);
-        gbc.gridy++;
-        txtKgGerados = criarCampo(fonteCampo, verdeEscuro);
-        txtKgGerados.setText(String.valueOf(canteiro.getKgGerados()));
-        painelForm.add(txtKgGerados, gbc);
-
         // Campo Status
         gbc.gridy++;
         painelForm.add(criarLabel("Status:", verdeEscuro), gbc);
@@ -181,10 +172,21 @@ public class TelaEditarCanteiro extends JFrame {
             // Atualizar dados do canteiro
             canteiroAtual.setNome(txtNome.getText().trim());
             BigDecimal novaArea = new BigDecimal(txtArea.getText().replace(",", "."));
-            BigDecimal novoKg = new BigDecimal(txtKgGerados.getText().replace(",", "."));
             canteiroAtual.setAreaCanteiroM2(novaArea);
-            canteiroAtual.setKgGerados(novoKg);
             canteiroAtual.setStatus((String) comboStatus.getSelectedItem());
+            
+            // Recalcular Kg automaticamente com base na área e espécie
+            BigDecimal novoKg = BigDecimal.ZERO;
+            if (ordemAtual != null && ordemAtual.getEspecieId() != null) {
+                br.edu.ifsp.hto.cooperativa.estoque.controle.ControleEstoque controleEstoque = 
+                    br.edu.ifsp.hto.cooperativa.estoque.controle.ControleEstoque.getInstance();
+                float kgCalculado = controleEstoque.calcularQuantidade(
+                    ordemAtual.getEspecieId().intValue(), 
+                    novaArea.floatValue()
+                );
+                novoKg = BigDecimal.valueOf(kgCalculado);
+            }
+            canteiroAtual.setKgGerados(novoKg);
 
             // Salvar canteiro via DAO
             CanteiroDAO canteiroDAO = new CanteiroDAO();

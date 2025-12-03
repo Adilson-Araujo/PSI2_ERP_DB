@@ -165,14 +165,17 @@ public class TelaTalhao extends JInternalFrame {
         JButton btnRemover = criarBotaoPadrao("Remover Ordem", verdeClaro);
         JButton btnEditar = criarBotaoPadrao("Editar Talhão", verdeClaro);
         JButton btnPlano = criarBotaoPadrao("Usar Plano", verdeClaro);
+        JButton btnCriarPlano = criarBotaoPadrao("+ Criar Plano", new Color(157, 170, 61));
 
         btnRemover.setPreferredSize(tam); btnRemover.setMaximumSize(tam);
         btnEditar.setPreferredSize(tam); btnEditar.setMaximumSize(tam);
         btnPlano.setPreferredSize(tam); btnPlano.setMaximumSize(tam);
+        btnCriarPlano.setPreferredSize(tam); btnCriarPlano.setMaximumSize(tam);
 
         leftButtonsBelow.add(btnRemover);
         leftButtonsBelow.add(btnEditar);
         leftButtonsBelow.add(btnPlano);
+        leftButtonsBelow.add(btnCriarPlano);
 
         // Ação do botão Editar Talhão: abre dropdown com talhões e edita o selecionado
         btnEditar.addActionListener(e -> {
@@ -275,6 +278,32 @@ public class TelaTalhao extends JInternalFrame {
                     "Erro ao buscar planos: " + ex.getMessage(), 
                     "Erro", 
                     JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
+            }
+        });
+
+        // Ação do botão + Criar Plano: abre tela de detalhes do talhão para criação de planos
+        btnCriarPlano.addActionListener(e -> {
+            try {
+                // Busca o primeiro talhão da área para obter o ID
+                Long talhaoId = null;
+                if (area.getTalhoes() != null && !area.getTalhoes().isEmpty()) {
+                    talhaoId = area.getTalhoes().get(0).getId();
+                }
+                
+                if (talhaoId != null) {
+                    // A VisaoDetalhesTalhao já gerencia sua própria adição ao desktop no construtor
+                    new br.edu.ifsp.hto.cooperativa.planejamento.visao.telas.VisaoDetalhesTalhao(
+                        talhaoId.intValue(), desktop);
+                } else {
+                    JOptionPane.showMessageDialog(TelaTalhao.this, 
+                        "Não foi possível encontrar um talhão válido para criar o plano.", 
+                        "Erro", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(TelaTalhao.this, 
+                    "Erro ao abrir tela de criação de plano: " + ex.getMessage(), 
+                    "Erro", JOptionPane.ERROR_MESSAGE);
                 ex.printStackTrace();
             }
         });

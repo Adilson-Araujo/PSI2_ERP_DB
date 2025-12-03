@@ -118,10 +118,10 @@ public class VisaoDetalhesTalhao extends VisaoBase {
         this.dispose(); 
         if (this.areaIdVinculada != -1) {
             // Assumindo que VisaoDetalhesArea existe e está importada/disponível
-            // new VisaoDetalhesArea(this.areaIdVinculada, parent).setVisible(true);
+            new VisaoDetalhesArea(this.areaIdVinculada, parent).setVisible(true);
         } else {
             // Assumindo que VisaoAreas existe e está importada/disponível
-            // new VisaoAreas(parent).setVisible(true);
+            new VisaoAreas(parent).setVisible(true);
         }
     }
 

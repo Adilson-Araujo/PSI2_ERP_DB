@@ -1,10 +1,9 @@
 package br.edu.ifsp.hto.cooperativa.producao.visao;
 
 import javax.swing.*;
-// import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
-public class TelaCanteiro extends JFrame {
+public class TelaCanteiro extends JInternalFrame {
 
     private String cultura;
     private String nomeCanteiro;
@@ -13,8 +12,11 @@ public class TelaCanteiro extends JFrame {
     private double qtdKg;
     private Long canteiroId;
     private Long areaId;
+    private JDesktopPane desktop;
 
-    public TelaCanteiro(String cultura, String nomeCanteiro, java.util.Date inicio, double areaM2, double qtdKg, Long canteiroId, Long areaId) {
+    public TelaCanteiro(JDesktopPane desktop, String cultura, String nomeCanteiro, java.util.Date inicio, double areaM2, double qtdKg, Long canteiroId, Long areaId) {
+        super("Canteiro - " + nomeCanteiro, true, true, true, true);
+        this.desktop = desktop;
         this.cultura = cultura;
         this.nomeCanteiro = nomeCanteiro;
         this.inicio = inicio;
@@ -22,10 +24,8 @@ public class TelaCanteiro extends JFrame {
         this.qtdKg = qtdKg;
         this.canteiroId = canteiroId;
         this.areaId = areaId;
-        setTitle("Canteiro");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setSize(1200, 800);
-        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
         // cores (mesmas da TelaInicial)
@@ -67,24 +67,36 @@ public class TelaCanteiro extends JFrame {
                 try {
                     long associadoId = br.edu.ifsp.hto.cooperativa.sessao.modelo.negocios.Sessao.getAssociadoIdLogado();
                     if (texto.equals("Tela inicial")) {
-                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaInicial(associadoId).setVisible(true);
+                        TelaInicial tela = new TelaInicial(desktop);
+                        desktop.add(tela);
+                        tela.setVisible(true);
+                        try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
                         dispose();
                     } else if (texto.equals("Área de plantio")) {
-                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaGerenciarArea().setVisible(true);
+                        TelaGerenciarArea tela = new TelaGerenciarArea(desktop);
+                        desktop.add(tela);
+                        tela.setVisible(true);
+                        try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
                         dispose();
                     } else if (texto.equals("Registrar problemas")) {
                         br.edu.ifsp.hto.cooperativa.producao.modelo.RegistrarProblemasModel model = 
                             new br.edu.ifsp.hto.cooperativa.producao.modelo.RegistrarProblemasModel();
                         br.edu.ifsp.hto.cooperativa.producao.controle.RegistrarProblemasController controller = 
                             new br.edu.ifsp.hto.cooperativa.producao.controle.RegistrarProblemasController(model);
-                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaRegistrarProblemas(controller).setVisible(true);
+                        TelaRegistrarProblemas tela = new TelaRegistrarProblemas(desktop, controller);
+                        desktop.add(tela);
+                        tela.setVisible(true);
+                        try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
                         dispose();
                     } else if (texto.equals("Relatório de produção")) {
                         br.edu.ifsp.hto.cooperativa.producao.modelo.RelatorioProducaoModel model = 
                             new br.edu.ifsp.hto.cooperativa.producao.modelo.RelatorioProducaoModel();
                         br.edu.ifsp.hto.cooperativa.producao.controle.RelatorioProducaoController controller = 
                             new br.edu.ifsp.hto.cooperativa.producao.controle.RelatorioProducaoController(model);
-                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaRelatorioProducao(controller).setVisible(true);
+                        TelaRelatorioProducao tela = new TelaRelatorioProducao(desktop, controller);
+                        desktop.add(tela);
+                        tela.setVisible(true);
+                        try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
                         dispose();
                     }
                 } catch (Exception ex) {
@@ -134,7 +146,7 @@ public class TelaCanteiro extends JFrame {
                     br.edu.ifsp.hto.cooperativa.producao.modelo.vo.AreaVO area = 
                         controller.carregarAreaCompletaPorId(areaId);
                     if (area != null) {
-                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaTalhao(area).setVisible(true);
+                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaTalhao(desktop, area).setVisible(true);
                         dispose();
                     } else {
                         dispose();
@@ -158,8 +170,10 @@ public class TelaCanteiro extends JFrame {
                         canteiroDAO.buscarPorId(canteiroId.intValue());
                     
                     if (canteiro != null) {
-                        TelaEditarCanteiro telaEditar = new TelaEditarCanteiro(canteiro, areaId);
+                        TelaEditarCanteiro telaEditar = new TelaEditarCanteiro(desktop, canteiro, areaId);
+                        desktop.add(telaEditar);
                         telaEditar.setVisible(true);
+                        try { telaEditar.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
                         // Não fecha a tela atual - a TelaEditarCanteiro vai fechar e reabrir quando salvar
                     } else {
                         JOptionPane.showMessageDialog(TelaCanteiro.this, 
@@ -556,7 +570,10 @@ public class TelaCanteiro extends JFrame {
                 br.edu.ifsp.hto.cooperativa.producao.modelo.vo.AreaVO areaRecarregada = 
                     areaController.carregarAreaCompletaPorId(areaId);
                 if (areaRecarregada != null) {
-                    new br.edu.ifsp.hto.cooperativa.producao.visao.TelaTalhao(areaRecarregada).setVisible(true);
+                    TelaTalhao tela = new TelaTalhao(desktop, areaRecarregada);
+                    desktop.add(tela);
+                    tela.setVisible(true);
+                    try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
                     dispose();
                 }
             }
@@ -643,8 +660,10 @@ public class TelaCanteiro extends JFrame {
 
             // Recarregar a tela
             dispose();
-            TelaCanteiro novaTela = new TelaCanteiro(cultura, nomeCanteiro, inicio, areaM2, qtdKg, canteiroId, areaId);
+            TelaCanteiro novaTela = new TelaCanteiro(desktop, cultura, nomeCanteiro, inicio, areaM2, qtdKg, canteiroId, areaId);
+            desktop.add(novaTela);
             novaTela.setVisible(true);
+            try { novaTela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Erro ao adicionar atividade: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
@@ -682,8 +701,10 @@ public class TelaCanteiro extends JFrame {
         
         // Ação do botão Ver: navegar para TelaAtividades
         ver.addActionListener(e -> {
-            TelaAtividades telaAtividades = new TelaAtividades(cultura, nomeCanteiro, inicio, areaM2, qtdKg, canteiroId, areaId);
+            TelaAtividades telaAtividades = new TelaAtividades(desktop, cultura, nomeCanteiro, inicio, areaM2, qtdKg, canteiroId, areaId);
+            desktop.add(telaAtividades);
             telaAtividades.setVisible(true);
+            try { telaAtividades.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
             TelaCanteiro.this.dispose();
         });
 

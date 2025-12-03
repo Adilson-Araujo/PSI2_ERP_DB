@@ -7,9 +7,10 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 
-public class TelaRelatorioProducao extends JFrame {
+public class TelaRelatorioProducao extends JInternalFrame {
 
     private RelatorioProducaoController controller;
+    private JDesktopPane desktop;
     
     // Componentes dinâmicos
     private JComboBox<String> comboArea;
@@ -19,18 +20,18 @@ public class TelaRelatorioProducao extends JFrame {
     private JLabel lblPlantacoes;
     private JLabel lblTotalKg;
 
-    public TelaRelatorioProducao(RelatorioProducaoController controller) {
+    public TelaRelatorioProducao(JDesktopPane desktop, RelatorioProducaoController controller) {
+        super("Tela Inicial - Produção", true, true, true, true);
         this.controller = controller;
+        this.desktop = desktop;
 
         configurarTela();
         montarLayout();
     }
 
     private void configurarTela() {
-        setTitle("Tela Inicial - Produção");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setSize(1200, 800);
-        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
     }
 
@@ -76,18 +77,27 @@ public class TelaRelatorioProducao extends JFrame {
                 try {
                     long associadoId = br.edu.ifsp.hto.cooperativa.sessao.modelo.negocios.Sessao.getAssociadoIdLogado();
                     if (texto.equals("Tela inicial")) {
-                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaInicial(associadoId).setVisible(true);
-                        dispose();
+                        TelaInicial tela = new TelaInicial(desktop);
+                        desktop.add(tela);
+                        tela.setVisible(true);
+                        try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
+                        this.dispose();
                     } else if (texto.equals("Área de plantio")) {
-                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaGerenciarArea().setVisible(true);
-                        dispose();
+                        TelaGerenciarArea tela = new TelaGerenciarArea(desktop);
+                        desktop.add(tela);
+                        tela.setVisible(true);
+                        try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
+                        this.dispose();
                     } else if (texto.equals("Registrar problemas")) {
                         br.edu.ifsp.hto.cooperativa.producao.modelo.RegistrarProblemasModel model = 
                             new br.edu.ifsp.hto.cooperativa.producao.modelo.RegistrarProblemasModel();
                         br.edu.ifsp.hto.cooperativa.producao.controle.RegistrarProblemasController controller = 
                             new br.edu.ifsp.hto.cooperativa.producao.controle.RegistrarProblemasController(model);
-                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaRegistrarProblemas(controller).setVisible(true);
-                        dispose();
+                        TelaRegistrarProblemas tela = new TelaRegistrarProblemas(desktop, controller);
+                        desktop.add(tela);
+                        tela.setVisible(true);
+                        try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
+                        this.dispose();
                     }
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(this, "Erro ao navegar: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);

@@ -15,7 +15,9 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -28,27 +30,28 @@ import br.edu.ifsp.hto.cooperativa.producao.modelo.vo.TalhaoVO;
 import br.edu.ifsp.hto.cooperativa.producao.modelo.vo.AreaVO;
 import br.edu.ifsp.hto.cooperativa.ConnectionFactory;
 
-public class TelaEditarTalhao extends JFrame {
+public class TelaEditarTalhao extends JInternalFrame {
 
     private TalhaoVO talhaoAtual;
     private Long areaId;
     private GerenciarAreaController controller;
+    private JDesktopPane desktop;
 
     private JTextField txtNome;
     private JTextField txtArea;
     private JTextArea txtObservacoes;
     private JComboBox<String> comboStatus;
 
-    public TelaEditarTalhao(TalhaoVO talhao, Long areaId) {
+    public TelaEditarTalhao(JDesktopPane desktop, TalhaoVO talhao, Long areaId) {
+        super("Editar Talhão - " + talhao.getNome(), true, true, true, true);
         
+        this.desktop = desktop;
         this.talhaoAtual = talhao;
         this.areaId = areaId;
         this.controller = new GerenciarAreaController();
 
-        setTitle("Editar Talhão");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setSize(1200, 800);
-        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
         // ======= CORES =======
@@ -197,7 +200,7 @@ public class TelaEditarTalhao extends JFrame {
     
     private void recarregarTelaTalhao() {
         try {
-            if (areaId != null) {
+            if (areaId != null && desktop != null) {
                 // Buscar área completa atualizada
                 AreaVO area = controller.carregarAreaCompletaPorId(areaId);
                 
@@ -206,15 +209,17 @@ public class TelaEditarTalhao extends JFrame {
                     dispose();
                     
                     // Fechar a tela de talhão anterior (se houver)
-                    for (java.awt.Window window : java.awt.Window.getWindows()) {
-                        if (window instanceof TelaTalhao && window.isVisible()) {
-                            window.dispose();
+                    for (javax.swing.JInternalFrame frame : desktop.getAllFrames()) {
+                        if (frame instanceof TelaTalhao && frame.isVisible()) {
+                            frame.dispose();
                         }
                     }
                     
                     // Abrir nova tela de talhão com dados atualizados
-                    TelaTalhao telaTalhao = new TelaTalhao(area);
+                    TelaTalhao telaTalhao = new TelaTalhao(desktop, area);
+                    desktop.add(telaTalhao);
                     telaTalhao.setVisible(true);
+                    try { telaTalhao.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
                 } else {
                     dispose();
                 }

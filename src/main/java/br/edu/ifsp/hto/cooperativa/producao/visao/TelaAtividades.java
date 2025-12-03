@@ -17,7 +17,7 @@ import br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.MaterialVO;
 
 import java.awt.*;
 
-public class TelaAtividades extends JFrame {
+public class TelaAtividades extends JInternalFrame {
 
     private String cultura;
     private String nomeCanteiro;
@@ -27,8 +27,11 @@ public class TelaAtividades extends JFrame {
     private Long canteiroId;
     private Long areaId;
     private Integer atividadeId;
+    private JDesktopPane desktop;
 
-    public TelaAtividades(String cultura, String nomeCanteiro, java.util.Date inicio, double areaM2, double qtdKg, Long canteiroId, Long areaId) {
+    public TelaAtividades(JDesktopPane desktop, String cultura, String nomeCanteiro, java.util.Date inicio, double areaM2, double qtdKg, Long canteiroId, Long areaId) {
+        super("Atividades - " + nomeCanteiro, true, true, true, true);
+        this.desktop = desktop;
         this.cultura = cultura;
         this.nomeCanteiro = nomeCanteiro;
         this.inicio = inicio;
@@ -36,10 +39,8 @@ public class TelaAtividades extends JFrame {
         this.qtdKg = qtdKg;
         this.canteiroId = canteiroId;
         this.areaId = areaId;
-        setTitle("Tela Atividades");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setSize(1200, 800);
-        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
         // ======= CORES =======
@@ -84,24 +85,36 @@ public class TelaAtividades extends JFrame {
                 try {
                     long associadoId = br.edu.ifsp.hto.cooperativa.sessao.modelo.negocios.Sessao.getAssociadoIdLogado();
                     if (texto.equals("Tela inicial")) {
-                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaInicial(associadoId).setVisible(true);
+                        TelaInicial tela = new TelaInicial(desktop);
+                        desktop.add(tela);
+                        tela.setVisible(true);
+                        try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
                         dispose();
                     } else if (texto.equals("Área de plantio")) {
-                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaGerenciarArea().setVisible(true);
+                        TelaGerenciarArea tela = new TelaGerenciarArea(desktop);
+                        desktop.add(tela);
+                        tela.setVisible(true);
+                        try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
                         dispose();
                     } else if (texto.equals("Registrar problemas")) {
                         br.edu.ifsp.hto.cooperativa.producao.modelo.RegistrarProblemasModel model = 
                             new br.edu.ifsp.hto.cooperativa.producao.modelo.RegistrarProblemasModel();
                         br.edu.ifsp.hto.cooperativa.producao.controle.RegistrarProblemasController controller = 
                             new br.edu.ifsp.hto.cooperativa.producao.controle.RegistrarProblemasController(model);
-                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaRegistrarProblemas(controller).setVisible(true);
+                        TelaRegistrarProblemas tela = new TelaRegistrarProblemas(desktop, controller);
+                        desktop.add(tela);
+                        tela.setVisible(true);
+                        try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
                         dispose();
                     } else if (texto.equals("Relatório de produção")) {
                         br.edu.ifsp.hto.cooperativa.producao.modelo.RelatorioProducaoModel model = 
                             new br.edu.ifsp.hto.cooperativa.producao.modelo.RelatorioProducaoModel();
                         br.edu.ifsp.hto.cooperativa.producao.controle.RelatorioProducaoController controller = 
                             new br.edu.ifsp.hto.cooperativa.producao.controle.RelatorioProducaoController(model);
-                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaRelatorioProducao(controller).setVisible(true);
+                        TelaRelatorioProducao tela = new TelaRelatorioProducao(desktop, controller);
+                        desktop.add(tela);
+                        tela.setVisible(true);
+                        try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
                         dispose();
                     }
                 } catch (Exception ex) {
@@ -133,8 +146,10 @@ public class TelaAtividades extends JFrame {
         btnVoltar.setFocusPainted(false);
         btnVoltar.setPreferredSize(new Dimension(120, 45));
         btnVoltar.addActionListener(e -> {
-            TelaCanteiro telaCanteiro = new TelaCanteiro(cultura, nomeCanteiro, inicio, areaM2, qtdKg, canteiroId, areaId);
+            TelaCanteiro telaCanteiro = new TelaCanteiro(desktop, cultura, nomeCanteiro, inicio, areaM2, qtdKg, canteiroId, areaId);
+            desktop.add(telaCanteiro);
             telaCanteiro.setVisible(true);
+            try { telaCanteiro.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
             TelaAtividades.this.dispose();
         });
         gbc.gridx = 0;
@@ -258,8 +273,10 @@ public class TelaAtividades extends JFrame {
                         JOptionPane.INFORMATION_MESSAGE
                     );
                     // Volta para tela canteiro
-                    TelaCanteiro telaCanteiro = new TelaCanteiro(cultura, nomeCanteiro, inicio, areaM2, qtdKg, canteiroId, areaId);
+                    TelaCanteiro telaCanteiro = new TelaCanteiro(desktop, cultura, nomeCanteiro, inicio, areaM2, qtdKg, canteiroId, areaId);
+                    desktop.add(telaCanteiro);
                     telaCanteiro.setVisible(true);
+                    try { telaCanteiro.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
                     TelaAtividades.this.dispose();
                 }
             } else {
@@ -351,7 +368,8 @@ public class TelaAtividades extends JFrame {
      * Abre um diálogo para adicionar um material à atividade
      */
     private void abrirDialogAdicionarMaterial() {
-        JDialog dialog = new JDialog(this, "Adicionar Material", true);
+        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        JDialog dialog = new JDialog(parentFrame, "Adicionar Material", true);
         dialog.setSize(500, 300);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new GridBagLayout());
@@ -437,8 +455,10 @@ public class TelaAtividades extends JFrame {
                 dialog.dispose();
                 
                 // Recarregar a tela para atualizar a tabela
-                TelaAtividades novaTelaAtividades = new TelaAtividades(cultura, nomeCanteiro, inicio, areaM2, qtdKg, canteiroId, areaId);
+                TelaAtividades novaTelaAtividades = new TelaAtividades(desktop, cultura, nomeCanteiro, inicio, areaM2, qtdKg, canteiroId, areaId);
+                desktop.add(novaTelaAtividades);
                 novaTelaAtividades.setVisible(true);
+                try { novaTelaAtividades.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
                 TelaAtividades.this.dispose();
                 
             } catch (NumberFormatException ex) {
@@ -461,8 +481,15 @@ public class TelaAtividades extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            TelaAtividades tela = new TelaAtividades("Tomate", "Canteiro A", new java.util.Date(), 10.0, 50.0, 1L, 1L);
+            JFrame frame = new JFrame("Test");
+            JDesktopPane desktop = new JDesktopPane();
+            frame.add(desktop);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setSize(1400, 900);
+            TelaAtividades tela = new TelaAtividades(desktop, "Tomate", "Canteiro A", new java.util.Date(), 10.0, 50.0, 1L, 1L);
+            desktop.add(tela);
             tela.setVisible(true);
+            frame.setVisible(true);
         });
     }
 }

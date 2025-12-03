@@ -11,9 +11,10 @@ import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.text.ParseException;
 
-public class TelaRegistrarProblemas extends JFrame {
+public class TelaRegistrarProblemas extends JInternalFrame {
 
     private RegistrarProblemasController controller;
+    private JDesktopPane desktop;
 
     // Cores
     private Color verdeEscuro = new Color(63, 72, 23);
@@ -28,18 +29,18 @@ public class TelaRegistrarProblemas extends JFrame {
     private JFormattedTextField txtData;
     private JTextArea areaObs;
 
-    public TelaRegistrarProblemas(RegistrarProblemasController controller) {
+    public TelaRegistrarProblemas(JDesktopPane desktop, RegistrarProblemasController controller) {
+        super("Registrar Problemas - Produção", true, true, true, true);
         this.controller = controller;
+        this.desktop = desktop;
 
         configurarTela();
         montarLayout();
     }
 
     private void configurarTela() {
-        setTitle("Registrar Problemas - Produção");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setSize(1200, 800);
-        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
     }
 
@@ -81,11 +82,17 @@ public class TelaRegistrarProblemas extends JFrame {
                 try {
                     long associadoId = br.edu.ifsp.hto.cooperativa.sessao.modelo.negocios.Sessao.getAssociadoIdLogado();
                     if (texto.equals("Tela inicial")) {
-                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaInicial(associadoId).setVisible(true);
-                        dispose();
+                        TelaInicial tela = new TelaInicial(desktop);
+                        desktop.add(tela);
+                        tela.setVisible(true);
+                        try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
+                        this.dispose();
                     } else if (texto.equals("Área de plantio")) {
-                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaGerenciarArea().setVisible(true);
-                        dispose();
+                        TelaGerenciarArea tela = new TelaGerenciarArea(desktop);
+                        desktop.add(tela);
+                        tela.setVisible(true);
+                        try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
+                        this.dispose();
                     } else if (texto.equals("Registrar problemas")) {
                         // Já está na tela de registrar problemas, não faz nada
                         // ou apenas foca na tela atual
@@ -94,8 +101,11 @@ public class TelaRegistrarProblemas extends JFrame {
                             new br.edu.ifsp.hto.cooperativa.producao.modelo.RelatorioProducaoModel();
                         br.edu.ifsp.hto.cooperativa.producao.controle.RelatorioProducaoController relController = 
                             new br.edu.ifsp.hto.cooperativa.producao.controle.RelatorioProducaoController(model);
-                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaRelatorioProducao(relController).setVisible(true);
-                        dispose();
+                        TelaRelatorioProducao tela = new TelaRelatorioProducao(desktop, relController);
+                        desktop.add(tela);
+                        tela.setVisible(true);
+                        try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
+                        this.dispose();
                     }
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(this, "Erro ao navegar: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);

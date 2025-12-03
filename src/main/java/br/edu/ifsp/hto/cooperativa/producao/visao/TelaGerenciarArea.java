@@ -8,20 +8,22 @@ import br.edu.ifsp.hto.cooperativa.producao.controle.GerenciarAreaController;
 import br.edu.ifsp.hto.cooperativa.producao.modelo.vo.AreaVO;
 import br.edu.ifsp.hto.cooperativa.sessao.modelo.negocios.Sessao;
 
-public class TelaGerenciarArea extends JFrame {
+public class TelaGerenciarArea extends JInternalFrame {
 
     // Campo para guardar o ID do Associado
     private long associadoId; 
     private GerenciarAreaController controller;
+    private JDesktopPane desktop;
 
     // 🔑 NOVO CONSTRUTOR NECESSÁRIO
-    public TelaGerenciarArea() {
+    public TelaGerenciarArea(JDesktopPane desktop) {
+        super("Gerenciar Área", true, true, true, true);
+        this.desktop = desktop;
         // Busca o ID do associado logado na Sessão estática
         try {
             this.associadoId = Sessao.getAssociadoIdLogado(); 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Erro: Nenhum usuário logado. Retornando ao login.", "Erro de Sessão", JOptionPane.ERROR_MESSAGE);
-            // new TelaLogin().setVisible(true); // Se tiver uma tela de login
             return; // Impede a continuação se a sessão falhar
         }
         this.controller = new GerenciarAreaController();
@@ -42,10 +44,8 @@ public class TelaGerenciarArea extends JFrame {
             return;
         }
 
-        setTitle("Gerenciar Área");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setSize(1200, 800);
-        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
         // ======= CORES =======
@@ -91,8 +91,11 @@ public class TelaGerenciarArea extends JFrame {
                 try {
                     if (texto.equals("Tela inicial")) {
                         // AÇÃO CORRETA para o botão "Tela inicial"
-                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaInicial(this.associadoId).setVisible(true);
-                        dispose(); // Fecha a tela atual (TelaGerenciarArea)
+                        TelaInicial tela = new TelaInicial(desktop);
+                        desktop.add(tela);
+                        tela.setVisible(true);
+                        try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
+                        this.dispose(); // Fecha a tela atual (TelaGerenciarArea)
                     } else if (texto.equals("Área de plantio")) {
                         // Já está na TelaGerenciarArea, não faz nada ou apenas foca na tela
                         // Não é necessário navegar para si mesmo
@@ -101,15 +104,21 @@ public class TelaGerenciarArea extends JFrame {
                             new br.edu.ifsp.hto.cooperativa.producao.modelo.RegistrarProblemasModel();
                         br.edu.ifsp.hto.cooperativa.producao.controle.RegistrarProblemasController controller = 
                             new br.edu.ifsp.hto.cooperativa.producao.controle.RegistrarProblemasController(model);
-                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaRegistrarProblemas(controller).setVisible(true);
-                        dispose();
+                        TelaRegistrarProblemas tela = new TelaRegistrarProblemas(desktop, controller);
+                        desktop.add(tela);
+                        tela.setVisible(true);
+                        try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
+                        this.dispose();
                     } else if (texto.equals("Relatório de produção")) {
                         br.edu.ifsp.hto.cooperativa.producao.modelo.RelatorioProducaoModel model = 
                             new br.edu.ifsp.hto.cooperativa.producao.modelo.RelatorioProducaoModel();
                         br.edu.ifsp.hto.cooperativa.producao.controle.RelatorioProducaoController controller = 
                             new br.edu.ifsp.hto.cooperativa.producao.controle.RelatorioProducaoController(model);
-                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaRelatorioProducao(controller).setVisible(true);
-                        dispose();
+                        TelaRelatorioProducao tela = new TelaRelatorioProducao(desktop, controller);
+                        desktop.add(tela);
+                        tela.setVisible(true);
+                        try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
+                        this.dispose();
                     }
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(this, "Erro ao navegar: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
@@ -143,8 +152,11 @@ public class TelaGerenciarArea extends JFrame {
             // Fecha a tela atual
             dispose(); 
 
-            // CORRIGIDO PARA USAR O CONSTRUTOR COM associadoId
-            new br.edu.ifsp.hto.cooperativa.producao.visao.TelaInicial(this.associadoId).setVisible(true);
+            // CORRIGIDO PARA USAR O CONSTRUTOR COM desktop
+            TelaInicial tela = new TelaInicial(desktop);
+            desktop.add(tela);
+            tela.setVisible(true);
+            try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
         });
 
         JLabel lblTitulo = new JLabel("Gerenciar Área");
@@ -196,7 +208,10 @@ public class TelaGerenciarArea extends JFrame {
                 AreaVO areaCompleta = ctrl.carregarAreaCompletaPorId(areaIncompleta.getId());
                 
                 if (areaCompleta != null) {
-                    new TelaTalhao(areaCompleta).setVisible(true); // Abre a tela com a área COMPLETA
+                    TelaTalhao tela = new TelaTalhao(desktop, areaCompleta); // Abre a tela com a área COMPLETA
+                    desktop.add(tela);
+                    tela.setVisible(true);
+                    try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
                     dispose();
                 } else {
                     JOptionPane.showMessageDialog(this, "Erro ao carregar os detalhes da área.", "Erro", JOptionPane.ERROR_MESSAGE);

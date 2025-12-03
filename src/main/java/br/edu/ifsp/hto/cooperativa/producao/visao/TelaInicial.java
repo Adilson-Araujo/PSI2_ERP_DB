@@ -9,20 +9,26 @@ import java.awt.*;
 import br.edu.ifsp.hto.cooperativa.sessao.controlador.SessaoControlador;
 import br.edu.ifsp.hto.cooperativa.sessao.modelo.dto.UsuarioTO;
 
-public class TelaInicial extends JFrame {
+public class TelaInicial extends JInternalFrame {
 
     private long associadoId;
+    private JDesktopPane desktop;
 
-    public TelaInicial(Long associadoId) {
-        this.associadoId = associadoId;
+    public TelaInicial(JDesktopPane desktop) {
+        super("Tela Inicial - Produção", true, true, true, true);
+        this.desktop = desktop;
+        try {
+            this.associadoId = br.edu.ifsp.hto.cooperativa.sessao.modelo.negocios.Sessao.getAssociadoIdLogado();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao obter usuário logado: " + e.getMessage());
+            this.associadoId = 0;
+        }
         initializeComponents();
     }
 
     public void initializeComponents() {
-        setTitle("Tela Inicial - Produção");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setSize(1200, 800);
-        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
         // ======= CORES =======
@@ -66,8 +72,11 @@ public class TelaInicial extends JFrame {
         // ======= AÇÃO DOS BOTÕES =======
         botao.addActionListener(e -> {
             if (texto.equals("Área de plantio")) {
-            new br.edu.ifsp.hto.cooperativa.producao.visao.TelaGerenciarArea().setVisible(true);
-                    dispose(); 
+                TelaGerenciarArea tela = new TelaGerenciarArea(desktop);
+                desktop.add(tela);
+                tela.setVisible(true);
+                try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
+                this.dispose();
             }
             if (texto.equals("Registrar problemas")) {
                 // Criar e abrir tela de registrar problemas
@@ -75,8 +84,11 @@ public class TelaInicial extends JFrame {
                     new br.edu.ifsp.hto.cooperativa.producao.modelo.RegistrarProblemasModel();
                 br.edu.ifsp.hto.cooperativa.producao.controle.RegistrarProblemasController controller = 
                     new br.edu.ifsp.hto.cooperativa.producao.controle.RegistrarProblemasController(model);
-                new br.edu.ifsp.hto.cooperativa.producao.visao.TelaRegistrarProblemas(controller).setVisible(true);
-                dispose();
+                TelaRegistrarProblemas tela = new TelaRegistrarProblemas(desktop, controller);
+                desktop.add(tela);
+                tela.setVisible(true);
+                try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
+                this.dispose();
             }
             if (texto.equals("Relatório de produção")) {
                 // Criar e abrir tela de relatório de produção
@@ -84,8 +96,11 @@ public class TelaInicial extends JFrame {
                     new br.edu.ifsp.hto.cooperativa.producao.modelo.RelatorioProducaoModel();
                 br.edu.ifsp.hto.cooperativa.producao.controle.RelatorioProducaoController controller = 
                     new br.edu.ifsp.hto.cooperativa.producao.controle.RelatorioProducaoController(model);
-                new br.edu.ifsp.hto.cooperativa.producao.visao.TelaRelatorioProducao(controller).setVisible(true);
-                dispose();
+                TelaRelatorioProducao tela = new TelaRelatorioProducao(desktop, controller);
+                desktop.add(tela);
+                tela.setVisible(true);
+                try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
+                this.dispose();
             }
         });
 

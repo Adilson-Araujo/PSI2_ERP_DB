@@ -14,7 +14,9 @@ import java.sql.Connection;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -30,19 +32,22 @@ import br.edu.ifsp.hto.cooperativa.producao.modelo.dao.OrdemProducaoDAO;
 import br.edu.ifsp.hto.cooperativa.ConnectionFactory;
 
 
-public class TelaEditarCanteiro extends JFrame {
+public class TelaEditarCanteiro extends JInternalFrame {
 
     private CanteiroVO canteiroAtual;
     private OrdemProducaoVO ordemAtual;
     private Long areaId;
     private GerenciarAreaController controller;
+    private JDesktopPane desktop;
 
     // Campos do Canteiro
     private JTextField txtNome;
     private JTextField txtArea;
     private JComboBox<String> comboStatus;
 
-    public TelaEditarCanteiro(CanteiroVO canteiro, Long areaId) {
+    public TelaEditarCanteiro(JDesktopPane desktop, CanteiroVO canteiro, Long areaId) {
+        super("Editar Canteiro - " + canteiro.getNome(), true, true, true, true);
+        this.desktop = desktop;
         this.canteiroAtual = canteiro;
         this.areaId = areaId;
         this.controller = new GerenciarAreaController();
@@ -50,10 +55,8 @@ public class TelaEditarCanteiro extends JFrame {
         // Carregar ordem de produção associada
         carregarOrdemProducao();
 
-        setTitle("Editar Canteiro");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE); // Fecha só a janela, não o app
         setSize(1200, 800);
-        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
         // ======= CORES =======
@@ -254,15 +257,17 @@ public class TelaEditarCanteiro extends JFrame {
                 dispose();
                 
                 // Fechar a tela de canteiro anterior (se houver)
-                for (java.awt.Window window : java.awt.Window.getWindows()) {
-                    if (window instanceof TelaCanteiro && window.isVisible()) {
-                        window.dispose();
+                for (javax.swing.JInternalFrame frame : desktop.getAllFrames()) {
+                    if (frame instanceof TelaCanteiro && frame.isVisible()) {
+                        frame.dispose();
                     }
                 }
                 
                 // Abrir nova tela de canteiro com dados atualizados
-                TelaCanteiro telaCanteiro = new TelaCanteiro(cultura, titulo, inicio, areaM2, qtdKg, canteiroAtual.getId(), areaId);
+                TelaCanteiro telaCanteiro = new TelaCanteiro(desktop, cultura, titulo, inicio, areaM2, qtdKg, canteiroAtual.getId(), areaId);
+                desktop.add(telaCanteiro);
                 telaCanteiro.setVisible(true);
+                try { telaCanteiro.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
             } else {
                 dispose();
             }

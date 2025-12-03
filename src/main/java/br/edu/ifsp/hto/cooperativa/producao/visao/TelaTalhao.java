@@ -13,9 +13,10 @@ import java.awt.event.ActionListener; // Import necessário para o listener
 import br.edu.ifsp.hto.cooperativa.producao.controle.GerenciarAreaController; // Controller
 import java.math.BigDecimal;
 
-public class TelaTalhao extends JFrame {
+public class TelaTalhao extends JInternalFrame {
 
     private AreaVO area;
+    private JDesktopPane desktop;
     private GerenciarAreaController controller = new GerenciarAreaController();
     // Cores definidas como campos da classe para acesso em todos os métodos
     private final Color verdeEscuro = new Color(63, 72, 23);
@@ -26,9 +27,11 @@ public class TelaTalhao extends JFrame {
     // private TelaGerenciarArea telaAnterior; 
 
     // O construtor é o mesmo, mas o conteúdo é movido para initComponents()
-    public TelaTalhao(AreaVO area) {
+    public TelaTalhao(JDesktopPane desktop, AreaVO area) {
+        super("Área - " + area.getNome(), true, true, true, true);
         // Recarrega a área completa (inclui talhões, ordens e recalcula área utilizada)
         this.area = area;
+        this.desktop = desktop;
         try {
             AreaVO recarregada = controller.carregarAreaCompletaPorId(area.getId());
             if (recarregada != null) this.area = recarregada;
@@ -42,10 +45,8 @@ public class TelaTalhao extends JFrame {
     
     // Se você migrou para o padrão initComponents, encapsule todo o corpo do construtor nele.
     private void initComponents() { 
-        setTitle("Área - " + area.getNome());
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setSize(1200, 800);
-        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
         // ======= NAVBAR SUPERIOR =======
@@ -81,25 +82,37 @@ public class TelaTalhao extends JFrame {
                 try {
                     long associadoId = br.edu.ifsp.hto.cooperativa.sessao.modelo.negocios.Sessao.getAssociadoIdLogado();
                     if (texto.equals("Tela inicial")) {
-                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaInicial(associadoId).setVisible(true);
-                        dispose();
+                        TelaInicial tela = new TelaInicial(desktop);
+                        desktop.add(tela);
+                        tela.setVisible(true);
+                        try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
+                        this.dispose();
                     } else if (texto.equals("Área de plantio")) {
-                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaGerenciarArea().setVisible(true);
-                        dispose();
+                        TelaGerenciarArea tela = new TelaGerenciarArea(desktop);
+                        desktop.add(tela);
+                        tela.setVisible(true);
+                        try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
+                        this.dispose();
                     } else if (texto.equals("Registrar problemas")) {
                         br.edu.ifsp.hto.cooperativa.producao.modelo.RegistrarProblemasModel model = 
                             new br.edu.ifsp.hto.cooperativa.producao.modelo.RegistrarProblemasModel();
                         br.edu.ifsp.hto.cooperativa.producao.controle.RegistrarProblemasController controller = 
                             new br.edu.ifsp.hto.cooperativa.producao.controle.RegistrarProblemasController(model);
-                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaRegistrarProblemas(controller).setVisible(true);
-                        dispose();
+                        TelaRegistrarProblemas tela = new TelaRegistrarProblemas(desktop, controller);
+                        desktop.add(tela);
+                        tela.setVisible(true);
+                        try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
+                        this.dispose();
                     } else if (texto.equals("Relatório de produção")) {
                         br.edu.ifsp.hto.cooperativa.producao.modelo.RelatorioProducaoModel model = 
                             new br.edu.ifsp.hto.cooperativa.producao.modelo.RelatorioProducaoModel();
                         br.edu.ifsp.hto.cooperativa.producao.controle.RelatorioProducaoController controller = 
                             new br.edu.ifsp.hto.cooperativa.producao.controle.RelatorioProducaoController(model);
-                        new br.edu.ifsp.hto.cooperativa.producao.visao.TelaRelatorioProducao(controller).setVisible(true);
-                        dispose();
+                        TelaRelatorioProducao tela = new TelaRelatorioProducao(desktop, controller);
+                        desktop.add(tela);
+                        tela.setVisible(true);
+                        try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
+                        this.dispose();
                     }
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(this, "Erro ao navegar: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
@@ -130,7 +143,10 @@ public class TelaTalhao extends JFrame {
 
         JButton btnVoltar = criarBotaoPadrao("Voltar", verdeClaro);
         btnVoltar.addActionListener(e -> {
-            new br.edu.ifsp.hto.cooperativa.producao.visao.TelaGerenciarArea().setVisible(true);
+            TelaGerenciarArea tela = new TelaGerenciarArea(desktop);
+            desktop.add(tela);
+            tela.setVisible(true);
+            try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
             dispose();
         });
 
@@ -200,8 +216,10 @@ public class TelaTalhao extends JFrame {
             if (escolhido != null) {
                 TalhaoVO talhaoEscolhido = mapNomeTalhao.get(escolhido);
                 if (talhaoEscolhido != null) {
-                    TelaEditarTalhao telaEditar = new TelaEditarTalhao(talhaoEscolhido, area.getId());
+                    TelaEditarTalhao telaEditar = new TelaEditarTalhao(desktop, talhaoEscolhido, area.getId());
+                    desktop.add(telaEditar);
                     telaEditar.setVisible(true);
+                    try { telaEditar.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
                     // Não fecha a tela atual - a TelaEditarTalhao vai fechar e reabrir quando salvar
                 }
             }
@@ -557,8 +575,12 @@ public class TelaTalhao extends JFrame {
                                 Long canteiroId = canteiro.getId();
                                 Long areaId = area != null ? area.getId() : null;
 
-                                TelaCanteiro tela = new TelaCanteiro(cultura, titulo, inicio, areaM2, qtdKg, canteiroId, areaId);
+                                TelaCanteiro tela = new TelaCanteiro(desktop, cultura, titulo, inicio, areaM2, qtdKg, canteiroId, areaId);
+                                desktop.add(tela);
                                 tela.setVisible(true);
+                                try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
+                                TelaTalhao.this.dispose();
+                                try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
                                 TelaTalhao.this.dispose();
                             });
                         }
@@ -667,8 +689,10 @@ public class TelaTalhao extends JFrame {
                                 Long canteiroId = canteiro.getId();
                                 Long areaId = area != null ? area.getId() : null;
 
-                                TelaCanteiro tela = new TelaCanteiro(cultura, titulo, inicio, areaM2, qtdKg, canteiroId, areaId);
+                                TelaCanteiro tela = new TelaCanteiro(desktop, cultura, titulo, inicio, areaM2, qtdKg, canteiroId, areaId);
+                                desktop.add(tela);
                                 tela.setVisible(true);
+                                try { tela.setSelected(true); } catch (java.beans.PropertyVetoException ex) {}
                                 // Fecha a tela atual (Talhão) para não ficar duas abertas
                                 TelaTalhao.this.dispose();
                             });

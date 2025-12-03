@@ -73,15 +73,15 @@ public class Cooperativa extends JFrame {
 
 
         //Grupo Producao adicionar as opcoes do subMneu (JMenuItem) aqui
-        JMenuItem producaoItemMenu1 = new JMenuItem("Janela1");
-        JMenuItem producaoItemMenu2 = new JMenuItem("Janela2");
-        JMenuItem producaoItemMenu3 = new JMenuItem("Janela3");
-        JMenuItem producaoItemMenu4 = new JMenuItem("Janela4");
+        JMenuItem producaoItemTelaInicial = new JMenuItem("Tela Inicial");
+        JMenuItem producaoItemGerenciarArea = new JMenuItem("Gerenciar Área");
+        JMenuItem producaoItemRegistrarProblemas = new JMenuItem("Registrar Problemas");
+        JMenuItem producaoItemRelatorioProducao = new JMenuItem("Relatório de Produção");
 
-        producaoMenu.add(producaoItemMenu1);
-        producaoMenu.add(producaoItemMenu2);
-        producaoMenu.add(producaoItemMenu3);
-        producaoMenu.add(producaoItemMenu4);
+        producaoMenu.add(producaoItemTelaInicial);
+        producaoMenu.add(producaoItemGerenciarArea);
+        producaoMenu.add(producaoItemRegistrarProblemas);
+        producaoMenu.add(producaoItemRelatorioProducao);
 
         // --- GRUPO VENDAS ---
         JMenuItem vendaItemCriarPedido = new JMenuItem("Criar Pedido");
@@ -182,6 +182,47 @@ public class Cooperativa extends JFrame {
         planejamentoItemMenu1.addActionListener(ev -> new VisaoHome(desktop));
         planejamentoItemMenu2.addActionListener(ev -> new VisaoAreas(desktop));
         planejamentoItemMenu3.addActionListener(ev -> new VisaoMateriais(desktop));
+
+        // --- AÇÕES DO GRUPO PRODUÇÃO ---
+        producaoItemTelaInicial.addActionListener(ev -> {
+            br.edu.ifsp.hto.cooperativa.producao.visao.TelaInicial tela = 
+                new br.edu.ifsp.hto.cooperativa.producao.visao.TelaInicial(desktop);
+            desktop.add(tela);
+            tela.setVisible(true);
+            try { tela.setSelected(true); } catch (java.beans.PropertyVetoException e) {}
+        });
+
+        producaoItemGerenciarArea.addActionListener(ev -> {
+            br.edu.ifsp.hto.cooperativa.producao.visao.TelaGerenciarArea tela = 
+                new br.edu.ifsp.hto.cooperativa.producao.visao.TelaGerenciarArea(desktop);
+            desktop.add(tela);
+            tela.setVisible(true);
+            try { tela.setSelected(true); } catch (java.beans.PropertyVetoException e) {}
+        });
+
+        producaoItemRegistrarProblemas.addActionListener(ev -> {
+            br.edu.ifsp.hto.cooperativa.producao.modelo.RegistrarProblemasModel model = 
+                new br.edu.ifsp.hto.cooperativa.producao.modelo.RegistrarProblemasModel();
+            br.edu.ifsp.hto.cooperativa.producao.controle.RegistrarProblemasController controller = 
+                new br.edu.ifsp.hto.cooperativa.producao.controle.RegistrarProblemasController(model);
+            br.edu.ifsp.hto.cooperativa.producao.visao.TelaRegistrarProblemas tela = 
+                new br.edu.ifsp.hto.cooperativa.producao.visao.TelaRegistrarProblemas(desktop, controller);
+            desktop.add(tela);
+            tela.setVisible(true);
+            try { tela.setSelected(true); } catch (java.beans.PropertyVetoException e) {}
+        });
+
+        producaoItemRelatorioProducao.addActionListener(ev -> {
+            br.edu.ifsp.hto.cooperativa.producao.modelo.RelatorioProducaoModel model = 
+                new br.edu.ifsp.hto.cooperativa.producao.modelo.RelatorioProducaoModel();
+            br.edu.ifsp.hto.cooperativa.producao.controle.RelatorioProducaoController controller = 
+                new br.edu.ifsp.hto.cooperativa.producao.controle.RelatorioProducaoController(model);
+            br.edu.ifsp.hto.cooperativa.producao.visao.TelaRelatorioProducao tela = 
+                new br.edu.ifsp.hto.cooperativa.producao.visao.TelaRelatorioProducao(desktop, controller);
+            desktop.add(tela);
+            tela.setVisible(true);
+            try { tela.setSelected(true); } catch (java.beans.PropertyVetoException e) {}
+        });
 
         // --- AÇÕES DO GRUPO ESTOQUE ---
         estoqueItemEstoqueEntrada.addActionListener(ev -> ControleEstoque.telaEstoqueEstrada(desktop));

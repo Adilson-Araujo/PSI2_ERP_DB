@@ -13,6 +13,7 @@ import br.edu.ifsp.hto.cooperativa.planejamento.modelo.DAO.AtividadeDAO;
 import br.edu.ifsp.hto.cooperativa.planejamento.modelo.DAO.MaterialDAO;
 import br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.AtividadeNoCanteiroVO;
 import br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.MaterialNaAtividadeVO;
+import br.edu.ifsp.hto.cooperativa.planejamento.modelo.VO.MaterialVO;
 
 import java.awt.*;
 
@@ -181,6 +182,27 @@ public class TelaAtividades extends JFrame {
         JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 0));
         painelBotoes.setOpaque(false);
 
+        JButton btnAdicionarMaterial = new JButton("Adicionar material");
+        btnAdicionarMaterial.setFont(new Font("Arial", Font.BOLD, 16));
+        btnAdicionarMaterial.setBackground(verdeClaro);
+        btnAdicionarMaterial.setForeground(Color.BLACK);
+        btnAdicionarMaterial.setFocusPainted(false);
+        btnAdicionarMaterial.setPreferredSize(new Dimension(200, 38));
+        btnAdicionarMaterial.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnAdicionarMaterial.addActionListener(e -> {
+            if (atividadeId != null) {
+                abrirDialogAdicionarMaterial();
+            } else {
+                JOptionPane.showMessageDialog(
+                    TelaAtividades.this,
+                    "Nenhuma atividade disponível para adicionar material.",
+                    "Aviso",
+                    JOptionPane.WARNING_MESSAGE
+                );
+            }
+        });
+        painelBotoes.add(btnAdicionarMaterial);
+
         JButton btnConcluir = new JButton("Marcar como concluído");
         btnConcluir.setFont(new Font("Arial", Font.BOLD, 16));
         btnConcluir.setBackground(verdeClaro);
@@ -293,6 +315,118 @@ public class TelaAtividades extends JFrame {
         conteudo.add(scrollTabela, gbc);
 
         // Botão atrelar material removido - funcionalidade será implementada posteriormente
+    }
+
+    /**
+     * Abre um diálogo para adicionar um material à atividade
+     */
+    private void abrirDialogAdicionarMaterial() {
+        JDialog dialog = new JDialog(this, "Adicionar Material", true);
+        dialog.setSize(500, 300);
+        dialog.setLocationRelativeTo(this);
+        dialog.setLayout(new GridBagLayout());
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // Label e ComboBox para selecionar material
+        JLabel lblMaterial = new JLabel("Material:");
+        lblMaterial.setFont(new Font("Arial", Font.BOLD, 16));
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        dialog.add(lblMaterial, gbc);
+
+        MaterialDAO materialDAO = new MaterialDAO();
+        List<MaterialVO> materiais = materialDAO.listarTodos();
+        
+        JComboBox<String> comboMateriais = new JComboBox<>();
+        for (MaterialVO material : materiais) {
+            comboMateriais.addItem(material.getId() + " - " + material.getNome() + " (" + material.getUnidadeMedida() + ")");
+        }
+        comboMateriais.setFont(new Font("Arial", Font.PLAIN, 14));
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.weightx = 1;
+        dialog.add(comboMateriais, gbc);
+
+        // Label e TextField para quantidade utilizada
+        JLabel lblQuantidade = new JLabel("Quantidade:");
+        lblQuantidade.setFont(new Font("Arial", Font.BOLD, 16));
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.weightx = 0;
+        dialog.add(lblQuantidade, gbc);
+
+        JTextField txtQuantidade = new JTextField();
+        txtQuantidade.setFont(new Font("Arial", Font.PLAIN, 14));
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.weightx = 1;
+        dialog.add(txtQuantidade, gbc);
+
+        // Painel de botões
+        JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        
+        JButton btnCancelar = new JButton("Cancelar");
+        btnCancelar.setFont(new Font("Arial", Font.BOLD, 14));
+        btnCancelar.addActionListener(e -> dialog.dispose());
+        painelBotoes.add(btnCancelar);
+
+        JButton btnSalvar = new JButton("Salvar");
+        btnSalvar.setFont(new Font("Arial", Font.BOLD, 14));
+        btnSalvar.setBackground(new Color(157, 170, 61));
+        btnSalvar.addActionListener(e -> {
+            try {
+                // Validar entrada
+                if (comboMateriais.getSelectedIndex() < 0) {
+                    JOptionPane.showMessageDialog(dialog, "Selecione um material.", "Erro", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                String quantidadeStr = txtQuantidade.getText().trim();
+                if (quantidadeStr.isEmpty()) {
+                    JOptionPane.showMessageDialog(dialog, "Informe a quantidade utilizada.", "Erro", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                float quantidadeUtilizada = Float.parseFloat(quantidadeStr);
+                if (quantidadeUtilizada <= 0) {
+                    JOptionPane.showMessageDialog(dialog, "A quantidade deve ser maior que zero.", "Erro", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                // Extrair ID do material selecionado
+                String itemSelecionado = (String) comboMateriais.getSelectedItem();
+                int materialId = Integer.parseInt(itemSelecionado.split(" - ")[0]);
+                
+                // Inserir material na atividade
+                materialDAO.inserirMaterialNaAtividade(atividadeId, materialId, quantidadeUtilizada);
+                
+                JOptionPane.showMessageDialog(dialog, "Material adicionado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                dialog.dispose();
+                
+                // Recarregar a tela para atualizar a tabela
+                TelaAtividades novaTelaAtividades = new TelaAtividades(cultura, nomeCanteiro, inicio, areaM2, qtdKg, canteiroId, areaId);
+                novaTelaAtividades.setVisible(true);
+                TelaAtividades.this.dispose();
+                
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(dialog, "Quantidade inválida. Use apenas números.", "Erro", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(dialog, "Erro ao adicionar material: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
+            }
+        });
+        painelBotoes.add(btnSalvar);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        gbc.weightx = 1;
+        dialog.add(painelBotoes, gbc);
+
+        dialog.setVisible(true);
     }
 
     public static void main(String[] args) {

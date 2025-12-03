@@ -131,6 +131,31 @@ public class MaterialDAO {
 
         return materiais;
     }
+
+    /**
+     * Insere um material na tabela atividade_has_material
+     * 
+     * @param atividadeId identificador da atividade
+     * @param materialId identificador do material
+     * @param quantidadeUtilizada quantidade utilizada do material
+     */
+    public void inserirMaterialNaAtividade(int atividadeId, int materialId, float quantidadeUtilizada) {
+        try {
+            Connection conn = ConnectionFactory.getConnection();
+
+            String sql = "INSERT INTO atividade_has_material (atividade_id, material_id, quantidade_utilizada, ativo) VALUES (?, ?, ?, true)";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, atividadeId);
+            stmt.setInt(2, materialId);
+            stmt.setFloat(3, quantidadeUtilizada);
+            stmt.executeUpdate();
+
+            stmt.close();
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     
     /**
      * Atualiza um material presente no banco de dados

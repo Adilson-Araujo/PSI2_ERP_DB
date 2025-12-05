@@ -6,7 +6,7 @@ import java.awt.*;
 
 public class TelaEstoqueAtual {
     public static JInternalFrame gerarFrameInterno(){
-        JInternalFrame janela = new JInternalFrame();
+        JInternalFrame janela = new JInternalFrame("Visão – Estoque Atual", true, true, true, true);
         
         JPanel painelControle;
         JPanel painelExibicao;
@@ -15,7 +15,6 @@ public class TelaEstoqueAtual {
         JTable tabelaEstoque;
         JScrollPane scrollTabela;
         
-        janela.setTitle("Visão – Estoque Atual");
         janela.setSize(900, 600);
         janela.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
         janela.setLayout(new BorderLayout());

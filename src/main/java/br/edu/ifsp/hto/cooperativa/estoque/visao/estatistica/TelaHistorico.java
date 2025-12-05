@@ -22,7 +22,7 @@ public class TelaHistorico {
 
     public static JInternalFrame gerarFrameInterno() {
 
-        JInternalFrame janela = new JInternalFrame("Histórico");
+        JInternalFrame janela = new JInternalFrame("Histórico", true, true, true, true);
         janela.setSize(1200, 700);
         janela.setDefaultCloseOperation(JInternalFrame.EXIT_ON_CLOSE);
         janela.setLayout(new BorderLayout());

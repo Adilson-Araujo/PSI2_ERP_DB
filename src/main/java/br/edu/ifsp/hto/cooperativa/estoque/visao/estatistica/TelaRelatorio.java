@@ -10,7 +10,7 @@ public class TelaRelatorio {
     public static JInternalFrame gerarFrameInterno(){
 
         // Criação da janela principal
-        final JInternalFrame janela = new JInternalFrame("Relatório");
+        final JInternalFrame janela = new JInternalFrame("Relatório", true, true, true, true);
         janela.setSize(900, 600);
         janela.setDefaultCloseOperation(JInternalFrame.EXIT_ON_CLOSE);
         janela.setLayout(new BorderLayout());

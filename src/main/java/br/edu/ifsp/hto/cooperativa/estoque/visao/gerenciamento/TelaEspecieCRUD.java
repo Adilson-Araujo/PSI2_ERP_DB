@@ -1,8 +1,8 @@
 package br.edu.ifsp.hto.cooperativa.estoque.visao.gerenciamento;
 
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.ArmazemDAO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.CategoriaDAO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.EspecieDAO;
-import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.ArmazemVO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.CategoriaVO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.EspecieVO;
 import java.awt.*;
 import java.awt.event.*;
@@ -12,11 +12,17 @@ import javax.swing.table.DefaultTableModel;
 import java.util.List;
 
 public class TelaEspecieCRUD {
-    static ArmazemDAO armazemDAO = ArmazemDAO.getInstance();
-    static ArmazemVO armazemDados = null;
+    static EspecieDAO especieDAO = EspecieDAO.getInstance();
+    static CategoriaDAO categoriaDAO = CategoriaDAO.getInstance();
+    static EspecieVO especieDados = null;
+    static CategoriaVO categoriaDados = null;
     static JTextField textId = null;
+    static JComboBox<CategoriaVO> comboCategoria = null;
     static JTextField textNome = null;
-    static JComboBox<String> comboEndereco = null;
+    static JTextField textDescricao = null;
+    static JTextField textTempoColheita = null;
+    static JTextField textRendimentoM2 = null;
+    
     static JTable tabelaRegistros = null;
 
     public static JInternalFrame gerarFrameInterno() {
@@ -46,6 +52,20 @@ public class TelaEspecieCRUD {
         painelDados.add(painelId);
         painelDados.add(Box.createVerticalStrut(20));
 
+        // Campo de Categoria
+        JPanel painelCategoria = new JPanel();
+        painelCategoria.setLayout(new BoxLayout(painelCategoria, BoxLayout.Y_AXIS));
+        painelCategoria.setBackground(new Color(55, 61, 13));
+        JLabel labelCategoria = new JLabel("Categoria");
+        labelCategoria.setForeground(Color.WHITE);
+        List<CategoriaVO> opcoes = categoriaDAO.listarTodas();
+        comboCategoria = new JComboBox<>(opcoes.toArray(CategoriaVO[]::new));
+        comboCategoria.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
+        painelCategoria.add(labelCategoria);
+        painelCategoria.add(comboCategoria);
+        painelDados.add(painelCategoria);
+        painelDados.add(Box.createVerticalStrut(10));
+        
         // Campo de Nome
         JPanel painelNome = new JPanel();
         painelNome.setLayout(new BoxLayout(painelNome, BoxLayout.Y_AXIS));
@@ -60,20 +80,48 @@ public class TelaEspecieCRUD {
         painelDados.add(painelNome);
         painelDados.add(Box.createVerticalStrut(20));
 
-        // Campo de Endereço
-        JPanel painelEndereco = new JPanel();
-        painelEndereco.setLayout(new BoxLayout(painelEndereco, BoxLayout.Y_AXIS));
-        painelEndereco.setBackground(new Color(55, 61, 13));
-        JLabel labelEndereco = new JLabel("Endereços");
-        labelEndereco.setForeground(Color.WHITE);
-        String[] opcoes = { "Opção 1", "Opção 2", "Opção 3", "Opção 4", "Opção 5"};
-        comboEndereco = new JComboBox<>(opcoes);
-        comboEndereco.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
-        painelEndereco.add(labelEndereco);
-        painelEndereco.add(comboEndereco);
-        painelDados.add(painelEndereco);
-        painelDados.add(Box.createVerticalStrut(10));
+        // Campo de Descricao
+        JPanel painelDescricao = new JPanel();
+        painelDescricao.setLayout(new BoxLayout(painelDescricao, BoxLayout.Y_AXIS));
+        painelDescricao.setBackground(new Color(55, 61, 13));
+        JLabel labelDescricao = new JLabel("Descricao:");
+        labelDescricao.setForeground(Color.WHITE);
+        textDescricao = new JTextField();
+        textDescricao.setEditable(true);
+        textDescricao.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
+        painelDescricao.add(labelDescricao);
+        painelDescricao.add(textDescricao);
+        painelDados.add(painelDescricao);
+        painelDados.add(Box.createVerticalStrut(20));
 
+        // Campo de TempoColheita
+        JPanel painelTempoColheita = new JPanel();
+        painelTempoColheita.setLayout(new BoxLayout(painelTempoColheita, BoxLayout.Y_AXIS));
+        painelTempoColheita.setBackground(new Color(55, 61, 13));
+        JLabel labelTempoColheita = new JLabel("TempoColheita:");
+        labelTempoColheita.setForeground(Color.WHITE);
+        textTempoColheita = new JTextField();
+        textTempoColheita.setEditable(true);
+        textTempoColheita.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
+        painelTempoColheita.add(labelTempoColheita);
+        painelTempoColheita.add(textTempoColheita);
+        painelDados.add(painelTempoColheita);
+        painelDados.add(Box.createVerticalStrut(20));
+
+        // Campo de RendimentoM2
+        JPanel painelRendimentoM2 = new JPanel();
+        painelRendimentoM2.setLayout(new BoxLayout(painelRendimentoM2, BoxLayout.Y_AXIS));
+        painelRendimentoM2.setBackground(new Color(55, 61, 13));
+        JLabel labelRendimentoM2 = new JLabel("RendimentoM2:");
+        labelRendimentoM2.setForeground(Color.WHITE);
+        textRendimentoM2 = new JTextField();
+        textRendimentoM2.setEditable(true);
+        textRendimentoM2.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
+        painelRendimentoM2.add(labelRendimentoM2);
+        painelRendimentoM2.add(textRendimentoM2);
+        painelDados.add(painelRendimentoM2);
+        painelDados.add(Box.createVerticalStrut(20));
+        
         // --- Botões ---
         JPanel painelBotoes = new JPanel();
         painelBotoes.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 0));
@@ -81,30 +129,33 @@ public class TelaEspecieCRUD {
 
         JButton btnNovo = new JButton("Novo");
         btnNovo.addActionListener(e -> {
-            armazemDados = new ArmazemVO(-1, "", 1);
+            comboCategoria.setSelectedIndex(0);
+            especieDados = new EspecieVO(-1, (CategoriaVO) comboCategoria.getSelectedItem(), "", "", 0, 0);
             atualizarPainelDados();
             atualizarTabelaRegistros();
         });
         
         JButton btnSalvar = new JButton("Salvar");
         btnSalvar.addActionListener(e -> {
-            String endereco = (String) comboEndereco.getSelectedItem();
-            int endereco_id = Character.getNumericValue(endereco.charAt(endereco.length() - 1)); // converte para int            
-            armazemDados.setNome(textNome.getText());
-            armazemDados.setEndereco(endereco_id);
-            if(armazemDados.getId() == -1){
-                armazemDAO.inserir(armazemDados);
+            especieDados.setCategoria((CategoriaVO) comboCategoria.getSelectedItem());
+            especieDados.setNome(textNome.getText());
+            especieDados.setDescricao(textDescricao.getText());
+            especieDados.setTempo_colheita((int) Integer.valueOf(textTempoColheita.getText()));
+            especieDados.setRendimento_kg_m2(((Double) Double.parseDouble(textRendimentoM2.getText())).floatValue());
+            if(especieDados.getId() == -1){
+                especieDAO.inserir(especieDados);
                 atualizarPainelDados();
             } else {
-                armazemDAO.atualizar(armazemDados);
+                especieDAO.atualizar(especieDados);
             }
             atualizarTabelaRegistros();
         });
         
         JButton btnExcluir = new JButton("Excluir");
         btnExcluir.addActionListener(e -> {
-            armazemDAO.excluir(Integer.parseInt(textId.getText()));
-            armazemDados = new ArmazemVO(-1, "", 1);
+            especieDAO.excluir(Integer.parseInt(textId.getText()));
+            comboCategoria.setSelectedIndex(0);
+            especieDados = new EspecieVO(-1, (CategoriaVO) comboCategoria.getSelectedItem(), "", "", 0, 0);
             atualizarPainelDados();
             atualizarTabelaRegistros();
         });
@@ -125,17 +176,20 @@ public class TelaEspecieCRUD {
         painelRegistros.setBackground(new Color(55, 61, 13));
 
         // Cabeçalhos da tabela
-        String[] colunas = { "ID", "Nome", "Endereço" };
+        String[] colunas = { "ID", "Categoria", "Nome", "Descrição", "Tempo Colheira", "Rendimento" };
 
         // Converte a lista de ArmazemVO em matriz para o modelo da tabela
-        List<ArmazemVO> lista = armazemDAO.listarTodos();
-        Object[][] dados = new Object[lista.size()][3];
+        List<EspecieVO> lista = especieDAO.listarTodas();
+        Object[][] dados = new Object[lista.size()][6];
 
         for (int i = 0; i < lista.size(); i++) {
-            ArmazemVO a = lista.get(i);
+            EspecieVO a = lista.get(i);
             dados[i][0] = a.getId();
-            dados[i][1] = a.getNome();
-            dados[i][2] = a.getEnderecoId(); // Trocar para nome do Endereço.
+            dados[i][1] = a.getCategoria();
+            dados[i][2] = a.getNome();
+            dados[i][3] = a.getDescricao();
+            dados[i][4] = a.getTempo_colheita();
+            dados[i][5] = a.getRendimento_kg_m2();
         }
 
         // Modelo de tabela não editável
@@ -181,29 +235,35 @@ public class TelaEspecieCRUD {
 
     // Função chamada ao clicar um registro da tabela
     private static void onTabelaClick(int id) {
-        armazemDados = armazemDAO.buscarPorId(id);
+        especieDados = especieDAO.buscarPorId(id);
         atualizarPainelDados();
     }
     
     private static void atualizarPainelDados(){
-        textId.setText(""+armazemDados.getId());
-        textNome.setText(armazemDados.getNome());
-        comboEndereco.setSelectedItem("Opção " + armazemDados.getEnderecoId());
+        textId.setText(""+especieDados.getId());
+        comboCategoria.setSelectedItem(especieDados.getCategoria());
+        textNome.setText(especieDados.getNome());
+        textDescricao.setText(especieDados.getDescricao());
+        textTempoColheita.setText(""+especieDados.getTempo_colheita());
+        textRendimentoM2.setText(""+especieDados.getRendimento_kg_m2());
     }
     
     private static void atualizarTabelaRegistros(){
         // Cabeçalhos da tabela
-        String[] colunas = { "ID", "Nome", "Endereço" };
+        String[] colunas = { "ID", "Categoria", "Nome", "Descrição", "Tempo Colheira", "Rendimento" };
 
         // Converte a lista de ArmazemVO em matriz para o modelo da tabela
-        List<ArmazemVO> lista = armazemDAO.listarTodos();
-        Object[][] dados = new Object[lista.size()][3];
+        List<EspecieVO> lista = especieDAO.listarTodas();
+        Object[][] dados = new Object[lista.size()][6];
 
         for (int i = 0; i < lista.size(); i++) {
-            ArmazemVO a = lista.get(i);
+            EspecieVO a = lista.get(i);
             dados[i][0] = a.getId();
-            dados[i][1] = a.getNome();
-            dados[i][2] = a.getEnderecoId(); // Trocar para nome do Endereço.
+            dados[i][1] = a.getCategoria();
+            dados[i][2] = a.getNome();
+            dados[i][3] = a.getDescricao();
+            dados[i][4] = a.getTempo_colheita();
+            dados[i][5] = a.getRendimento_kg_m2();
         }
 
         // Modelo de tabela não editável

@@ -64,4 +64,9 @@ public class EspecieVO{
     public void setRendimento_kg_m2(float rendimento_kg_m2) {
         this.rendimento_kg_m2 = rendimento_kg_m2;
     }
+    
+    @Override
+    public String toString(){
+        return this.getNome();
+    } 
 }

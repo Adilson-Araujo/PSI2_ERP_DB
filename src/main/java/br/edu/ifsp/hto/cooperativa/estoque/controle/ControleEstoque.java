@@ -10,7 +10,6 @@ import br.edu.ifsp.hto.cooperativa.estoque.modelo.to.*;
 import java.sql.Timestamp;
 import java.util.List;
 import javax.swing.JDesktopPane;
-import javax.swing.JInternalFrame;
 
 /**
  * Controlador central do módulo de estoque. Responsável por intermediar operações
@@ -66,13 +65,13 @@ public class ControleEstoque {
     // CHAMADAS DE TELA DA CAMADA DE APRESENTAÇÃO
     
     public static void telaEstoqueEstrada(JDesktopPane desktop)
-    {desktop.add(TelaDeEntrada2.gerarFrameInterno());}
+    {desktop.add(TelaDeEntrada.gerarFrameInterno());}
     
     public static void telaEstoqueSaida(JDesktopPane desktop)
-    {desktop.add(TelaDeSaida2.gerarFrameInterno());}
+    {desktop.add(TelaDeSaida.gerarFrameInterno());}
     
     public static void telaEstoqueTranferencia(JDesktopPane desktop)
-    {desktop.add(TelaDeTransferencia2.gerarFrameInterno());}
+    {desktop.add(TelaDeTransferencia.gerarFrameInterno());}
     
     public static void telaEstoqueIndicacao(JDesktopPane desktop)
     {desktop.add(TelaDeIndicacao.gerarFrameInterno());}
@@ -122,7 +121,7 @@ public class ControleEstoque {
      * @return lista de {@code Armazem}
      */
     public List<ArmazemVO> listarArmazens() {
-        return armazemDAO.listarTodos();
+        return armazemDAO.listarEditaveis();
     }
     
     /**

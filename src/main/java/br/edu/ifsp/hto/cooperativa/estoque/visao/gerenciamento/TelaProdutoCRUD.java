@@ -2,6 +2,7 @@ package br.edu.ifsp.hto.cooperativa.estoque.visao.gerenciamento;
 
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.ProdutoDAO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.dao.EspecieDAO;
+import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.EspecieVO;
 import br.edu.ifsp.hto.cooperativa.estoque.modelo.vo.ProdutoVO;
 import java.awt.*;
 import java.awt.event.*;
@@ -15,7 +16,7 @@ public class TelaProdutoCRUD {
     static EspecieDAO especieDAO = EspecieDAO.getInstance();
     static ProdutoVO produtoDados = null;
     static JTextField textId = null;
-    static JComboBox<String> comboEspecie = null;
+    static JComboBox<EspecieVO> comboEspecie = null;
     static JTextField textNome = null;
     static JTextArea textDescricao = null;
     static JTable tabelaRegistros = null;
@@ -53,8 +54,8 @@ public class TelaProdutoCRUD {
         painelEspecie.setBackground(new Color(55, 61, 13));
         JLabel labelEspecie = new JLabel("Espécie:");
         labelEspecie.setForeground(Color.WHITE);
-        String[] opcoes = { "Opção 10", "Opção 11", "Opção 12", "Opção 13", "Opção 14"};
-        comboEspecie = new JComboBox<>(opcoes);
+        List<EspecieVO> opcoes = especieDAO.listarTodas();
+        comboEspecie = new JComboBox<>(opcoes.toArray(EspecieVO[]::new));
         comboEspecie.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
         painelEspecie.add(labelEspecie);
         painelEspecie.add(comboEspecie);
@@ -105,10 +106,7 @@ public class TelaProdutoCRUD {
         
         JButton btnSalvar = new JButton("Salvar");
         btnSalvar.addActionListener(e -> {
-            String especie = (String) comboEspecie.getSelectedItem();
-            especie = especie.substring(6, especie.length());
-            int especie_id = Integer.parseInt(especie); // converte para int
-            produtoDados.setEspecie(especieDAO.buscarPorId(especie_id));
+            produtoDados.setEspecie((EspecieVO) comboEspecie.getSelectedItem());
             produtoDados.setNome(textNome.getText());
             produtoDados.setDescricao(textDescricao.getText());
             if(produtoDados.getId() == -1){
@@ -153,7 +151,7 @@ public class TelaProdutoCRUD {
         for (int i = 0; i < lista.size(); i++) {
             ProdutoVO a = lista.get(i);
             dados[i][0] = a.getId();
-            dados[i][1] = a.getEspecie().getId();
+            dados[i][1] = a.getEspecie();
             dados[i][2] = a.getNome();
             dados[i][3] = a.getDescricao();
         }
@@ -223,7 +221,7 @@ public class TelaProdutoCRUD {
         for (int i = 0; i < lista.size(); i++) {
             ProdutoVO a = lista.get(i);
             dados[i][0] = a.getId();
-            dados[i][1] = a.getEspecie().getId();
+            dados[i][1] = a.getEspecie();
             dados[i][2] = a.getNome();
             dados[i][3] = a.getDescricao();
         }

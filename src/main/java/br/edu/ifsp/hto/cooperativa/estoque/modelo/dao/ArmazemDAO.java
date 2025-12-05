@@ -121,9 +121,9 @@ public class ArmazemDAO {
         }
     }
 
-    public List<ArmazemVO> listarTodos() {
+    public List<ArmazemVO> listarEditaveis() {
         List<ArmazemVO> armazens = new ArrayList<>();
-        String sql = "SELECT id, nome, endereco_id FROM armazem WHERE deletado = false";
+        String sql = "SELECT id, nome, endereco_id FROM armazem WHERE producao = false AND venda = false AND deletado = false";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);

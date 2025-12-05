@@ -6,7 +6,7 @@ import java.awt.*;
 
 public class TelaInventario {
     public static JInternalFrame gerarFrameInterno(){
-        JInternalFrame janela = new JInternalFrame();
+        JInternalFrame janela = new JInternalFrame("Visão – Inventário", true, true, true, true);
 
         JPanel painelControle;
         JPanel painelBotoes;
@@ -21,7 +21,6 @@ public class TelaInventario {
 
         JTable tabelaInventario;
 
-        janela.setTitle("Visão – Inventário");
         janela.setSize(900, 600);
         janela.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
         janela.setLayout(new BorderLayout());

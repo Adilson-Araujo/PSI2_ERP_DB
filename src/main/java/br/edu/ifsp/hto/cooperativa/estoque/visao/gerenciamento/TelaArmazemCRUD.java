@@ -126,7 +126,7 @@ public class TelaArmazemCRUD {
         String[] colunas = { "ID", "Nome", "Endereço" };
 
         // Converte a lista de ArmazemVO em matriz para o modelo da tabela
-        List<ArmazemVO> lista = armazemDAO.listarTodos();
+        List<ArmazemVO> lista = armazemDAO.listarEditaveis();
         Object[][] dados = new Object[lista.size()][3];
 
         for (int i = 0; i < lista.size(); i++) {
@@ -194,7 +194,7 @@ public class TelaArmazemCRUD {
         String[] colunas = { "ID", "Nome", "Endereço" };
 
         // Converte a lista de ArmazemVO em matriz para o modelo da tabela
-        List<ArmazemVO> lista = armazemDAO.listarTodos();
+        List<ArmazemVO> lista = armazemDAO.listarEditaveis();
         Object[][] dados = new Object[lista.size()][3];
 
         for (int i = 0; i < lista.size(); i++) {

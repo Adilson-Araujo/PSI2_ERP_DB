@@ -85,7 +85,7 @@ public class TelaDeIndicacao {
         painelArmazem.setBackground(new Color(55, 61, 13));
         JLabel labelArmazem = new JLabel("Armazem:");
         labelArmazem.setForeground(Color.WHITE);
-        List<ArmazemVO> armazens = armazemDAO.listarTodos();
+        List<ArmazemVO> armazens = armazemDAO.listarEditaveis();
         comboArmazem = new JComboBox<>(armazens.toArray(ArmazemVO[]::new));
         comboArmazem.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
         painelArmazem.add(labelArmazem);

@@ -294,7 +294,7 @@ public class TelaCadastroVenda extends ViewBase {
             if (tela.produtoFoiSelecionado()) {
                 var produto = tela.getProdutoSelecionado();
                 var nfItem = new NotaFiscalItemVO();
-                nfItem.setProdutoId(produto.getProduto().getId());
+                nfItem.setProdutoId((long)produto.getProduto().getId());
                 nfItem.setNcm("0");
                 nfItem.setCfop("5101");
                 nfItem.setValorUnitario(BigDecimal.valueOf(produto.getPrecoPPA().getValor()));

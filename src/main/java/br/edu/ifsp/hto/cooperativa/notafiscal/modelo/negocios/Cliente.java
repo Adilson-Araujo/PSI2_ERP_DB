@@ -9,6 +9,8 @@ import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.dto.ClienteTO;
 import br.edu.ifsp.hto.cooperativa.notafiscal.modelo.vo.ClienteVO;
 import br.edu.ifsp.hto.cooperativa.notafiscal.recursos.DbHelper;
 
+import java.time.LocalDateTime;
+
 public class Cliente extends BaseNegocios {
     public ClienteTO buscarCpfCnpj(String cpfCnpj){
         if (cpfCnpj == null)
@@ -44,6 +46,7 @@ public class Cliente extends BaseNegocios {
         if (cliente == null)
             return;
         cliente.setId(DbHelper.gerarPk("cliente"));
+        cliente.setDataCadastro(LocalDateTime.now());
         DAOFactory.getClienteDAO().adicionar(cliente);
     }
 

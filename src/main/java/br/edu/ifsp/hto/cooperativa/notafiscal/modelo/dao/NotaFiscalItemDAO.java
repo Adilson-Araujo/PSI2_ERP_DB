@@ -40,7 +40,7 @@ public class NotaFiscalItemDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
         }
         return null;
     }
@@ -75,7 +75,7 @@ public class NotaFiscalItemDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -105,7 +105,7 @@ public class NotaFiscalItemDAO {
             p.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -140,7 +140,7 @@ public class NotaFiscalItemDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
         }
 
         return lista;
@@ -176,7 +176,7 @@ public class NotaFiscalItemDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
         }
 
         return lista;

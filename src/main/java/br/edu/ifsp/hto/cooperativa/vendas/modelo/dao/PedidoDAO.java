@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDate;
 
 import br.edu.ifsp.hto.cooperativa.ConnectionFactory;
 import br.edu.ifsp.hto.cooperativa.vendas.modelo.vo.ItemPedidoVO;
@@ -85,17 +86,24 @@ public class PedidoDAO {
         return lista;
     }
 
-    // --- MÉTODOS DE FILTRO QUE ESTÃO FALTANDO ---
+    // --- CORREÇÃO AQUI ---
 
     public List<PedidoVO> listarTodos() {
-        return filtrarPedidos(null, null);
+        // Redireciona para o filtro avançado passando tudo null (traz tudo)
+        return filtrarAvancado(null, null, null, null, null);
     }
 
     public List<PedidoVO> listarPorAssociado(Long associadoId) {
-        return filtrarPedidos(null, associadoId);
+        // Redireciona para o filtro avançado filtrando apenas pelo associado
+        return filtrarAvancado(associadoId, null, null, null, null);
     }
 
+    // Método mantido para compatibilidade (Bridge para o novo método)
     public List<PedidoVO> filtrarPedidos(String termo, Long associadoId) {
+        return filtrarAvancado(associadoId, termo, null, null, null);
+    }
+
+    public List<PedidoVO> filtrarAvancado(Long associadoId, String termo, Long statusId, LocalDate dataInicio, LocalDate dataFim) {
         List<PedidoVO> lista = new ArrayList<>();
         StringBuilder sql = new StringBuilder();
         
@@ -106,12 +114,28 @@ public class PedidoDAO {
         sql.append("INNER JOIN status_pedido s ON p.status_pedido_id = s.id ");
         sql.append("WHERE 1=1 ");
 
+        // 1. Filtro de Segurança (Produtor vê apenas o dele)
         if (associadoId != null) {
             sql.append("AND p.associado_id = ? ");
         }
 
+        // 2. Filtro Textual (Busca geral)
         if (termo != null && !termo.trim().isEmpty()) {
-            sql.append("AND (proj.nome_projeto ILIKE ? OR a.nome_fantasia ILIKE ? OR s.descricao ILIKE ?) ");
+            sql.append("AND (proj.nome_projeto ILIKE ? OR a.nome_fantasia ILIKE ?) ");
+        }
+
+        // 3. Filtro de Status
+        if (statusId != null && statusId > 0) {
+            sql.append("AND p.status_pedido_id = ? ");
+        }
+
+        // 4. Filtro de Datas (Início e Fim)
+        if (dataInicio != null) {
+            sql.append("AND p.data_criacao >= ? ");
+        }
+        if (dataFim != null) {
+            // Ajusta para pegar até o final do dia (23:59:59)
+            sql.append("AND p.data_criacao <= ? ");
         }
 
         sql.append("ORDER BY p.data_criacao DESC");
@@ -120,6 +144,7 @@ public class PedidoDAO {
              PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
 
             int index = 1;
+            
             if (associadoId != null) {
                 stmt.setLong(index++, associadoId);
             }
@@ -128,7 +153,18 @@ public class PedidoDAO {
                 String busca = "%" + termo + "%";
                 stmt.setString(index++, busca);
                 stmt.setString(index++, busca);
-                stmt.setString(index++, busca);
+            }
+
+            if (statusId != null && statusId > 0) {
+                stmt.setLong(index++, statusId);
+            }
+
+            if (dataInicio != null) {
+                stmt.setTimestamp(index++, Timestamp.valueOf(dataInicio.atStartOfDay()));
+            }
+
+            if (dataFim != null) {
+                stmt.setTimestamp(index++, Timestamp.valueOf(dataFim.atTime(23, 59, 59)));
             }
 
             ResultSet rs = stmt.executeQuery();
@@ -143,7 +179,6 @@ public class PedidoDAO {
                 vo.setValorTotal(rs.getBigDecimal("valor_total"));
                 vo.setStatusPedidoId(rs.getLong("status_pedido_id"));
                 vo.setStatusDescricao(rs.getString("status_desc")); 
-
                 lista.add(vo);
             }
         } catch (SQLException e) {

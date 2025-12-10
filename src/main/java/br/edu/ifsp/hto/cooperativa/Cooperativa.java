@@ -26,11 +26,13 @@ import br.edu.ifsp.hto.cooperativa.notafiscal.visao.TelaCadastroAssociado;
 import br.edu.ifsp.hto.cooperativa.notafiscal.visao.TelaCadastroVenda;
 import br.edu.ifsp.hto.cooperativa.notafiscal.visao.TelaGerarNotaFiscalVenda;
 
-// --- SEUS IMPORTS (VENDAS) ---
 import br.edu.ifsp.hto.cooperativa.vendas.visao.CriarPedidoView;
 import br.edu.ifsp.hto.cooperativa.vendas.visao.ConsultaPedidosView;
 import br.edu.ifsp.hto.cooperativa.vendas.visao.CriarProjetoView;
 import br.edu.ifsp.hto.cooperativa.vendas.visao.ConsultaProjetosView;
+import br.edu.ifsp.hto.cooperativa.vendas.visao.ProdutorMainView;
+import br.edu.ifsp.hto.cooperativa.vendas.visao.AssociacaoMainView;
+
 import br.edu.ifsp.hto.cooperativa.sessao.modelo.negocios.Sessao;
 
 public class Cooperativa extends JFrame {
@@ -90,30 +92,59 @@ public class Cooperativa extends JFrame {
         producaoMenu.add(producaoItemRegistrarProblemas);
         producaoMenu.add(producaoItemRelatorioProducao);
 
-        // --- GRUPO VENDAS ---
+        // 1. Criar todos os itens de menu
+        JMenuItem vendaItemPainelProdutor = new JMenuItem("Painel do Produtor");
+        JMenuItem vendaItemPainelAssociacao = new JMenuItem("Painel da Associação");
+        
         JMenuItem vendaItemCriarPedido = new JMenuItem("Criar Pedido");
         JMenuItem vendaItemConsultarPedidos = new JMenuItem("Consultar Pedidos");
         
-        // Itens de Projeto (Separados pois podem ser desabilitados)
         JMenuItem vendaItemCriarProjeto = new JMenuItem("Criar Projeto");
         JMenuItem vendaItemConsultarProjetos = new JMenuItem("Consultar Projetos");
 
-        // Lógica de Permissão: Se for Produtor (tipo 2), bloqueia gestão de projetos
-        try {
-            if (Sessao.getUsuarioLogado().usuarioVO.getTipoUsuario() == 2) { 
-                vendaItemCriarProjeto.setEnabled(false);
-                vendaItemConsultarProjetos.setEnabled(false);
-            }
-        } catch (Exception e) {
-            System.err.println("Aviso: Não foi possível verificar permissões de sessão.");
-        }
-
+        // 2. Adicionar na barra (Adicionamos todos, depois desabilitamos conforme a regra)
+        vendaMenu.add(vendaItemPainelProdutor);
+        vendaMenu.add(vendaItemPainelAssociacao);
+        vendaMenu.addSeparator();
         vendaMenu.add(vendaItemCriarPedido);
         vendaMenu.add(vendaItemConsultarPedidos);
         vendaMenu.addSeparator();
         vendaMenu.add(vendaItemCriarProjeto);
         vendaMenu.add(vendaItemConsultarProjetos);
 
+        // 3. Lógica de Permissões (Regras Tipo 1 vs Tipo 2)
+        try {
+            long tipoUsuario = Sessao.getUsuarioLogado().usuarioVO.getTipoUsuario();
+
+            if (tipoUsuario == 1) {
+                // === REGRAS TIPO 1 (PRODUTOR) ===
+                // Pode: Painel Produtor, Criar Pedido, Consultar Pedidos
+                vendaItemPainelProdutor.setEnabled(true);
+                vendaItemCriarPedido.setEnabled(true);
+                vendaItemConsultarPedidos.setEnabled(true);
+
+                // Bloqueado: O resto
+                vendaItemPainelAssociacao.setEnabled(false); // ou .setVisible(false) se preferir sumir
+                vendaItemCriarProjeto.setEnabled(false);
+                vendaItemConsultarProjetos.setEnabled(false);
+
+            } else if (tipoUsuario == 2) {
+                // === REGRAS TIPO 2 (ASSOCIAÇÃO/ADMIN) ===
+                // Bloqueado: Painel Produtor
+                vendaItemPainelProdutor.setEnabled(false);
+
+                // Liberado: Todo o resto
+                vendaItemPainelAssociacao.setEnabled(true);
+                vendaItemCriarPedido.setEnabled(true);
+                vendaItemConsultarPedidos.setEnabled(true);
+                vendaItemCriarProjeto.setEnabled(true);
+                vendaItemConsultarProjetos.setEnabled(true);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Erro ao verificar permissões de venda: " + e.getMessage());
+            // Por segurança, em caso de erro, você pode optar por bloquear tudo ou deixar padrão
+        }
 
         //Grupo Estoque adicionar as opcoes do subMneu (JMenuItem) aqui
         JMenuItem estoqueItemEstoqueEntrada = new JMenuItem("Entrada de Estoque");
@@ -250,32 +281,47 @@ public class Cooperativa extends JFrame {
         estoqueItemEstoque.addActionListener(ev -> ControleEstoque.telaEstoqueEstoque(desktop));
         
         // --- AÇÕES DO GRUPO VENDAS ---
+        // Ação: Painel Produtor
+        vendaItemPainelProdutor.addActionListener(ev -> {
+            ProdutorMainView tela = new ProdutorMainView();
+            desktop.add(tela);
+            tela.setVisible(true);
+            try { tela.setSelected(true); } catch (Exception e) {}
+        });
+
+        vendaItemPainelAssociacao.addActionListener(ev -> {
+            AssociacaoMainView tela = new AssociacaoMainView();
+            desktop.add(tela);
+            tela.setVisible(true);
+            try { tela.setSelected(true); } catch (Exception e) {}
+        });
+
         vendaItemCriarPedido.addActionListener(ev -> {
             CriarPedidoView tela = new CriarPedidoView();
-            desktop.add(tela); // <--- O PULO DO GATO: Adiciona DENTRO da área de trabalho
+            desktop.add(tela);
             tela.setVisible(true);
-            try { tela.setSelected(true); } catch (java.beans.PropertyVetoException e) {}
+            try { tela.setSelected(true); } catch (Exception e) {}
         });
 
         vendaItemConsultarPedidos.addActionListener(ev -> {
             ConsultaPedidosView tela = new ConsultaPedidosView();
-            desktop.add(tela); // Adiciona ao desktop
+            desktop.add(tela);
             tela.setVisible(true);
-            try { tela.setSelected(true); } catch (java.beans.PropertyVetoException e) {}
+            try { tela.setSelected(true); } catch (Exception e) {}
         });
 
         vendaItemCriarProjeto.addActionListener(ev -> {
             CriarProjetoView tela = new CriarProjetoView();
-            desktop.add(tela); // Adiciona ao desktop
+            desktop.add(tela);
             tela.setVisible(true);
-            try { tela.setSelected(true); } catch (java.beans.PropertyVetoException e) {}
+            try { tela.setSelected(true); } catch (Exception e) {}
         });
 
         vendaItemConsultarProjetos.addActionListener(ev -> {
             ConsultaProjetosView tela = new ConsultaProjetosView();
-            desktop.add(tela); // Adiciona ao desktop
+            desktop.add(tela);
             tela.setVisible(true);
-            try { tela.setSelected(true); } catch (java.beans.PropertyVetoException e) {}
+            try { tela.setSelected(true); } catch (Exception e) {}
         });
         
                 // -- Ações do grupo FINANCEIRO

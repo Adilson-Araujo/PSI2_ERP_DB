@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +50,63 @@ public class ProjetoDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, "%" + termo + "%");
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                ProjetoVO p = new ProjetoVO();
+                p.setId(rs.getLong("id"));
+                p.setNomeProjeto(rs.getString("nome_projeto"));
+                if(rs.getTimestamp("data_criacao") != null)
+                    p.setDataCriacao(rs.getTimestamp("data_criacao").toLocalDateTime());
+                if(rs.getTimestamp("data_final") != null)
+                    p.setDataFinal(rs.getTimestamp("data_final").toLocalDateTime());
+                p.setOrcamento(rs.getBigDecimal("orcamento"));
+                lista.add(p);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+    
+    public List<ProjetoVO> filtrarAvancado(String termo, LocalDate dataInicio, LocalDate dataFim) {
+        List<ProjetoVO> lista = new ArrayList<>();
+        StringBuilder sql = new StringBuilder();
+        
+        sql.append("SELECT * FROM projeto WHERE 1=1 ");
+
+        if (termo != null && !termo.trim().isEmpty()) {
+            sql.append("AND nome_projeto ILIKE ? ");
+        }
+
+        if (dataInicio != null) {
+            sql.append("AND data_criacao >= ? ");
+        }
+
+        if (dataFim != null) {
+            sql.append("AND data_criacao <= ? ");
+        }
+
+        sql.append("ORDER BY nome_projeto");
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            int index = 1;
+
+            if (termo != null && !termo.trim().isEmpty()) {
+                stmt.setString(index++, "%" + termo + "%");
+            }
+
+            if (dataInicio != null) {
+                stmt.setTimestamp(index++, Timestamp.valueOf(dataInicio.atStartOfDay()));
+            }
+
+            if (dataFim != null) {
+                // Ajusta para o final do dia (23:59:59)
+                stmt.setTimestamp(index++, Timestamp.valueOf(dataFim.atTime(23, 59, 59)));
+            }
+
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
